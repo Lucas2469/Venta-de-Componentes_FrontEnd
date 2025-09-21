@@ -1,5 +1,5 @@
 import axios from "axios";
-import { mockMeetingPoints } from "../components/mockData"; // Importa tus tipos
+import { mockMeetingPoints } from "../components/mockData"; 
 import { MeetingPoint } from "../components/types";
 
 const API_URL = "http://localhost:5000/api"; 

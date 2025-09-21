@@ -911,7 +911,7 @@ export function NewAdminDashboard() {
                     {user.role !== 'admin' && (
                       <Button 
                         variant="outline" 
-                        size="sm"
+                      
                         onClick={() => handleToggleUserStatus(user.id)}
                       >
                         <Edit className="h-4 w-4" />
@@ -976,10 +976,10 @@ export function NewAdminDashboard() {
                 </TableCell>
                 <TableCell>
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="destructive" size="sm">
+                    <Button >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -1494,7 +1494,7 @@ export function NewAdminDashboard() {
                 Cancelar
               </Button>
               <Button 
-                variant="destructive"
+                
                 onClick={confirmDisableAd}
                 className="flex-1"
                 disabled={!disableReason.trim()}
@@ -1534,7 +1534,7 @@ export function NewAdminDashboard() {
                 Cancelar
               </Button>
               <Button 
-                variant="destructive"
+               
                 onClick={confirmRejectPurchase}
                 className="flex-1"
                 disabled={!purchaseRejectionReason.trim()}
