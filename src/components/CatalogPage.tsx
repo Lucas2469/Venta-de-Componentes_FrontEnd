@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Slider } from "./ui/slider";
-import { Star, MapPin, Calendar, Eye, Crown, Trophy, Award, Plus, CreditCard, Settings } from "lucide-react";
+import { Star, MapPin, Calendar, Eye, Crown, Trophy, Award, Plus, CreditCard, Settings, MapPin as MapPinIcon } from "lucide-react";
 import { Product, User } from "./types";
 import { mockProducts, mockUsers, mockCategories } from "./mockData";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -190,7 +190,7 @@ export function CatalogPage({ searchQuery, onProductClick, currentUser, onNaviga
           {/* Filters and Sort */}
           <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select value={selectedCategory} onValueChange={(value: string) => setSelectedCategory(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todas las categorías" />
                 </SelectTrigger>
@@ -215,7 +215,10 @@ export function CatalogPage({ searchQuery, onProductClick, currentUser, onNaviga
                 />
               </div>
 
-              <Select value={minRating.toString()} onValueChange={(value) => setMinRating(Number(value))}>
+              <Select 
+                value={minRating.toString()} 
+                onValueChange={(value: string) => setMinRating(Number(value))}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Calificación mínima" />
                 </SelectTrigger>
@@ -227,7 +230,7 @@ export function CatalogPage({ searchQuery, onProductClick, currentUser, onNaviga
                 </SelectContent>
               </Select>
 
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select value={sortBy} onValueChange={(value: string) => setSortBy(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Ordenar por" />
                 </SelectTrigger>
@@ -274,27 +277,28 @@ export function CatalogPage({ searchQuery, onProductClick, currentUser, onNaviga
               <div className="flex flex-wrap justify-center gap-4">
                 <Button 
                   onClick={() => onNavigate?.('create-ad')}
-                  className="bg-electromarket-maroon text-white hover:bg-opacity-90"
+                  style={{ backgroundColor: '#9d0045', color: '#ffffff' }}
+                  className="hover:bg-opacity-90"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Crear Anuncio
                 </Button>
                 <Button 
                   onClick={() => onNavigate?.('buy-credits')}
-                  className="bg-electromarket-teal text-white hover:bg-opacity-90"
+                  style={{ backgroundColor: '#2eafa9ff', color: '#ffffff' }}
+                  className="hover:bg-opacity-90"
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
                   Comprar Créditos
                 </Button>
-                {currentUser?.role === 'admin' && (
-                  <Button 
-                    onClick={() => onNavigate?.('admin-dashboard')}
-                    className="bg-yellow-500 text-black hover:bg-yellow-400 font-bold text-lg px-6 py-3"
-                  >
-                    <Settings className="h-5 w-5 mr-2" />
-                    🔧 Panel Admin
-                  </Button>
-                )}
+                <Button 
+                  onClick={() => onNavigate?.('admin-dashboard')}
+                  style={{ backgroundColor: '#c95119ff', color: '#ffffff' }}
+                  className="hover:bg-opacity-90"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Panel Administrador
+                </Button>
               </div>
             </div>
           )}
