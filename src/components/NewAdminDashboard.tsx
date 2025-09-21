@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react"; //useEffect carga los paquetes al inicio.
+
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -6,7 +7,7 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Badge } from "./ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "./ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Separator } from "./ui/separator";
 import { Switch } from "./ui/switch";
@@ -35,19 +36,23 @@ import {
 } from "lucide-react";
 import { mockUsers, mockProducts, mockMeetingPoints, mockCreditPackages, mockCategories, mockRatings } from "./mockData";
 import { User, Product, MeetingPoint, CreditPackage, Category, CreditPurchase, Rating } from "./types";
+import axios from "axios";
 
 export function NewAdminDashboard() {
   const [activeSection, setActiveSection] = useState("statistics");
   const [users, setUsers] = useState(mockUsers.map(user => ({ ...user, isActive: true })));
   const [products, setProducts] = useState(mockProducts.map(product => ({ ...product, status: 'active' as const })));
   const [meetingPoints, setMeetingPoints] = useState(mockMeetingPoints);
-  const [creditPackages, setCreditPackages] = useState(mockCreditPackages);
+  //Paquetes
+  const [creditPackages, setCreditPackages] = useState<any[]>([]);
+
   const [categories, setCategories] = useState(mockCategories);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectionModal, setShowRejectionModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
-  const [selectedPurchaseId, setSelectedPurchaseId] = useState("");
+  //Comprobante
+  const [selectedPurchaseId, setSelectedPurchaseId] = useState<number | null>(null);
   const [showUserEditModal, setShowUserEditModal] = useState(false);
   const [showAdDisableModal, setShowAdDisableModal] = useState(false);
   const [showPurchaseRejectModal, setShowPurchaseRejectModal] = useState(false);
@@ -62,6 +67,145 @@ export function NewAdminDashboard() {
     coordinates: { lat: -16.5000, lng: -68.1193 },
     searchAddress: ""
   });
+
+  //API base
+  const API_BASE = "http://localhost:5000";
+  const API_URL = `${API_BASE}/api/packs`;
+  const CREDIT_API = `${API_BASE}/api/creditos`;
+
+  // Comprobantes
+  const [creditTxs, setCreditTxs] = useState<any[]>([]);
+  const [proofOpen, setProofOpen] = useState(false);
+  const [proofSrc, setProofSrc] = useState<string | null>(null);
+
+  // Rechazo (reutilizo tus estados existentes)
+  const [loadingAction, setLoadingAction] = useState(false);
+
+  useEffect(() => {
+    const fetchPacks = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/api/packs`);
+        setCreditPackages(res.data);
+      } catch (err) {
+        console.error("Error al cargar paquetes", err);
+      }
+    };
+
+    const fetchTransactions = async () => {
+      try {
+        const res = await axios.get(`${CREDIT_API}/transacciones`);
+        setCreditTxs(res.data);
+      } catch (err) {
+        console.error("Error al cargar transacciones", err);
+      }
+    };
+
+    fetchPacks();
+    fetchTransactions();
+  }, []);
+
+  //Handlers
+  const refreshTransactions = async () => {
+    const res = await axios.get(`${CREDIT_API}/transacciones`);
+    setCreditTxs(res.data);
+  };
+
+  const handleViewProof = (relUrl: string) => {
+    setProofSrc(`${API_BASE}${relUrl}`);
+    setProofOpen(true);
+  };
+
+  const handleApprovePurchase = async (id: number) => {
+    try {
+      setLoadingAction(true);
+      await axios.put(`${CREDIT_API}/transacciones/${id}`, {
+        accion: "aprobar",
+        comentarios_admin: ""
+      });
+      await refreshTransactions();
+    } catch (e) {
+      console.error(e);
+      alert("No se pudo aprobar la transacción.");
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  const openRejectModal = (id: number) => {
+    setSelectedPurchaseId(id);
+    setPurchaseRejectionReason("");
+    setShowPurchaseRejectModal(true);
+  };
+
+  const submitRejectPurchase = async () => {
+    if (!selectedPurchaseId) return;
+    if (!purchaseRejectionReason.trim()) {
+      alert("Debes indicar el motivo del rechazo.");
+      return;
+    }
+    try {
+      setLoadingAction(true);
+      await axios.put(`${CREDIT_API}/transacciones/${selectedPurchaseId}`, {
+        accion: "rechazar",
+        comentarios_admin: purchaseRejectionReason
+      });
+      setShowPurchaseRejectModal(false);
+      setSelectedPurchaseId(null);
+      setPurchaseRejectionReason("");
+      await refreshTransactions();
+    } catch (e) {
+      console.error(e);
+      alert("No se pudo rechazar la transacción.");
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+
+
+  //Update
+  // Editar Paquete (modal)
+  const [editOpen, setEditOpen] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editPack, setEditPack] = useState<{
+    id: number | null;
+    nombre: string;
+    cantidad_creditos: string;
+    precio: string;
+    qr: File | null;            // archivo NUEVO (opcional)
+    qr_imagen_url: string;      // url ACTUAL (necesaria si no reemplazas)
+  }>({
+    id: null,
+    nombre: "",
+    cantidad_creditos: "",
+    precio: "",
+    qr: null,
+    qr_imagen_url: "",
+  });
+
+  
+  // States
+  const [newCreditPack, setNewCreditPack] = useState({
+    nombre: "",
+    cantidad_creditos: "",
+    precio: "",
+    qr: null as File | null,
+  });
+  const [showQr, setShowQr] = useState<string | null>(null);
+
+  // Cargar lista inicial
+  useEffect(() => {
+    const fetchPacks = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/packs");
+        setCreditPackages(res.data);
+      } catch (err) {
+        console.error("Error al cargar paquetes", err);
+      }
+    };
+    fetchPacks();
+  }, []);
+  
   
   // Filtros para calificaciones
   const [ratingsFilters, setRatingsFilters] = useState({
@@ -142,7 +286,7 @@ export function NewAdminDashboard() {
     setShowRejectionModal(true);
   };
 
-  const confirmRejectProduct = () => {
+  /*const confirmRejectProduct = () => {
     setProducts(prev => prev.map(p => 
       p.id === selectedProductId ? { 
         ...p, 
@@ -153,7 +297,7 @@ export function NewAdminDashboard() {
     setShowRejectionModal(false);
     setRejectionReason("");
     setSelectedProductId("");
-  };
+  };*/
 
   const handleApproveProduct = (productId: string) => {
     setProducts(prev => prev.map(p => 
@@ -188,7 +332,7 @@ export function NewAdminDashboard() {
     }
   };
 
-  const confirmDisableAd = () => {
+  /*const confirmDisableAd = () => {
     setProducts(prev => prev.map(p => 
       p.id === selectedProductId ? { 
         ...p, 
@@ -199,21 +343,22 @@ export function NewAdminDashboard() {
     setShowAdDisableModal(false);
     setDisableReason("");
     setSelectedProductId("");
-  };
+  };*/
 
   // Funciones para solicitudes de pago
-  const handleApprovePurchase = (purchaseId: string) => {
+  
+  /*const handleApprovePurchase = (purchaseId: string) => {
     setCreditPurchases(prev => prev.map(p => 
       p.id === purchaseId ? { ...p, status: 'approved' as const } : p
     ));
-  };
+  };*/
 
-  const handleRejectPurchase = (purchaseId: string) => {
+  /*const handleRejectPurchase = (purchaseId: string) => {
     setSelectedPurchaseId(purchaseId);
     setShowPurchaseRejectModal(true);
-  };
+  };*/
 
-  const confirmRejectPurchase = () => {
+  /*const confirmRejectPurchase = () => {
     setCreditPurchases(prev => prev.map(p => 
       p.id === selectedPurchaseId ? { 
         ...p, 
@@ -224,7 +369,7 @@ export function NewAdminDashboard() {
     setShowPurchaseRejectModal(false);
     setPurchaseRejectionReason("");
     setSelectedPurchaseId("");
-  };
+  };*/
 
   const renderStatistics = () => {
     // Datos para el gráfico circular de solicitudes de pago
@@ -402,83 +547,173 @@ export function NewAdminDashboard() {
     );
   };
 
+  //Comprobantes Pago
   const renderCreditPurchases = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle>Comprobantes de Pago</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Usuario</TableHead>
-              <TableHead>Paquete</TableHead>
-              <TableHead>Monto</TableHead>
-              <TableHead>Comprobante</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Acciones</TableHead>
+  <Card>
+    <CardHeader>
+      <CardTitle>Comprobantes de Pago</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Usuario</TableHead>
+            <TableHead>Paquete</TableHead>
+            <TableHead>Monto</TableHead>
+            <TableHead>Comprobante</TableHead>
+            <TableHead>Estado</TableHead>
+            <TableHead>Fecha</TableHead>
+            <TableHead>Acciones</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {creditTxs.map((tx) => (
+            <TableRow key={tx.id}>
+              <TableCell>{tx.usuario}</TableCell>
+              <TableCell>{tx.pack_nombre}</TableCell>
+              <TableCell>Bs {Number(tx.monto_pagado || 0).toFixed(2)}</TableCell>
+              <TableCell>
+                {tx.comprobante_pago_url ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewProof(tx.comprobante_pago_url)}
+                    className="gap-2"
+                  >
+                    <FileImage className="h-4 w-4" /> Ver
+                  </Button>
+                ) : (
+                  <span className="text-gray-500 text-sm">Sin comprobante</span>
+                )}
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    tx.estado === "aprobada"
+                      ? "default"
+                      : tx.estado === "pendiente"
+                      ? "secondary"
+                      : "destructive"
+                  }
+                >
+                  {tx.estado === "aprobada"
+                    ? "Aprobado"
+                    : tx.estado === "pendiente"
+                    ? "Pendiente"
+                    : "Rechazado"}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                {tx.fecha_compra
+                  ? new Date(tx.fecha_compra).toLocaleDateString("es-BO")
+                  : "-"}
+              </TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  {tx.estado !== "aprobada" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleApprovePurchase(tx.id)}
+                      disabled={loadingAction}
+                      title="Aprobar"
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {tx.estado === "pendiente" && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => openRejectModal(tx.id)}
+                      disabled={loadingAction}
+                      title="Rechazar"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {creditPurchases.map((purchase) => {
-              const user = users.find(u => u.id === purchase.userId);
-              const pkg = creditPackages.find(p => p.id === purchase.packageId);
-              return (
-                <TableRow key={purchase.id}>
-                  <TableCell>{user?.username}</TableCell>
-                  <TableCell>{pkg?.name}</TableCell>
-                  <TableCell>Bs {purchase.amount}</TableCell>
-                  <TableCell>
-                    {purchase.proofImageUrl ? (
-                      <Button variant="outline" size="sm">
-                        <FileImage className="h-4 w-4 mr-2" />
-                        Ver
-                      </Button>
-                    ) : (
-                      <span className="text-gray-500">Sin comprobante</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={
-                      purchase.status === 'approved' ? 'default' :
-                      purchase.status === 'pending' ? 'secondary' : 'destructive'
-                    }>
-                      {purchase.status === 'approved' ? 'Aprobado' :
-                       purchase.status === 'pending' ? 'Pendiente' : 'Rechazado'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{new Date(purchase.createdAt).toLocaleDateString('es-ES')}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      {purchase.status !== 'approved' && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleApprovePurchase(purchase.id)}
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {purchase.status === 'pending' && (
-                        <Button 
-                          variant="destructive" 
-                          size="sm"
-                          onClick={() => handleRejectPurchase(purchase.id)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  );
+          ))}
+        </TableBody>
+      </Table>
+    </CardContent>
+
+    {/* Modal: Ver comprobante */}
+    <Dialog open={proofOpen} onOpenChange={setProofOpen}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Comprobante de Pago</DialogTitle>
+        </DialogHeader>
+        <div className="flex items-center justify-center p-2">
+          {proofSrc ? (
+            <img
+              src={proofSrc}
+              alt="Comprobante"
+              className="max-h-[70vh] w-auto rounded-md border object-contain"
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">Sin imagen</p>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setProofOpen(false)}>
+            Cerrar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    {/* Modal: Rechazar con motivo */}
+    <Dialog
+      open={showPurchaseRejectModal}
+      onOpenChange={(open: boolean) => {
+        setShowPurchaseRejectModal(open);
+        if (!open) {
+          setPurchaseRejectionReason("");
+          setSelectedPurchaseId(null);
+        }
+      }}
+    >
+
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Rechazar Solicitud de Pago</DialogTitle>
+          <DialogDescription>
+            Indica el motivo del rechazo. Se guardará como comentario del administrador.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-2">
+          <Label htmlFor="purchase-rejection-reason">Motivo del rechazo</Label>
+          <Textarea
+            id="purchase-rejection-reason"
+            value={purchaseRejectionReason}
+            onChange={(e) => setPurchaseRejectionReason(e.target.value)}
+            placeholder="Describe el motivo del rechazo…"
+            rows={4}
+          />
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowPurchaseRejectModal(false)}>
+            Cancelar
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={submitRejectPurchase}
+            disabled={loadingAction || !purchaseRejectionReason.trim()}
+          >
+            Rechazar Solicitud
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </Card>
+);
+
+
 
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -710,86 +945,438 @@ export function NewAdminDashboard() {
     </div>
   );
 
-  const renderCreditPackages = () => (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Paquetes de Créditos</CardTitle>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar Paquete
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Nuevo Paquete de Créditos</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="package-name">Nombre</Label>
-                <Input id="package-name" placeholder="Nombre del paquete" />
+  //Paquete de Creditos
+  // Handlers
+  const handleCreditPackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const fd = new FormData();
+      fd.append("nombre", newCreditPack.nombre);
+      fd.append("cantidad_creditos", String(newCreditPack.cantidad_creditos));
+      fd.append("precio", String(newCreditPack.precio));
+      if (newCreditPack.qr) fd.append("qr", newCreditPack.qr); // <- CLAVE CORRECTA
+
+      // No seteamos Content-Type manualmente
+      await axios.post(API_URL, fd);
+
+      // Limpiar formulario
+      setNewCreditPack({ nombre: "", cantidad_creditos: "", precio: "", qr: null });
+
+      // Recargar lista
+      const res = await axios.get(API_URL);
+      setCreditPackages(res.data);
+    } catch (err) {
+      console.error("Error al crear paquete", err);
+      alert("Error al crear el paquete. Por favor, intenta nuevamente.");
+    }
+  };
+
+  const handleCreditPackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, files } = e.target;
+    if (files) {
+      setNewCreditPack((prev) => ({ ...prev, [name]: files[0] }));
+    } else {
+      setNewCreditPack((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  //Update
+  // Abre el modal con datos precargados
+  const openEditModal = (pack: any) => {
+    setEditPack({
+      id: pack.id,
+      nombre: pack.nombre ?? "",
+      cantidad_creditos: String(pack.cantidad_creditos ?? ""),
+      precio: String(pack.precio ?? ""),
+      qr: null,
+      qr_imagen_url: pack.qr_imagen_url ?? "",
+    });
+    setEditOpen(true);
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, files } = e.target;
+    if (files) {
+      setEditPack((p) => ({ ...p, [name]: files[0] })); // name="qr"
+    } else {
+      setEditPack((p) => ({ ...p, [name]: value }));
+    }
+  };
+
+  const validateEdit = () => {
+    if (!editPack.nombre.trim()) return "El nombre es obligatorio";
+    const c = Number(editPack.cantidad_creditos);
+    const p = Number(editPack.precio);
+    if (!Number.isFinite(c) || c <= 0) return "Créditos debe ser un número > 0";
+    if (!Number.isFinite(p) || p <= 0) return "Precio debe ser un número > 0";
+    return null;
+  };
+
+  const saveEdit = async () => {
+    const err = validateEdit();
+    if (err) return alert(err);
+
+    try {
+      setSavingEdit(true);
+      const fd = new FormData();
+      fd.append("nombre", editPack.nombre);
+      fd.append("cantidad_creditos", editPack.cantidad_creditos);
+      fd.append("precio", editPack.precio);
+
+      if (editPack.qr) {
+        // Reemplazar QR
+        fd.append("qr", editPack.qr);
+      } else {
+        // IMPORTANTE: si no envías archivo nuevo, debes mandar la URL actual,
+        // porque tu backend la lee de req.body.qr_imagen_url
+        fd.append("qr_imagen_url", editPack.qr_imagen_url || "");
+      }
+
+      await axios.put(`${API_URL}/${editPack.id}`, fd);
+      // Refrescar lista
+      const res = await axios.get(API_URL);
+      setCreditPackages(res.data);
+      setEditOpen(false);
+    } catch (e) {
+      console.error(e);
+      alert("No se pudo actualizar el paquete.");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+
+  const fileEditRef = useRef<HTMLInputElement>(null);
+  // --- Render ---
+  const renderCreditPackages = () => {
+    return (
+      <div className="space-y-6">
+        {/* Formulario */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Crear Paquete de Créditos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleCreditPackSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="nombre">Nombre del paquete</Label>
+                  <Input
+                    id="nombre"
+                    name="nombre"
+                    type="text"
+                    value={newCreditPack.nombre}
+                    onChange={handleCreditPackChange}
+                    placeholder="Ej: Paquete Básico"
+                    required
+                  />
+
+                </div>
+                <div>
+                  <Label htmlFor="cantidad_creditos">Cantidad de créditos</Label>
+                  <Input
+                    id="cantidad_creditos"
+                    name="cantidad_creditos"
+                    type="number"
+                    min="1"
+                    value={newCreditPack.cantidad_creditos}
+                    onChange={handleCreditPackChange}
+                    placeholder="50"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="precio">Precio (Bs)</Label>
+                  <Input
+                    id="precio"
+                    name="precio"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={newCreditPack.precio}
+                    onChange={handleCreditPackChange}
+                    placeholder="25.00"
+                    required
+                  />
+                </div>
               </div>
+
               <div>
-                <Label htmlFor="package-credits">Créditos</Label>
-                <Input id="package-credits" type="number" placeholder="Cantidad de créditos" />
+                <Label htmlFor="qr">Subir QR de pago</Label>
+                <Input
+                  id="qr"
+                  name="qr"                      // <- este nombre debe ser 'qr'
+                  type="file"
+                  accept="image/png,image/jpeg"  // o añade webp si backend lo permite
+                  onChange={handleCreditPackChange}
+                />
+
+                {newCreditPack.qr && (
+                  <p className="text-sm text-green-600 mt-1">
+                    Archivo seleccionado: {newCreditPack.qr.name}
+                  </p>
+                )}
               </div>
-              <div>
-                <Label htmlFor="package-price">Precio (Bs)</Label>
-                <Input id="package-price" type="number" placeholder="Precio en bolivianos" />
-              </div>
-              <div>
-                <Label htmlFor="package-qr">Código QR</Label>
-                <Button variant="outline" className="w-full">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Subir Imagen QR
+
+              <div className="flex justify-end space-x-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    setNewCreditPack({
+                      nombre: "",
+                      cantidad_creditos: "",
+                      precio: "",
+                      qr: null,
+                    })
+                  }
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={
+                    !newCreditPack.nombre ||
+                    !newCreditPack.cantidad_creditos ||
+                    !newCreditPack.precio
+                  }
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Crear Paquete
                 </Button>
               </div>
-              <Button className="w-full">Guardar</Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Lista */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Paquetes de Créditos Disponibles</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {creditPackages.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p>No hay paquetes de créditos registrados</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Créditos</TableHead>
+                    <TableHead>Precio (Bs)</TableHead>
+                    <TableHead>QR de Pago</TableHead>
+                    <TableHead>Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {creditPackages.map((pack) => (
+                    <TableRow key={pack.id}>
+                      <TableCell className="font-medium">{pack.nombre}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-sm">
+                          {pack.cantidad_creditos} créditos
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        Bs {parseFloat(pack.precio).toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        {pack.qr_imagen_url ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setShowQr(pack.qr_imagen_url)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver QR
+                          </Button>
+                        ) : (
+                          <span className="text-gray-500 text-sm">Sin QR</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline" onClick={() => openEditModal(pack)} className="gap-2">
+                            <Edit className="h-4 w-4" /> Editar
+                          </Button>
+
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={async () => {
+                              if (
+                                confirm("¿Estás seguro de eliminar este paquete?")
+                              ) {
+                                try {
+                                  await axios.delete(
+                                    `http://localhost:5000/api/packs/${pack.id}`
+                                  );
+                                  const res = await axios.get(
+                                    "http://localhost:5000/api/packs"
+                                  );
+                                  setCreditPackages(res.data);
+                                } catch (err) {
+                                  console.error("Error al eliminar paquete", err);
+                                }
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Modal QR */}
+        <Dialog open={!!showQr} onOpenChange={() => setShowQr(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>QR del Paquete</DialogTitle>
+            </DialogHeader>
+            <div className="flex justify-center p-4">
+              {showQr && (
+                <img
+                  src={`${API_BASE}${showQr}`}    // <- usa 5000 o tu API_BASE centralizado
+                  alt="Código QR de pago"
+                  className="max-w-full h-auto max-h-64 object-contain border rounded-lg"
+                />
+              )}
             </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowQr(null)}>
+                Cerrar
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Créditos</TableHead>
-              <TableHead>Precio</TableHead>
-              <TableHead>QR Code</TableHead>
-              <TableHead>Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {creditPackages.map((pkg) => (
-              <TableRow key={pkg.id}>
-                <TableCell>{pkg.name}</TableCell>
-                <TableCell>{pkg.credits}</TableCell>
-                <TableCell>Bs {pkg.price}</TableCell>
-                <TableCell>
-                  <Button variant="outline" size="sm">
-                    <FileImage className="h-4 w-4 mr-2" />
-                    Ver QR
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="destructive" size="sm">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  );
+        
+
+        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Editar Paquete de Créditos</DialogTitle>
+              <DialogDescription>
+                Actualiza los datos del paquete. El QR es opcional.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3">
+              {/* Campo Nombre */}
+              <div className="grid gap-2">
+                <Label htmlFor="edit-nombre">Nombre</Label>
+                <Input
+                  id="edit-nombre"
+                  type="text"
+                  name="nombre"
+                  value={editPack.nombre}
+                  onChange={handleEditChange}
+                  placeholder="Nombre del paquete"
+                />
+              </div>
+
+              {/* Campo Créditos */}
+              <div className="grid gap-2">
+                <Label htmlFor="edit-creditos">Créditos</Label>
+                <Input
+                  id="edit-creditos"
+                  type="number"
+                  name="cantidad_creditos"
+                  min={1}
+                  value={editPack.cantidad_creditos}
+                  onChange={handleEditChange}
+                />
+              </div>
+
+              {/* Campo Precio */}
+              <div className="grid gap-2">
+                <Label htmlFor="edit-precio">Precio (Bs)</Label>
+                <Input
+                  id="edit-precio"
+                  type="number"
+                  name="precio"
+                  min={0.01}
+                  step={0.01}
+                  value={editPack.precio}
+                  onChange={handleEditChange}
+                />
+              </div>
+
+              {/* Campo QR - Vista previa */}
+              <div className="grid gap-2">
+                <Label>Código QR</Label>
+                <div className="flex items-center gap-4">
+                  {editPack.qr ? (
+                    <img
+                      src={URL.createObjectURL(editPack.qr)}
+                      alt="QR nuevo"
+                      className="h-24 w-24 object-contain rounded border"
+                    />
+                  ) : editPack.qr_imagen_url ? (
+                    <img
+                      src={`${API_BASE}${editPack.qr_imagen_url}`}
+                      alt="QR actual"
+                      className="h-24 w-24 object-contain rounded border"
+                    />
+                  ) : (
+                    <span className="text-sm text-muted-foreground">Sin QR</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Input de archivo oculto y botones de acción */}
+            <div className="flex justify-end gap-2 mt-4">
+              <input
+                ref={fileEditRef}
+                type="file"
+                name="qr"
+                accept="image/png,image/jpeg"
+                onChange={handleEditChange}
+                className="sr-only"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2"
+                onClick={() => fileEditRef.current?.click()}
+              >
+                <Upload className="h-4 w-4" /> Seleccionar archivo
+              </Button>
+              {editPack.qr && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setEditPack(p => ({ ...p, qr: null }))}
+                >
+                  Quitar archivo
+                </Button>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditOpen(false)}>
+                <X className="h-4 w-4 mr-2" /> Cancelar
+              </Button>
+              <Button onClick={saveEdit} disabled={savingEdit}>
+                <Check className="h-4 w-4 mr-2" /> 
+                {savingEdit ? "Guardando..." : "Guardar cambios"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  };
+
 
   const renderAdsManagement = () => (
     <Card>
@@ -1056,7 +1643,7 @@ export function NewAdminDashboard() {
               <Label htmlFor="rating-filter">Calificación Mínima</Label>
               <Select 
                 value={ratingsFilters.minRating.toString()} 
-                onValueChange={(value) => setRatingsFilters(prev => ({ ...prev, minRating: Number(value) }))}
+                //onValueChange={(value) => setRatingsFilters(prev => ({ ...prev, minRating: Number(value) }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar" />
@@ -1076,7 +1663,7 @@ export function NewAdminDashboard() {
               <Label htmlFor="meeting-point-filter">Punto de Encuentro</Label>
               <Select 
                 value={ratingsFilters.meetingPointId} 
-                onValueChange={(value) => setRatingsFilters(prev => ({ ...prev, meetingPointId: value }))}
+                //onValueChange={(value) => setRatingsFilters(prev => ({ ...prev, meetingPointId: value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar" />
@@ -1495,51 +2082,11 @@ export function NewAdminDashboard() {
               </Button>
               <Button 
                 variant="destructive"
-                onClick={confirmDisableAd}
+                //onClick={confirmDisableAd}
                 className="flex-1"
                 disabled={!disableReason.trim()}
               >
                 Inhabilitar Anuncio
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Purchase Rejection Modal */}
-      <Dialog open={showPurchaseRejectModal} onOpenChange={setShowPurchaseRejectModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rechazar Solicitud de Pago</DialogTitle>
-            <DialogDescription>
-              Por favor indica la razón por la cual se está rechazando esta solicitud
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="purchase-rejection-reason">Motivo del rechazo</Label>
-              <Textarea
-                id="purchase-rejection-reason"
-                placeholder="Describe el motivo del rechazo..."
-                value={purchaseRejectionReason}
-                onChange={(e) => setPurchaseRejectionReason(e.target.value)}
-              />
-            </div>
-            <div className="flex space-x-3">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowPurchaseRejectModal(false)}
-                className="flex-1"
-              >
-                Cancelar
-              </Button>
-              <Button 
-                variant="destructive"
-                onClick={confirmRejectPurchase}
-                className="flex-1"
-                disabled={!purchaseRejectionReason.trim()}
-              >
-                Rechazar Solicitud
               </Button>
             </div>
           </div>

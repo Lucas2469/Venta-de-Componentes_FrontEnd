@@ -260,14 +260,14 @@ export const mockCreditPackages: CreditPackage[] = [
     name: "Paquete Básico",
     credits: 5,
     price: 50,
-    qrCodeUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+    qrCodeUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png"
   },
   {
     id: "2",
     name: "Paquete Estándar",
     credits: 10,
     price: 90,
-    qrCodeUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
+    qrCodeUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
     popular: true,
     bonus: 2
   },
@@ -276,7 +276,7 @@ export const mockCreditPackages: CreditPackage[] = [
     name: "Paquete Premium",
     credits: 25,
     price: 200,
-    qrCodeUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
+    qrCodeUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
     bonus: 5
   }
 ];

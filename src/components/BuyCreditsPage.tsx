@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { 
   CreditCard, 
@@ -13,7 +11,8 @@ import {
   Zap,
   FileImage
 } from "lucide-react";
-import { mockCreditPackages } from "./mockData";
+
+const API_BASE = "http://localhost:5000";
 
 interface BuyCreditsPageProps {
   onBack: () => void;
@@ -24,6 +23,30 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
   const [selectedPackage, setSelectedPackage] = useState<string>("");
   const [proofImage, setProofImage] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [creditPackages, setCreditPackages] = useState<any[]>([]);
+
+  // Obtener los paquetes de créditos desde el backend
+  useEffect(() => {
+    fetch(`${API_BASE}/api/packs`) // ← usa el endpoint de packs
+      .then(res => res.json())
+      .then(data => {
+        const mapped = data.map((p: any) => ({
+          id: String(p.id),
+          name: p.nombre,
+          credits: Number(p.cantidad_creditos),
+          price: Number(p.precio),
+          // prefija la URL del QR para que apunte al backend
+          qrCodeUrl: p.qr_imagen_url ? `${API_BASE}${p.qr_imagen_url}` : "",
+          popular: Boolean(p.popular),
+          bonus: Number(p.bonus_creditos || 0),
+        }));
+        setCreditPackages(mapped);
+      })
+      .catch(err => console.error("Error cargando packs:", err));
+  }, []);
+
+  // Encontrar el paquete seleccionado
+  const selectedPkg = creditPackages.find(pkg => pkg.id === selectedPackage);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -38,27 +61,58 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedPackage) {
-      alert("Por favor selecciona un paquete");
-      return;
-    }
-    if (!proofImage) {
-      alert("Por favor sube el comprobante de pago");
-      return;
-    }
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
+      if (!selectedPkg) {
+        alert("Por favor selecciona un paquete");
+        return;
+      }
+      if (!proofImage) {
+        alert("Por favor sube el comprobante de pago");
+        return;
+      }
 
-    alert("Tu solicitud de créditos ha sido enviada para revisión. Te notificaremos una vez sea aprobada.");
-    onBack();
-  };
+      setIsSubmitting(true);
 
-  const selectedPkg = mockCreditPackages.find(p => p.id === selectedPackage);
+      try {
+        // Obtener el archivo del input file
+        const fileInput = document.getElementById('proof-upload') as HTMLInputElement;
+        const file = fileInput?.files?.[0];
+        
+        if (!file) {
+          throw new Error("No se encontró el archivo");
+        }
+
+        // Crear FormData y agregar campos
+        const formData = new FormData();
+        formData.append("usuario_id", String(currentUser?.id || 1));
+        formData.append("pack_creditos_id", selectedPkg.id);
+        formData.append("cantidad_creditos", String(selectedPkg.credits + (selectedPkg.bonus || 0)));
+        formData.append("monto_pagado", String(selectedPkg.price));
+        formData.append("comprobante_pago", file); // el archivo real
+
+        const response = await fetch("http://localhost:5000/api/creditos/comprar", {
+          method: "POST",
+          body: formData // ← NO incluir headers Content-Type
+        });
+
+        if (!response.ok) {
+          throw new Error("Error en la solicitud");
+        }
+
+        const data = await response.json();
+        console.log("Respuesta backend:", data);
+
+        alert("Tu solicitud fue enviada correctamente. Será revisada en 24 horas.");
+        onBack();
+      } catch (error) {
+        console.error("Error en handleSubmit:", error);
+        alert("Hubo un error al enviar la solicitud, intenta nuevamente.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -92,7 +146,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
             <CardContent>
               <RadioGroup value={selectedPackage} onValueChange={setSelectedPackage}>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {mockCreditPackages.map((pkg) => (
+                  {creditPackages.map((pkg) => (
                     <div key={pkg.id} className="relative">
                       <RadioGroupItem 
                         value={pkg.id} 
@@ -128,7 +182,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
                               Bs {(pkg.price / pkg.credits).toFixed(2)} por crédito
                             </p>
                             <div className="text-xs text-gray-500">
-                              {pkg.bonus && (
+                              {pkg.bonus > 0 && (
                                 <p className="text-green-600 font-medium">
                                   ¡{pkg.bonus} créditos extra gratis!
                                 </p>
@@ -145,7 +199,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
           </Card>
 
           {/* Payment Instructions */}
-          {selectedPackage && (
+          {selectedPackage && selectedPkg && (
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -157,13 +211,19 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-medium mb-2">Resumen de tu compra:</h4>
                   <div className="flex justify-between items-center">
-                    <span>{selectedPkg?.name}</span>
-                    <span className="font-bold">Bs {selectedPkg?.price}</span>
+                    <span>{selectedPkg.name}</span>
+                    <span className="font-bold">Bs {selectedPkg.price}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Créditos a recibir:</span>
-                    <span className="font-bold">{selectedPkg?.credits}</span>
+                    <span className="font-bold">{selectedPkg.credits + (selectedPkg.bonus || 0)}</span>
                   </div>
+                  {selectedPkg.bonus > 0 && (
+                    <div className="flex justify-between items-center text-green-600">
+                      <span>Incluye bonus:</span>
+                      <span className="font-bold">+{selectedPkg.bonus} créditos</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-3">
@@ -201,15 +261,20 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
 
                 {/* QR Code Display */}
                 <div className="text-center bg-white p-6 border rounded-lg">
-                  <div className="w-48 h-48 mx-auto bg-gray-200 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <FileImage className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-600">
-                        Código QR<br />
-                        Bs {selectedPkg?.price}
-                      </p>
+                  {selectedPkg.qrCodeUrl ? (
+                    <img
+                      src={selectedPkg.qrCodeUrl}
+                      alt={`Código QR Bs ${selectedPkg.price}`}
+                      className="w-48 h-48 mx-auto rounded-lg shadow-md"
+                    />
+                  ) : (
+                    <div className="w-48 h-48 mx-auto bg-gray-200 rounded-lg flex items-center justify-center">
+                      <FileImage className="h-12 w-12 text-gray-400" />
                     </div>
-                  </div>
+                  )}
+                  <p className="text-sm text-gray-600 mt-2">
+                    Código QR<br />Bs {selectedPkg.price}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -272,7 +337,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
               type="submit" 
               className="flex-1"
               style={{ backgroundColor: '#9d0045', color: '#ffffff' }}
-              disabled={!selectedPackage || !proofImage || isSubmitting}
+              disabled={!selectedPkg || !proofImage || isSubmitting}
             >
               {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
             </Button>
