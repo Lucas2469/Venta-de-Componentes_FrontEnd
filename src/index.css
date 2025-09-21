@@ -5333,3 +5333,22 @@ html {
     opacity: 0;
   }
 }
+/* Asegúrate de que Leaflet se vea correctamente */
+@import 'leaflet/dist/leaflet.css';
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+/* Ajustes para los iconos de marcador */
+.leaflet-marker-icon {
+  margin-left: -12px !important;
+  margin-top: -41px !important;
+}
+
+.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+}

@@ -9,6 +9,7 @@ import { ContactConfirmationModal } from "./components/ContactConfirmationModal"
 import { NewAdminDashboard } from "./components/NewAdminDashboard";
 import { CreateAdPage } from "./components/CreateAdPage";
 import { BuyCreditsPage } from "./components/BuyCreditsPage";
+import { MeetingPointsPage } from "./components/MeetingPointsPage";
 import { User } from "./components/types";
 import { mockUsers } from "./components/mockData";
 
@@ -22,7 +23,8 @@ type AppState =
   | "buy-credits" 
   | "admin-dashboard"
   | "profile"
-  | "settings";
+  | "settings"
+  | "meeting-points";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<AppState>("catalog");
@@ -89,6 +91,7 @@ export default function App() {
       case 'create-ad':
       case 'buy-credits':
       case 'admin-dashboard':
+      case 'meeting-points':
         if (!currentUser) {
           navigateToLogin();
         } else {
@@ -154,6 +157,9 @@ export default function App() {
       
       case "admin-dashboard":
         return <NewAdminDashboard />;
+      
+      case "meeting-points":
+        return <MeetingPointsPage onBack={navigateToCatalog} />;
       
       case "profile":
         return (
