@@ -18,6 +18,13 @@ export interface ProductImage {
     fecha_subida: string;
 }
 
+export interface HorarioVendedor {
+    dia_semana: 'lunes' | 'martes' | 'miércoles' | 'jueves' | 'viernes' | 'sábado' | 'domingo';
+    hora_inicio: string;
+    hora_fin: string;
+    estado: 'activo' | 'inactivo';
+}
+
 export interface ProductDetail {
     id: number;
     nombre: string;
@@ -40,6 +47,13 @@ export interface ProductDetail {
     total_imagenes?: number;
     imagenes?: ProductImage[];
     productos_relacionados?: ProductSummary[];
+    horarios_vendedor?: HorarioVendedor[];
+    // Información del punto de encuentro
+    punto_encuentro_nombre?: string;
+    punto_encuentro_direccion?: string;
+    punto_encuentro_referencias?: string;
+    coordenadas_lat?: number;
+    coordenadas_lng?: number;
 }
 
 export interface ProductSummary {
