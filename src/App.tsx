@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { RegistrationPage } from "./components/RegistrationPage";
@@ -7,30 +8,38 @@ import { CatalogPage } from "./components/CatalogPage";
 import { ProductDetailPage } from "./components/ProductDetailPage";
 import { ContactConfirmationModal } from "./components/ContactConfirmationModal";
 import { NewAdminDashboard } from "./components/NewAdminDashboard";
-import { CreateAdPage } from "./components/CreateAdPage";
+import CreateAdPage from "./components/CreateAdPage";
 import { BuyCreditsPage } from "./components/BuyCreditsPage";
 import { User } from "./components/types";
 import { mockUsers } from "./components/mockData";
+import ScheduleManager from "./components/ScheduleManager";// ✅
 
-// Define AppState type
-type AppState = 
-  | "login" 
-  | "register" 
-  | "catalog" 
-  | "product-detail" 
-  | "create-ad" 
-  | "buy-credits" 
+export default function AppWrapper() {
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
+}
+
+type AppState =
+  | "login"
+  | "register"
+  | "catalog"
+  | "product-detail"
+  | "create-ad"
+  | "buy-credits"
   | "admin-dashboard"
   | "profile"
-  | "settings";
+  | "settings"
+  | "Mis horarios";
 
-export default function App() {
+function App() {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState<AppState>("catalog");
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
-  
-  // Contact confirmation modal state
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactDetails, setContactDetails] = useState<{
     productTitle: string;
@@ -39,70 +48,39 @@ export default function App() {
     meetingPointId: string;
   } | null>(null);
 
-  // Rest of your component logic (e.g., navigateToLogin, handleLogin, etc.)
-  const navigateToLogin = () => setCurrentPage("login");
-  const navigateToRegistration = () => setCurrentPage("register");
-  const navigateToCatalog = () => setCurrentPage("catalog");
+  const navigateToLogin = () => navigate("/login");
+  const navigateToRegistration = () => navigate("/register");
+  const navigateToCatalog = () => navigate("/");
   const logout = () => {
     setCurrentUser(null);
-    setCurrentPage("catalog");
+    navigateToCatalog();
   };
 
   const handleLogin = (credentials?: { username: string; password: string }) => {
     if (credentials) {
-      // Check for admin credentials
       if (credentials.username === "Admin" && credentials.password === "123456") {
         const adminUser = mockUsers.find(u => u.username === "Admin" && u.role === "admin");
         if (adminUser) {
           setCurrentUser(adminUser);
-          setCurrentPage("catalog"); // Go to catalog first so user can see the admin button
+           navigate("/admin-dashboard"); 
           return;
         }
       }
-      // In a real app, validate other user credentials here
       const user = mockUsers.find(u => u.username === credentials.username);
       if (user) {
         setCurrentUser(user);
-        setCurrentPage("catalog");
+        navigateToCatalog();
         return;
       }
     }
-    // Default behavior for demo
     const user = mockUsers[0];
     setCurrentUser(user);
-    setCurrentPage("catalog");
-  };
-
-  const handleNavigate = (page: string) => {
-    switch (page) {
-      case 'catalog':
-        navigateToCatalog();
-        break;
-      case 'login':
-        navigateToLogin();
-        break;
-      case 'register':
-        navigateToRegistration();
-        break;
-      case 'profile':
-      case 'settings':
-      case 'create-ad':
-      case 'buy-credits':
-      case 'admin-dashboard':
-        if (!currentUser) {
-          navigateToLogin();
-        } else {
-          setCurrentPage(page as AppState);
-        }
-        break;
-      default:
-        navigateToCatalog();
-    }
+    navigateToCatalog();
   };
 
   const handleProductClick = (productId: string) => {
     setSelectedProductId(productId);
-    setCurrentPage("product-detail");
+    navigate("/producto");
   };
 
   const handleContactSeller = (productId: string, date: Date, time: string) => {
@@ -110,99 +88,15 @@ export default function App() {
       navigateToLogin();
       return;
     }
-
-    // Find product details for the modal
     const product = mockUsers.find(p => p.id === productId);
     if (product) {
       setContactDetails({
-        productTitle: "iPhone 15 Pro Max 256GB", // This would come from the product
-        sellerName: "juan_tech", // This would come from the product
+        productTitle: "iPhone 15 Pro Max 256GB",
+        sellerName: "juan_tech",
         selectedDate: date,
-        meetingPointId: "1" // Use first available meeting point
+        meetingPointId: "1"
       });
       setShowContactModal(true);
-    }
-  };
-
-  const renderCurrentPage = () => {
-    switch (currentPage) {
-      case "register":
-        return <RegistrationPage onNavigateToLogin={navigateToLogin} />;
-      
-      case "login":
-        return (
-          <LoginPage
-            onNavigateToRegistration={navigateToRegistration}
-            onLoginSuccess={handleLogin}
-          />
-        );
-      
-      case "product-detail":
-        return (
-          <ProductDetailPage
-            productId={selectedProductId}
-            onBack={navigateToCatalog}
-            onContactSeller={handleContactSeller}
-          />
-        );
-      
-      case "create-ad":
-        return <CreateAdPage onBack={navigateToCatalog} />;
-      
-      case "buy-credits":
-        return <BuyCreditsPage onBack={navigateToCatalog} currentUser={currentUser} />;
-      
-      case "admin-dashboard":
-        return <NewAdminDashboard />;
-      
-      case "profile":
-        return (
-          <div className="container mx-auto px-4 py-8">
-            <div className="max-w-2xl mx-auto">
-              <h1 className="text-3xl font-bold mb-6" style={{ color: '#9d0045' }}>
-                Mi Perfil
-              </h1>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-                <h3 className="text-lg font-medium text-green-800 mb-2">
-                  Función en Desarrollo
-                </h3>
-                <p className="text-green-700">
-                  La página de perfil estará disponible próximamente.
-                </p>
-              </div>
-            </div>
-          </div>
-        );
-      
-      case "settings":
-        return (
-          <div className="container mx-auto px-4 py-8">
-            <div className="max-w-2xl mx-auto">
-              <h1 className="text-3xl font-bold mb-6" style={{ color: '#9d0045' }}>
-                Configuración
-              </h1>
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-                <h3 className="text-lg font-medium text-gray-800 mb-2">
-                  Función en Desarrollo
-                </h3>
-                <p className="text-gray-700">
-                  La página de configuración estará disponible próximamente.
-                </p>
-              </div>
-            </div>
-          </div>
-        );
-      
-      case "catalog":
-      default:
-        return (
-          <CatalogPage
-            searchQuery={searchQuery}
-            onProductClick={handleProductClick}
-            currentUser={currentUser}
-            onNavigate={handleNavigate}
-          />
-        );
     }
   };
 
@@ -212,19 +106,27 @@ export default function App() {
         currentUser={currentUser}
         onLogin={navigateToLogin}
         onLogout={logout}
-        onNavigate={handleNavigate}
+        onNavigate={(page) => navigate(`/${page}`)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
-      
-      <main className="flex-1">
-        {renderCurrentPage()}
-      </main>
-      
-      <Footer onNavigate={handleNavigate} />
 
-      {/* Contact Confirmation Modal */}
-     {showContactModal && contactDetails && (
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<CatalogPage searchQuery={searchQuery} onProductClick={handleProductClick} currentUser={currentUser} onNavigate={(p) => navigate(`/${p}`)} />} />
+          <Route path="/register" element={<RegistrationPage onNavigateToLogin={navigateToLogin} />} />
+          <Route path="/login" element={<LoginPage onNavigateToRegistration={navigateToRegistration} onLoginSuccess={handleLogin} />} />
+          <Route path="/producto" element={<ProductDetailPage productId={selectedProductId} onBack={navigateToCatalog} onContactSeller={handleContactSeller} />} />
+          <Route path="/create-ad" element={<CreateAdPage />} />
+          <Route path="/buy-credits" element={<BuyCreditsPage onBack={navigateToCatalog} currentUser={currentUser} />} />
+          <Route path="/admin-dashboard" element={<NewAdminDashboard />} />
+      
+        </Routes>
+      </main>
+
+      <Footer onNavigate={(page) => navigate(`/${page}`)} />
+
+      {showContactModal && contactDetails && (
         <ContactConfirmationModal
           isOpen={showContactModal}
           onClose={() => setShowContactModal(false)}
