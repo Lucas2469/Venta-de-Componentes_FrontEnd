@@ -6,7 +6,6 @@ import {
   getPuntosEncuentro,
   getCreditosDisponibles,
 } from "../api/AdProduct";
-
 import { Upload, X, FileText, Image as ImageIcon, DollarSign, ChevronDown } from "lucide-react";
 
 const VENDEDOR_ID = 2; // TODO: reemplazar por el id real del usuario logueado (JWT)
@@ -207,12 +206,14 @@ export default function CreateAdPage({ onBack }: CreateAdPageProps) {
           <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="flex items-center space-x-2 text-lg font-semibold text-gray-900">
+
                 <FileText className="h-5 w-5" />
                 <span>Información Básica</span>
               </h3>
             </div>
             <div className="p-6 space-y-4">
               <div>
+
                 <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
                   Título del Anuncio *
                 </label>
@@ -230,6 +231,7 @@ export default function CreateAdPage({ onBack }: CreateAdPageProps) {
               </div>
 
               <div>
+
                 <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
                   Descripción *
                 </label>
@@ -242,16 +244,19 @@ export default function CreateAdPage({ onBack }: CreateAdPageProps) {
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9d0045] focus:border-transparent resize-vertical ${
                     errors.descripcion ? "border-red-500" : "border-gray-300"
                   }`}
+
                 />
                 {errors.descripcion && <p className="text-red-500 text-sm mt-1">{errors.descripcion}</p>}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
+
                   <label htmlFor="precio" className="block text-sm font-medium text-gray-700 mb-1">
                     Precio (Bs) *
                   </label>
                   <input
+
                     id="precio"
                     type="number"
                     placeholder="25"
@@ -260,11 +265,13 @@ export default function CreateAdPage({ onBack }: CreateAdPageProps) {
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9d0045] focus:border-transparent ${
                       errors.precio ? "border-red-500" : "border-gray-300"
                     }`}
+
                   />
                   {errors.precio && <p className="text-red-500 text-sm mt-1">{errors.precio}</p>}
                 </div>
 
                 <div>
+
                   <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-1">
                     Stock *
                   </label>
@@ -282,6 +289,7 @@ export default function CreateAdPage({ onBack }: CreateAdPageProps) {
                 </div>
 
                 <div>
+
                   <label htmlFor="categoria" className="block text-sm font-medium text-gray-700 mb-1">
                     Categoría *
                   </label>
