@@ -6,7 +6,7 @@ import { RegistrationPage } from "./components/RegistrationPage";
 import { LoginPage } from "./components/LoginPage";
 import { ContactConfirmationModal } from "./components/ContactConfirmationModal";
 import { NewAdminDashboard } from "./components/NewAdminDashboard";
-import { CreateAdPage } from "./components/CreateAdPage";
+import CreateAdPage from "./components/CreateAdPage";
 import { BuyCreditsPage } from "./components/BuyCreditsPage";
 import { ProductCatalog } from "./components/ProductCatalog";
 import { UsersList } from "./components/UsersList";
@@ -47,8 +47,6 @@ export default function App() {
   const location = useLocation();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Contact confirmation modal state
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactDetails, setContactDetails] = useState<{
     productTitle: string;
@@ -64,7 +62,7 @@ export default function App() {
         const adminUser = mockUsers.find(u => u.username === "Admin" && u.role === "admin");
         if (adminUser) {
           setCurrentUser(adminUser);
-          navigate('/catalog');
+          navigate('/admin-dashboard'); // Navegación directa a admin dashboard (de Anett)
           return;
         }
       }
@@ -148,7 +146,7 @@ export default function App() {
             </div>
           } />
 
-          {/* Rutas protegidas */}
+          {/* Rutas protegidas - Usando CreateAdPage funcional de Anett */}
           <Route path="/create-ad" element={
             <ProtectedRoute currentUser={currentUser}>
               <CreateAdPage onBack={() => navigate('/catalog')} />
@@ -159,11 +157,13 @@ export default function App() {
               <BuyCreditsPage onBack={() => navigate('/catalog')} currentUser={currentUser} />
             </ProtectedRoute>
           } />
+          {/* 
           <Route path="/admin-dashboard" element={
             <ProtectedRoute currentUser={currentUser}>
               <NewAdminDashboard />
             </ProtectedRoute>
           } />
+           */}
           <Route path="/profile" element={
             <ProtectedRoute currentUser={currentUser}>
               <div className="container mx-auto px-4 py-8">

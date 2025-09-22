@@ -913,6 +913,7 @@ export function NewAdminDashboard() {
                       <Button 
                         variant="outline" 
                         size="sm"
+
                         onClick={() => handleToggleUserStatus(user.id)}
                       >
                         <Edit className="h-4 w-4" />
@@ -981,6 +982,7 @@ export function NewAdminDashboard() {
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button variant="destructive" size="sm">
+
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -1365,7 +1367,7 @@ export function NewAdminDashboard() {
     </div>
   );
 
-  const renderContent = () => {
+  const renderContent = (): JSX.Element => {
     switch (activeSection) {
       case "statistics":
         return renderStatistics();
@@ -1496,6 +1498,7 @@ export function NewAdminDashboard() {
               </Button>
               <Button 
                 variant="destructive"
+
                 onClick={confirmDisableAd}
                 className="flex-1"
                 disabled={!disableReason.trim()}
@@ -1536,6 +1539,7 @@ export function NewAdminDashboard() {
               </Button>
               <Button 
                 variant="destructive"
+
                 onClick={confirmRejectPurchase}
                 className="flex-1"
                 disabled={!purchaseRejectionReason.trim()}

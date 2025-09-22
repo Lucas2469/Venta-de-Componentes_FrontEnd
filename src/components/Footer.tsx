@@ -26,26 +26,32 @@ export function Footer({ onNavigate }: FooterProps) {
               </Button>
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 p-1.5">
                 <Instagram className="h-3.5 w-3.5" />
+
               </Button>
             </div>
           </div>
 
           {/* Quick Links */}
+
           <div className="space-y-3">
             <h4 className="font-medium text-sm">Enlaces Rápidos</h4>
             <ul className="space-y-1.5 text-xs">
               <li>
                 <button onClick={() => onNavigate('catalog')} className="text-white/80 hover:text-white transition-colors">
+
                   Catálogo
                 </button>
               </li>
               <li>
+
                 <button onClick={() => onNavigate('security')} className="text-white/80 hover:text-white transition-colors">
+
                   Seguridad
                 </button>
               </li>
               <li>
                 <button onClick={() => onNavigate('help')} className="text-white/80 hover:text-white transition-colors">
+
                   Centro de Ayuda
                 </button>
               </li>
@@ -58,17 +64,20 @@ export function Footer({ onNavigate }: FooterProps) {
             <ul className="space-y-1.5 text-xs">
               <li>
                 <button onClick={() => onNavigate('create-ad')} className="text-white/80 hover:text-white transition-colors">
+
                   Publicar Anuncio
                 </button>
               </li>
               <li>
                 <button onClick={() => onNavigate('buy-credits')} className="text-white/80 hover:text-white transition-colors">
+
                   Comprar Créditos
                 </button>
               </li>
               <li>
                 <button onClick={() => onNavigate('seller-guide')} className="text-white/80 hover:text-white transition-colors">
                   Guía del Vendedor
+
                 </button>
               </li>
             </ul>
@@ -89,6 +98,7 @@ export function Footer({ onNavigate }: FooterProps) {
               <div className="flex items-start space-x-2">
                 <MapPin className="h-3 w-3 text-teal-200 mt-0.5" />
                 <span className="text-white/80">La Paz, Bolivia</span>
+
               </div>
             </div>
           </div>
@@ -108,6 +118,7 @@ export function Footer({ onNavigate }: FooterProps) {
                 Términos
               </button>
               <button onClick={() => onNavigate('cookies')} className="text-white/60 hover:text-white transition-colors">
+
                 Cookies
               </button>
             </div>

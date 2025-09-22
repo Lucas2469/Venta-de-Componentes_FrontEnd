@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 import React from "react";
+=======
+>>>>>>> AnettG
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -9,9 +12,19 @@ import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+<<<<<<< HEAD
 import { 
   Users, 
   BarChart3, 
+=======
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { 
+  Users, 
+  CreditCard, 
+  MapPin, 
+  BarChart3, 
+  Package, 
+>>>>>>> AnettG
   FileImage, 
   ShoppingBag, 
   Star,
@@ -24,7 +37,11 @@ import {
   Upload
 } from "lucide-react";
 import { mockUsers, mockProducts, mockMeetingPoints, mockCreditPackages, mockCategories } from "./mockData";
+<<<<<<< HEAD
 import { CreditPurchase } from "./types";
+=======
+import { User, Product, MeetingPoint, CreditPackage, Category, CreditPurchase } from "./types";
+>>>>>>> AnettG
 
 export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
