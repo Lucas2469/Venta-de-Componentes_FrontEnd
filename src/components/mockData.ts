@@ -2,7 +2,19 @@ import { User, Product, MeetingPoint, CreditPackage, Category, Rating } from "./
 // cambios
 export const mockUsers: User[] = [
   {
-    id: "1",
+    id: "1", // ID real del admin en la BD
+    username: "Admin",
+    email: "admin@electromarket.bo", // Email real de la BD
+    role: "admin",
+    registrationDate: "2025-09-21", // Fecha real de la BD
+    rating: 0.0, // Valor real de la BD
+    totalTransactions: 0, // Valor real de la BD
+    credits: 0, // Valor real de la BD
+    isSeller: false,
+    isBuyer: false
+  },
+  {
+    id: "2",
     username: "juan_tech",
     email: "juan@electromarket.com",
     role: "user",
@@ -14,7 +26,7 @@ export const mockUsers: User[] = [
     isBuyer: true
   },
   {
-    id: "2", 
+    id: "3",
     username: "maria_buyer",
     email: "maria@electromarket.com",
     role: "user",
@@ -24,18 +36,6 @@ export const mockUsers: User[] = [
     credits: 0,
     isSeller: false,
     isBuyer: true
-  },
-  {
-    id: "3",
-    username: "Admin",
-    email: "admin@electromarket.com", 
-    role: "admin",
-    registrationDate: "2023-12-01",
-    rating: 5.0,
-    totalTransactions: 0,
-    credits: 0,
-    isSeller: false,
-    isBuyer: false
   },
   {
     id: "4",

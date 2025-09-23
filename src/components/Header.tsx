@@ -7,11 +7,9 @@ interface HeaderProps {
   onLogin: () => void;
   onLogout: () => void;
   onNavigate: (page: string) => void;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
 }
 
-export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery, onSearchChange }: HeaderProps) {
+export function Header({ currentUser, onLogin, onLogout, onNavigate }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
@@ -54,19 +52,6 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
               </button>
             </div>
 
-            {/* Search Bar - Hidden on mobile */}
-            <div className="hidden md:flex flex-1 max-w-md mx-8">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-pink-200" />
-                <input
-                  type="text"
-                  placeholder="Buscar productos..."
-                  value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-pink-200 focus:bg-white/20 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-200"
-                />
-              </div>
-            </div>
 
             {/* User Menu */}
             <div className="flex items-center space-x-3">
@@ -248,19 +233,6 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
             </div>
           </div>
 
-          {/* Mobile Search Bar */}
-          <div className="md:hidden pb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-pink-200" />
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-pink-200 focus:bg-white/20 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-200"
-              />
-            </div>
-          </div>
         </div>
       </div>
     </header>

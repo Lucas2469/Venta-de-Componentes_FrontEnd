@@ -181,6 +181,28 @@ class UsersApi {
             throw error;
         }
     }
+
+    // Actualizar estado de usuario (solo admins)
+    async updateUserStatus(userId: number, newStatus: 'activo' | 'inactivo' | 'suspendido'): Promise<{success: boolean; message: string}> {
+        try {
+            const response = await fetch(`${this.baseUrl}/${userId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ estado: newStatus })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error updating user status:', error);
+            throw error;
+        }
+    }
 }
 
 // Exportar instancia singleton

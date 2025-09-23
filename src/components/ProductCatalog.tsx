@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { Search, Filter, Grid, List, SlidersHorizontal } from 'lucide-react';
 import { productsApi, ProductSummary, ProductFilters } from '../api/productsApi';
 import { getImageUrl } from '../api/api';
 
 interface ProductCatalogProps {
-    searchQuery?: string;
     onProductClick?: (productId: number) => void;
 }
 
 export const ProductCatalog: React.FC<ProductCatalogProps> = ({
-    searchQuery = '',
     onProductClick
 }) => {
     const [products, setProducts] = useState<ProductSummary[]>([]);
@@ -16,11 +15,16 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState<ProductFilters>({
         page: 1,
         limit: 12,
         estado: 'activo'
     });
+
+    // Estados para los filtros visuales
+    const [selectedPriceRange, setSelectedPriceRange] = useState('');
+    const [selectedStockFilter, setSelectedStockFilter] = useState('activo');
 
     // Cargar productos
     const loadProducts = async () => {
@@ -65,13 +69,58 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
     };
 
+    // Manejar búsqueda
+    const handleSearchChange = (query: string) => {
+        setSearchQuery(query);
+        setFilters(prev => ({ ...prev, page: 1 }));
+    };
+
+    // Limpiar búsqueda
+    const clearSearch = () => {
+        setSearchQuery('');
+        setFilters(prev => ({ ...prev, page: 1 }));
+    };
+
+    // Manejar filtro de precio
+    const handlePriceFilter = (value: string) => {
+        setSelectedPriceRange(value);
+
+        if (value === 'low') {
+            handleFilterChange({ minPrice: undefined, maxPrice: 50 });
+        } else if (value === 'medium') {
+            handleFilterChange({ minPrice: 50, maxPrice: 200 });
+        } else if (value === 'high') {
+            handleFilterChange({ minPrice: 200, maxPrice: undefined });
+        } else {
+            handleFilterChange({ minPrice: undefined, maxPrice: undefined });
+        }
+    };
+
+    // Manejar filtro de stock
+    const handleStockFilter = (value: string) => {
+        setSelectedStockFilter(value);
+        handleFilterChange({ estado: value as any || 'activo' });
+    };
+
+    // Limpiar todos los filtros
+    const clearAllFilters = () => {
+        setSelectedPriceRange('');
+        setSelectedStockFilter('activo');
+        setSearchQuery('');
+        setFilters({
+            page: 1,
+            limit: 12,
+            estado: 'activo'
+        });
+    };
+
     // Componente de loading
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="flex items-center justify-center min-h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
                         <span className="ml-3 text-gray-600">Cargando productos...</span>
                     </div>
                 </div>
@@ -118,20 +167,10 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                         
                         <div className="flex flex-col sm:flex-row gap-3">
                             {/* Filtro por precio */}
-                            <select 
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white"
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    if (value === 'low') {
-                                        handleFilterChange({ minPrice: undefined, maxPrice: 50 });
-                                    } else if (value === 'medium') {
-                                        handleFilterChange({ minPrice: 50, maxPrice: 200 });
-                                    } else if (value === 'high') {
-                                        handleFilterChange({ minPrice: 200, maxPrice: undefined });
-                                    } else {
-                                        handleFilterChange({ minPrice: undefined, maxPrice: undefined });
-                                    }
-                                }}
+                            <select
+                                value={selectedPriceRange}
+                                onChange={(e) => handlePriceFilter(e.target.value)}
+                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white"
                             >
                                 <option value="">Todos los precios</option>
                                 <option value="low">Hasta Bs. 50</option>
@@ -140,17 +179,91 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                             </select>
 
                             {/* Filtro por stock */}
-                            <select 
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white"
-                                onChange={(e) => {
-                                    handleFilterChange({ estado: e.target.value as any || 'activo' });
-                                }}
+                            <select
+                                value={selectedStockFilter}
+                                onChange={(e) => handleStockFilter(e.target.value)}
+                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white"
                             >
                                 <option value="activo">Con stock</option>
                                 <option value="">Todos los estados</option>
                                 <option value="agotado">Agotados</option>
                             </select>
+
+                            {/* Botón limpiar filtros */}
+                            {(selectedPriceRange || selectedStockFilter !== 'activo' || searchQuery) && (
+                                <button
+                                    onClick={clearAllFilters}
+                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-2"
+                                >
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <span className="hidden sm:inline">Limpiar</span>
+                                </button>
+                            )}
                         </div>
+                    </div>
+                </div>
+
+                {/* Barra de búsqueda moderna */}
+                <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+                    <div className="max-w-2xl mx-auto">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Search className="h-5 w-5 text-pink-400" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Buscar productos por nombre (ej: Arduino, sensor, resistencia...)"
+                                value={searchQuery}
+                                onChange={(e) => handleSearchChange(e.target.value)}
+                                className="w-full pl-12 pr-12 py-4 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 placeholder:text-gray-400"
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={clearSearch}
+                                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-pink-500 transition-colors"
+                                >
+                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Búsquedas sugeridas */}
+                        {!searchQuery && (
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                <span className="text-sm text-gray-500 mr-2">Búsquedas populares:</span>
+                                {['Arduino', 'Sensor', 'Resistencia', 'ESP32', 'LED'].map((term) => (
+                                    <button
+                                        key={term}
+                                        onClick={() => handleSearchChange(term)}
+                                        className="px-3 py-1 text-sm bg-pink-50 text-pink-700 rounded-full hover:bg-pink-100 transition-colors"
+                                    >
+                                        {term}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Resultados de búsqueda */}
+                        {searchQuery && (
+                            <div className="mt-4 flex items-center justify-between text-sm">
+                                <span className="text-gray-600">
+                                    {products.length > 0
+                                        ? `Se encontraron ${products.length} productos para "${searchQuery}"`
+                                        : `No se encontraron productos para "${searchQuery}"`
+                                    }
+                                </span>
+                                <button
+                                    onClick={clearSearch}
+                                    className="text-pink-600 hover:text-pink-700 font-medium"
+                                >
+                                    Limpiar búsqueda
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 

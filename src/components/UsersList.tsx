@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { usersApi, UserDetail, UserFilters } from '../api/userApi';
+import { useToast } from './Toast';
 
 interface UsersListProps {
     searchQuery?: string;
@@ -36,6 +37,9 @@ export const UsersList: React.FC<UsersListProps> = ({
     const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
     const [pendingAction, setPendingAction] = useState<'activate' | 'deactivate' | null>(null);
     const [actionLoading, setActionLoading] = useState<number | null>(null);
+
+    // Hook para el Toast
+    const { showToast, ToastComponent } = useToast();
 
     // Cargar usuarios
     const loadUsers = async () => {
@@ -99,7 +103,11 @@ export const UsersList: React.FC<UsersListProps> = ({
     const handleStatusChange = (user: UserDetail) => {
         // No permitir cambiar estado de admins
         if (user.tipo_usuario === 'admin') {
-            alert('No se puede modificar el estado de otros administradores');
+            showToast(
+                'warning',
+                'Acción no permitida',
+                'No se puede modificar el estado de otros administradores por seguridad del sistema'
+            );
             return;
         }
 
@@ -114,25 +122,40 @@ export const UsersList: React.FC<UsersListProps> = ({
 
         setActionLoading(selectedUser.id);
         try {
-            // Aquí llamarías a tu API para cambiar el estado
-            // const newStatus = pendingAction === 'activate' ? 'activo' : 'inactivo';
-            // await usersApi.updateUserStatus(selectedUser.id, newStatus);
-            
-            // Por ahora simulamos la actualización
-            setUsers(prevUsers => 
-                prevUsers.map(user => 
-                    user.id === selectedUser.id 
-                        ? { ...user, estado: pendingAction === 'activate' ? 'activo' : 'inactivo' }
-                        : user
-                )
-            );
+            const newStatus = pendingAction === 'activate' ? 'activo' : 'inactivo';
+            const response = await usersApi.updateUserStatus(selectedUser.id, newStatus);
 
-            // Recargar estadísticas
-            loadStats();
-            
+            if (response.success) {
+                // Actualizar el estado local
+                setUsers(prevUsers =>
+                    prevUsers.map(user =>
+                        user.id === selectedUser.id
+                            ? { ...user, estado: newStatus }
+                            : user
+                    )
+                );
+
+                // Recargar estadísticas
+                loadStats();
+
+                // Mostrar mensaje de éxito
+                showToast(
+                    'success',
+                    '¡Acción realizada!',
+                    `Usuario ${newStatus === 'activo' ? 'activado' : 'desactivado'} exitosamente`
+                );
+            } else {
+                throw new Error(response.message || 'Error al actualizar el estado');
+            }
+
         } catch (error) {
             console.error('Error updating user status:', error);
-            alert('Error al actualizar el estado del usuario');
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            showToast(
+                'error',
+                'Error al actualizar estado',
+                `No se pudo actualizar el estado del usuario: ${message}`
+            );
         } finally {
             setActionLoading(null);
             setShowConfirmModal(false);
@@ -154,7 +177,7 @@ export const UsersList: React.FC<UsersListProps> = ({
             <div className="min-h-screen bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="flex items-center justify-center min-h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
                         <span className="ml-3 text-gray-600">Cargando usuarios...</span>
                     </div>
                 </div>
@@ -223,8 +246,8 @@ export const UsersList: React.FC<UsersListProps> = ({
                         
                         <div className="flex flex-col sm:flex-row gap-3">
                             {/* Filtro por tipo */}
-                            <select 
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            <select
+                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white"
                                 value={filters.tipo_usuario || ''}
                                 onChange={(e) => {
                                     handleFilterChange({ tipo_usuario: e.target.value as any || undefined });
@@ -237,8 +260,8 @@ export const UsersList: React.FC<UsersListProps> = ({
                             </select>
 
                             {/* Filtro por estado */}
-                            <select 
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            <select
+                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white"
                                 value={filters.estado || ''}
                                 onChange={(e) => {
                                     handleFilterChange({ estado: e.target.value as any || undefined });
@@ -438,6 +461,9 @@ export const UsersList: React.FC<UsersListProps> = ({
                 user={selectedUser}
                 action={pendingAction!}
             />
+
+            {/* Toast de notificaciones */}
+            <ToastComponent />
         </div>
     );
 };
