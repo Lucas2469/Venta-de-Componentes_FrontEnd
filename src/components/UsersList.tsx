@@ -194,7 +194,7 @@ export const UsersList: React.FC<UsersListProps> = ({
     if (error) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="relative bg-white border border-red-200 rounded-2xl p-8 text-center shadow-xl">
                         {/* Decorative background elements */}
                         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl opacity-50"></div>
@@ -219,7 +219,7 @@ export const UsersList: React.FC<UsersListProps> = ({
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 
                 {/* Estadísticas con animaciones mejoradas */}
                 {stats && (

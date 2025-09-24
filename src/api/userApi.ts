@@ -63,6 +63,24 @@ export interface UserStatsResponse {
     };
 }
 
+export interface TopUserData {
+    id: number;
+    nombre: string;
+    apellido: string;
+    email: string;
+    tipo_usuario: string;
+    calificacion_promedio: string;
+    total_intercambios_vendedor?: number;
+    total_intercambios_comprador?: number;
+    fecha_registro: string;
+}
+
+export interface TopUsersResponse {
+    success: boolean;
+    message: string;
+    data: TopUserData[];
+}
+
 class UsersApi {
     private baseUrl: string;
 
@@ -169,7 +187,7 @@ class UsersApi {
     }
 
     // Obtener top vendedores
-    async getTopVendedores(limit: number = 10) {
+    async getTopVendedores(limit: number = 10): Promise<TopUsersResponse> {
         try {
             const response = await fetch(`${this.baseUrl}/top-vendedores?limit=${limit}`);
             if (!response.ok) {
@@ -178,6 +196,20 @@ class UsersApi {
             return await response.json();
         } catch (error) {
             console.error('Error fetching top sellers:', error);
+            throw error;
+        }
+    }
+
+    // Obtener top compradores
+    async getTopCompradores(limit: number = 10): Promise<TopUsersResponse> {
+        try {
+            const response = await fetch(`${this.baseUrl}/top-compradores?limit=${limit}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching top buyers:', error);
             throw error;
         }
     }

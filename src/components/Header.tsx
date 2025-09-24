@@ -17,7 +17,7 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate }: HeaderPro
   const userCredits = currentUser?.credits ?? 0;
 
   return (
-    <header className="bg-gradient-to-r from-pink-700 to-pink-800 border-b border-pink-600 shadow-lg">
+    <header className="bg-gradient-to-r from-pink-700 to-pink-800 border-b border-pink-600 shadow-lg z-50">
       <div className="bg-black/10 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
@@ -125,7 +125,7 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate }: HeaderPro
 
                       {/* User Menu Dropdown */}
                       {isMenuOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                        <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 -z-50">
                           <div className="p-2">
                             <button
                               onClick={() => {

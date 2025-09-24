@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, Grid, List, SlidersHorizontal } from 'lucide-react';
 import { productsApi, ProductSummary, ProductFilters } from '../api/productsApi';
 import { getImageUrl } from '../api/api';
+import { StatisticsSidebar } from './StatisticsSidebar';
 
 interface ProductCatalogProps {
     onProductClick?: (productId: number) => void;
@@ -184,7 +185,13 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
             {/* Contenedor principal con máximo ancho */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+                {/* Layout principal con sidebar */}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+                    {/* Contenido principal - Catálogo */}
+                    <div className="lg:col-span-3">
 
                 {/* Header con filtros mejorado */}
                 <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-8 border border-white/20 overflow-hidden">
@@ -380,7 +387,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                             <span className="text-5xl text-white">🔍</span>
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-4">No se encontraron productos</h3>
-                        <p className="text-gray-600 max-w-md mx-auto mb-8">
+                        <p className="text-gray-600 max-w-full mx-auto mb-8">
                             {searchQuery
                                 ? `No pudimos encontrar productos que coincidan con "${searchQuery}". Intenta con otros términos de búsqueda o explora nuestras categorías.`
                                 : 'No hay productos disponibles en este momento. ¡Vuelve pronto para ver nuevos componentes!'}
@@ -477,6 +484,20 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                         )}
                     </>
                 )}
+
+                    </div>
+                    {/* Fin del contenido principal - Catálogo */}
+
+                    {/* Sidebar con estadísticas */}
+                    <div className="lg:col-span-1">
+                        <div className="sticky top-8">
+                            <StatisticsSidebar />
+                        </div>
+                    </div>
+
+                </div>
+                {/* Fin del layout principal */}
+
             </div>
         </div>
     );
