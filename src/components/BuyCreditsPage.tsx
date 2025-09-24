@@ -26,8 +26,8 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
   const [creditPackages, setCreditPackages] = useState<any[]>([]);
 
   // Obtener los paquetes de créditos desde el backend
-  useEffect(() => {
-    fetch(`${API_BASE}/api/packs`) // ← usa el endpoint de packs
+    useEffect(() => {
+    fetch(`${API_BASE}/api/packs`)
       .then(res => res.json())
       .then(data => {
         const mapped = data.map((p: any) => ({
@@ -35,15 +35,18 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
           name: p.nombre,
           credits: Number(p.cantidad_creditos),
           price: Number(p.precio),
-          // prefija la URL del QR para que apunte al backend
           qrCodeUrl: p.qr_imagen_url ? `${API_BASE}${p.qr_imagen_url}` : "",
+          description: p.descripcion || "",
           popular: Boolean(p.popular),
           bonus: Number(p.bonus_creditos || 0),
         }));
         setCreditPackages(mapped);
+        // Opcional: seleccionar el primero
+        // if (mapped.length) setSelectedPackage(mapped[0].id);
       })
       .catch(err => console.error("Error cargando packs:", err));
   }, []);
+
 
   // Encontrar el paquete seleccionado
   const selectedPkg = creditPackages.find(pkg => pkg.id === selectedPackage);
@@ -62,57 +65,46 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
   };
 
     const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
+    e.preventDefault();
 
-      if (!selectedPkg) {
-        alert("Por favor selecciona un paquete");
-        return;
-      }
-      if (!proofImage) {
-        alert("Por favor sube el comprobante de pago");
-        return;
-      }
+    if (!selectedPkg) {
+      alert("Por favor selecciona un paquete");
+      return;
+    }
+    if (!proofImage) {
+      alert("Por favor sube el comprobante de pago");
+      return;
+    }
 
-      setIsSubmitting(true);
+    setIsSubmitting(true);
+    try {
+      const fileInput = document.getElementById('proof-upload') as HTMLInputElement;
+      const file = fileInput?.files?.[0];
+      if (!file) throw new Error("No se encontró el archivo");
 
-      try {
-        // Obtener el archivo del input file
-        const fileInput = document.getElementById('proof-upload') as HTMLInputElement;
-        const file = fileInput?.files?.[0];
-        
-        if (!file) {
-          throw new Error("No se encontró el archivo");
-        }
+      const formData = new FormData();
+      formData.append("usuario_id", String(currentUser?.id));
+      formData.append("pack_creditos_id", selectedPkg.id);
+      formData.append("comprobante_pago", file); // ← nada más; el backend deriva todo
 
-        // Crear FormData y agregar campos
-        const formData = new FormData();
-        formData.append("usuario_id", String(currentUser?.id || 1));
-        formData.append("pack_creditos_id", selectedPkg.id);
-        formData.append("cantidad_creditos", String(selectedPkg.credits + (selectedPkg.bonus || 0)));
-        formData.append("monto_pagado", String(selectedPkg.price));
-        formData.append("comprobante_pago", file); // el archivo real
+      const response = await fetch(`${API_BASE}/api/creditos/comprar`, {
+        method: "POST",
+        body: formData
+      });
 
-        const response = await fetch("http://localhost:5000/api/creditos/comprar", {
-          method: "POST",
-          body: formData // ← NO incluir headers Content-Type
-        });
+      if (!response.ok) throw new Error("Error en la solicitud");
 
-        if (!response.ok) {
-          throw new Error("Error en la solicitud");
-        }
+      await response.json();
+      alert("Tu solicitud fue enviada correctamente. Será revisada en 24 horas.");
+      onBack();
+    } catch (error) {
+      console.error("Error en handleSubmit:", error);
+      alert("Hubo un error al enviar la solicitud, intenta nuevamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-        const data = await response.json();
-        console.log("Respuesta backend:", data);
-
-        alert("Tu solicitud fue enviada correctamente. Será revisada en 24 horas.");
-        onBack();
-      } catch (error) {
-        console.error("Error en handleSubmit:", error);
-        alert("Hubo un error al enviar la solicitud, intenta nuevamente.");
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -169,6 +161,9 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
                               </Badge>
                             )}
                             <CardTitle className="text-xl mb-2">{pkg.name}</CardTitle>
+                            {pkg.description && (
+                              <p className="text-xs text-gray-500 mt-2">{pkg.description}</p>
+                            )}
                             <div className="text-3xl font-bold" style={{ color: '#9d0045' }}>
                               {pkg.credits}
                             </div>
@@ -196,6 +191,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
                 </div>
               </RadioGroup>
             </CardContent>
+
           </Card>
 
           {/* Payment Instructions */}

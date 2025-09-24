@@ -2,7 +2,7 @@ import { User, Product, MeetingPoint, CreditPackage, Category, Rating } from "./
 // cambios
 export const mockUsers: User[] = [
   {
-    id: "1",
+    id: "3",
     username: "juan_tech",
     email: "juan@electromarket.com",
     role: "user",
@@ -26,7 +26,7 @@ export const mockUsers: User[] = [
     isBuyer: true
   },
   {
-    id: "3",
+    id: "1",
     username: "Admin",
     email: "admin@electromarket.com", 
     role: "admin",
