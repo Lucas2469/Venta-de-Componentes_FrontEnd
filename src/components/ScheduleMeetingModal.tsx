@@ -12,7 +12,9 @@ interface ScheduleMeetingModalProps {
         direccion: string;
         referencias?: string;
     };
-    onConfirm: (fecha: Date, horario: HorarioVendedor) => void;
+    quantity: number;
+    unitPrice: number;
+    onConfirm: (fecha: Date, horario: HorarioVendedor, cantidad: number) => void;
 }
 
 export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
@@ -22,6 +24,8 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
     vendorName,
     horarios,
     puntoEncuentro,
+    quantity,
+    unitPrice,
     onConfirm
 }) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -128,7 +132,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
         setErrors(newErrors);
 
         if (newErrors.length === 0 && selectedDate && selectedHorario) {
-            onConfirm(selectedDate, selectedHorario);
+            onConfirm(selectedDate, selectedHorario, quantity);
         }
     };
 
@@ -145,6 +149,15 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 
     const calendarDays = generateCalendarDays();
     const availableHorariosForSelectedDate = selectedDate ? getAvailableHorariosForDate(selectedDate) : [];
+
+    // Helper para formatear precio
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('es-BO', {
+            style: 'currency',
+            currency: 'BOB',
+            minimumFractionDigits: 2
+        }).format(price);
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -297,6 +310,35 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
                                     <strong>Referencias:</strong> {puntoEncuentro.referencias}
                                 </p>
                             )}
+                        </div>
+
+                        {/* Información del pedido */}
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 className="font-semibold text-green-900 mb-3">
+                                🛒 Resumen del pedido
+                            </h4>
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-green-800">Cantidad:</span>
+                                    <span className="font-medium text-green-900">
+                                        {quantity} unidad{quantity !== 1 ? 'es' : ''}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-green-800">Precio unitario:</span>
+                                    <span className="font-medium text-green-900">
+                                        {formatPrice(unitPrice)}
+                                    </span>
+                                </div>
+                                <div className="border-t border-green-300 pt-2 mt-2">
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-semibold text-green-900">Total a pagar:</span>
+                                        <span className="text-lg font-bold text-green-900">
+                                            {formatPrice(unitPrice * quantity)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
