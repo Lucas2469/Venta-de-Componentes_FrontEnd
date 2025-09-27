@@ -44,7 +44,7 @@ export const createPack = async (payload: CreatePackPayload): Promise<void> => {
   fd.append("nombre", payload.nombre);
   fd.append("cantidad_creditos", String(payload.cantidad_creditos));
   fd.append("precio", String(payload.precio));
-  fd.append("qr", payload.qr); // clave esperada por tu backend
+  fd.append("qr", payload.qr);
   fd.append("descripcion", payload.descripcion ?? "");
   await axios.post(PACKS_API, fd);
 };

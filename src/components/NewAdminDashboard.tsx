@@ -16,6 +16,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import ComprobantesPage from "./ComprobantesPage";
 //Paquetes Creditos
 import CreditPackagesPage from "./CreditPackagesPage";
+//Dashboard Admin
+import AdminStatisticsPage from "./AdminStatisticsPage";
 
 import { 
   Users, 
@@ -171,19 +173,6 @@ export function NewAdminDashboard() {
     setShowRejectionModal(true);
   };
 
-  /*const confirmRejectProduct = () => {
-    setProducts(prev => prev.map(p => 
-      p.id === selectedProductId ? { 
-        ...p, 
-        status: 'rejected' as const,
-        rejectionReason: rejectionReason
-      } : p
-    ));
-    setShowRejectionModal(false);
-    setRejectionReason("");
-    setSelectedProductId("");
-  };*/
-
   const handleApproveProduct = (productId: string) => {
     setProducts(prev => prev.map(p => 
       p.id === productId ? { ...p, status: 'active' as const } : p
@@ -255,182 +244,6 @@ export function NewAdminDashboard() {
     setPurchaseRejectionReason("");
     setSelectedPurchaseId("");
   };*/
-
-  const renderStatistics = () => {
-    // Datos para el gráfico circular de solicitudes de pago
-    const paymentStatusData = [
-      {
-        name: 'Pendientes',
-        value: creditPurchases.filter(p => p.status === 'pending').length,
-        color: '#fbbf24' // Amarillo
-      },
-      {
-        name: 'Aprobadas',
-        value: creditPurchases.filter(p => p.status === 'approved').length,
-        color: '#10b981' // Verde
-      },
-      {
-        name: 'Rechazadas',
-        value: creditPurchases.filter(p => p.status === 'rejected').length,
-        color: '#ef4444' // Rojo
-      }
-    ];
-
-    // Datos para el gráfico de barras de usuarios por mes
-    const userRegistrationData = [
-      { month: 'Oct', users: 12 },
-      { month: 'Nov', users: 18 },
-      { month: 'Dic', users: 24 }
-    ];
-
-    return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Usuarios Totales</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{statistics.totalUsers}</div>
-              <p className="text-xs text-muted-foreground">Usuarios registrados</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Usuarios Activos</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{statistics.activeUsers}</div>
-              <p className="text-xs text-muted-foreground">Usuarios no admin</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Productos Activos</CardTitle>
-              <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{statistics.activeProducts}</div>
-              <p className="text-xs text-muted-foreground">Anuncios publicados</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Anuncios Semanales</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{statistics.weeklyAds}</div>
-              <p className="text-xs text-muted-foreground">Últimos 7 días</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Gráficos */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <PieChartIcon className="h-5 w-5" />
-                <span>Solicitudes de Pago</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={paymentStatusData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}`}
-                    >
-                      {paymentStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <BarChart3 className="h-5 w-5" />
-                <span>Registros por Mes</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={userRegistrationData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="users" fill="#9d0045" name="Nuevos Usuarios" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Distribución de Usuarios</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span>Vendedores</span>
-                <Badge>{statistics.totalSellers}</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Compradores</span>
-                <Badge>{statistics.totalBuyers}</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Administradores</span>
-                <Badge>{users.filter(u => u.role === 'admin').length}</Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Resumen del Sistema</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span>Categorías</span>
-                <Badge>{statistics.totalCategories}</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Puntos de Encuentro</span>
-                <Badge>{statistics.totalMeetingPoints}</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Paquetes de Créditos</span>
-                <Badge>{creditPackages.length}</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  };
 
   //Comprobante Pagos
 
@@ -1241,27 +1054,27 @@ export function NewAdminDashboard() {
   );
 
   const renderContent = () => {
-    switch (activeSection) {
-      case "statistics":
-        return renderStatistics();
-      case "users":
-        return renderUsers();
-      case "payment-proofs":
-        return <ComprobantesPage />;
-      case "meeting-points":
-        return renderMeetingPoints();
-      case "credit-packages":
-        return <CreditPackagesPage />;
-      case "ads-management":
-        return renderAdsManagement();
-      case "categories":
-        return renderCategories();
-      case "ratings":
-        return renderRatings();
-      default:
-        return renderStatistics();
-    }
-  };
+      switch (activeSection) {
+        case "statistics":
+          return <AdminStatisticsPage />;
+        case "users":
+          return renderUsers();
+        case "payment-proofs":
+          return <ComprobantesPage />;
+        case "meeting-points":
+          return renderMeetingPoints();
+        case "credit-packages":
+          return <CreditPackagesPage />;
+        case "ads-management":
+          return renderAdsManagement();
+        case "categories":
+          return renderCategories();
+        case "ratings":
+          return renderRatings();
+        default:
+          return <AdminStatisticsPage />;
+      }
+    };
 
   return (
     <div className="flex h-screen bg-gray-50">
