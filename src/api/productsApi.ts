@@ -65,6 +65,7 @@ export interface ProductSummary {
     imagen_principal: string;
     categoria_nombre: string;
     categoria_id: number;
+    vendedor_id: number;
     vendedor_nombre: string;
     vendedor_apellido: string;
     vendedor_calificacion: string;
@@ -221,6 +222,28 @@ class ProductsApi {
             return await response.json();
         } catch (error) {
             console.error('Error checking availability:', error);
+            throw error;
+        }
+    }
+
+    // Actualizar estado de producto
+    async updateProductStatus(id: number, estado: 'activo' | 'inactivo' | 'expirado' | 'agotado') {
+        try {
+            const response = await fetch(`${this.baseUrl}/${id}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ estado })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error updating product status:', error);
             throw error;
         }
     }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, User as UserIcon, LogOut, Settings, Package, CreditCard, BarChart3, Menu, Bell, Grid, Users } from "lucide-react";
+import { Search, User as UserIcon, LogOut, Settings, Package, CreditCard, BarChart3, Menu, Bell, Grid } from "lucide-react";
 import { User } from "./types";
 
 interface HeaderProps {
@@ -7,9 +7,11 @@ interface HeaderProps {
   onLogin: () => void;
   onLogout: () => void;
   onNavigate: (page: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
-export function Header({ currentUser, onLogin, onLogout, onNavigate }: HeaderProps) {
+export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery, onSearchChange }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
@@ -42,13 +44,6 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate }: HeaderPro
               >
                 <Grid className="h-4 w-4" />
                 <span>Catálogo</span>
-              </button>
-              <button
-                onClick={() => onNavigate("users-list")}
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-105"
-              >
-                <Users className="h-4 w-4" />
-                <span>Usuarios</span>
               </button>
             </div>
 
@@ -163,18 +158,17 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate }: HeaderPro
                               </>
                             )}
 
-                            {isAdmin && (
-                              <button
-                                onClick={() => {
-                                  onNavigate("admin-dashboard");
-                                  setIsMenuOpen(false);
-                                }}
-                                className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
-                              >
-                                <BarChart3 className="h-4 w-4 mr-3" />
-                                Panel Administrativo
-                              </button>
-                            )}
+                            {/* Admin Dashboard - Temporarily visible to all users */}
+                            <button
+                              onClick={() => {
+                                onNavigate("admin-dashboard");
+                                setIsMenuOpen(false);
+                              }}
+                              className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
+                            >
+                              <BarChart3 className="h-4 w-4 mr-3" />
+                              Panel Administrativo {!isAdmin && "(Demo)"}
+                            </button>
 
                             <button
                               onClick={() => {

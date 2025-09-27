@@ -6,10 +6,12 @@ import { StatisticsSidebar } from './StatisticsSidebar';
 
 interface ProductCatalogProps {
     onProductClick?: (productId: number) => void;
+    searchQuery?: string;
 }
 
 export const ProductCatalog: React.FC<ProductCatalogProps> = ({
-    onProductClick
+    onProductClick,
+    searchQuery: externalSearchQuery
 }) => {
     const [products, setProducts] = useState<ProductSummary[]>([]);
     const [loading, setLoading] = useState(true);
@@ -54,6 +56,13 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             setLoading(false);
         }
     };
+
+    // Effect para sincronizar búsqueda externa con estado interno
+    useEffect(() => {
+        if (externalSearchQuery !== undefined && externalSearchQuery !== searchQuery) {
+            setSearchQuery(externalSearchQuery);
+        }
+    }, [externalSearchQuery]);
 
     // Effect para cargar productos
     useEffect(() => {

@@ -4,7 +4,8 @@ export const API_CONFIG = {
     ENDPOINTS: {
         PRODUCTS: '/api/products',
         USERS: '/api/users',
-        MEETING_POINTS: '/api/puntosencuentro'
+        MEETING_POINTS: '/api/puntosencuentro',
+        NOTIFICATIONS: '/api/notifications'
     }
 };
 

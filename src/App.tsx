@@ -139,12 +139,7 @@ export default function App() {
             </div>
           } />
 
-          {/* Ruta de usuarios */}
-          <Route path="/users-list" element={
-            <div className="container mx-auto px-4 py-8">
-              <UsersList searchQuery={searchQuery} onUserClick={(userId) => console.log('Usuario clickeado:', userId)} />
-            </div>
-          } />
+          {/* UsersList ahora está integrado en el panel administrativo */}
 
           {/* Rutas protegidas - Usando CreateAdPage funcional de Anett */}
           <Route path="/create-ad" element={
@@ -157,13 +152,8 @@ export default function App() {
               <BuyCreditsPage onBack={() => navigate('/catalog')} currentUser={currentUser} />
             </ProtectedRoute>
           } />
-          {/* 
-          <Route path="/admin-dashboard" element={
-            <ProtectedRoute currentUser={currentUser}>
-              <NewAdminDashboard />
-            </ProtectedRoute>
-          } />
-           */}
+          {/* Admin Dashboard - Temporarily accessible to all users */}
+          <Route path="/admin-dashboard" element={<NewAdminDashboard />} />
           <Route path="/profile" element={
             <ProtectedRoute currentUser={currentUser}>
               <div className="container mx-auto px-4 py-8">
