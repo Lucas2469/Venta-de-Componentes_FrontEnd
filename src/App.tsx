@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
-import { RegistrationPage } from "./components/RegistrationPage";
 import { LoginPage } from "./components/LoginPage";
-import { ContactConfirmationModal } from "./components/ContactConfirmationModal";
+import { RegistrationPage } from "./components/RegistrationPage";
 import { NewAdminDashboard } from "./components/NewAdminDashboard";
 import CreateAdPage from "./components/CreateAdPage";
-import { BuyCreditsPage } from "./components/BuyCreditsPage";
 import { ProductCatalog } from "./components/ProductCatalog";
 import { UsersList } from "./components/UsersList";
 import { ProductDetail } from "./components/ProductDetail";
@@ -128,8 +126,19 @@ export default function App() {
           {/* Rutas públicas */}
           <Route path="/" element={<ProductCatalog searchQuery={searchQuery} onProductClick={handleProductClick} />} />
           <Route path="/catalog" element={<ProductCatalog searchQuery={searchQuery} onProductClick={handleProductClick} />} />
-          <Route path="/login" element={<LoginPage onNavigateToRegistration={() => navigate('/register')} onLoginSuccess={handleLogin} />} />
-          <Route path="/register" element={<RegistrationPage onNavigateToLogin={() => navigate('/login')} />} />
+
+          {/* Rutas de autenticación */}
+          <Route path="/login" element={
+            <LoginPage
+              onNavigateToRegistration={() => navigate('/register')}
+              onLoginSuccess={handleLogin}
+            />
+          } />
+          <Route path="/register" element={
+            <RegistrationPage
+              onNavigateToLogin={() => navigate('/login')}
+            />
+          } />
 
           {/* Rutas de productos */}
           <Route path="/product/:id" element={<ProductDetailWrapper />} />
@@ -147,11 +156,7 @@ export default function App() {
               <CreateAdPage onBack={() => navigate('/catalog')} />
             </ProtectedRoute>
           } />
-          <Route path="/buy-credits" element={
-            <ProtectedRoute currentUser={currentUser}>
-              <BuyCreditsPage onBack={() => navigate('/catalog')} currentUser={currentUser} />
-            </ProtectedRoute>
-          } />
+
           {/* Admin Dashboard - Temporarily accessible to all users */}
           <Route path="/admin-dashboard" element={<NewAdminDashboard />} />
           <Route path="/profile" element={
@@ -196,18 +201,6 @@ export default function App() {
       </main>
 
       <Footer onNavigate={handleNavigate} />
-
-      {/* Contact Confirmation Modal */}
-      {showContactModal && contactDetails && (
-        <ContactConfirmationModal
-          isOpen={showContactModal}
-          onClose={() => setShowContactModal(false)}
-          productTitle={contactDetails.productTitle}
-          sellerName={contactDetails.sellerName}
-          selectedDate={contactDetails.selectedDate}
-          meetingPointId={contactDetails.meetingPointId}
-        />
-      )}
     </div>
   );
 }

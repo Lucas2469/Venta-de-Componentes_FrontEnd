@@ -1,11 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
-import { AlertCircle, LogIn, Mail, Lock } from "lucide-react";
-import { Alert, AlertDescription } from "./ui/alert";
+import { AlertCircle, LogIn, Mail } from "lucide-react";
 
 interface LoginPageProps {
   onNavigateToRegistration: () => void;
@@ -78,111 +73,116 @@ export function LoginPage({ onNavigateToRegistration, onLoginSuccess }: LoginPag
 
   if (showForgotPassword) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#ffffff' }}>
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center" style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+          <div className="text-center p-6" style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
             <div className="flex items-center justify-center mb-2">
               <Mail className="h-8 w-8 mr-2" />
-              <CardTitle className="text-2xl">Reset Password</CardTitle>
+              <h1 className="text-2xl font-bold">Reset Password</h1>
             </div>
-            <CardDescription className="text-white/80">
+            <p className="text-white/80">
               Enter your email or username to receive a reset link
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent className="p-6">
+            </p>
+          </div>
+
+          <div className="p-6">
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="emailOrUsername">Email or Username</Label>
-                <Input
+                <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-700">Email or Username</label>
+                <input
                   id="emailOrUsername"
                   type="text"
                   placeholder="Enter your email or username"
                   value={formData.emailOrUsername}
                   onChange={(e) => handleInputChange("emailOrUsername", e.target.value)}
-                  className={errors.emailOrUsername ? "border-red-500" : ""}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
+                    errors.emailOrUsername ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
                 />
                 {errors.emailOrUsername && (
-                  <Alert variant="destructive" className="p-2">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="text-sm">{errors.emailOrUsername}</AlertDescription>
-                  </Alert>
+                  <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <p className="text-sm text-red-600">{errors.emailOrUsername}</p>
+                  </div>
                 )}
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full"
+              <button
+                type="submit"
+                className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 style={{ backgroundColor: '#9d0045', color: '#ffffff' }}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Sending..." : "Send Reset Link"}
-              </Button>
+              </button>
 
-              <Button 
-                type="button" 
-                variant="ghost" 
-                className="w-full"
+              <button
+                type="button"
+                className="w-full py-3 px-4 rounded-lg font-medium transition-colors hover:bg-gray-100"
                 onClick={() => setShowForgotPassword(false)}
                 style={{ color: '#00adb5' }}
               >
                 Back to Login
-              </Button>
+              </button>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#ffffff' }}>
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center" style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+        <div className="text-center p-6" style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
           <div className="flex items-center justify-center mb-2">
             <LogIn className="h-8 w-8 mr-2" />
-            <CardTitle className="text-2xl">ELECTROMARKET</CardTitle>
+            <h1 className="text-2xl font-bold">ELECTROMARKET</h1>
           </div>
-          <CardDescription className="text-white/80">
+          <p className="text-white/80">
             Sign in to your account
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="p-6">
+          </p>
+        </div>
+
+        <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="emailOrUsername">Email or Username</Label>
-              <Input
+              <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-700">Email or Username</label>
+              <input
                 id="emailOrUsername"
                 type="text"
                 placeholder="Enter your email or username"
                 value={formData.emailOrUsername}
                 onChange={(e) => handleInputChange("emailOrUsername", e.target.value)}
-                className={errors.emailOrUsername ? "border-red-500" : ""}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
+                  errors.emailOrUsername ? "border-red-500 bg-red-50" : "border-gray-300"
+                }`}
               />
               {errors.emailOrUsername && (
-                <Alert variant="destructive" className="p-2">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-sm">{errors.emailOrUsername}</AlertDescription>
-                </Alert>
+                <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <p className="text-sm text-red-600">{errors.emailOrUsername}</p>
+                </div>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+              <input
                 id="password"
                 type="password"
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
-                className={errors.password ? "border-red-500" : ""}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
+                  errors.password ? "border-red-500 bg-red-50" : "border-gray-300"
+                }`}
               />
               {errors.password && (
-                <Alert variant="destructive" className="p-2">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-sm">{errors.password}</AlertDescription>
-                </Alert>
+                <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <p className="text-sm text-red-600">{errors.password}</p>
+                </div>
               )}
             </div>
 
@@ -190,38 +190,38 @@ export function LoginPage({ onNavigateToRegistration, onLoginSuccess }: LoginPag
               <button
                 type="button"
                 onClick={() => setShowForgotPassword(true)}
-                className="text-sm hover:underline"
+                className="text-sm hover:underline transition-colors"
                 style={{ color: '#00adb5' }}
               >
                 Forgot password?
               </button>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full"
+            <button
+              type="submit"
+              className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               style={{ backgroundColor: '#9d0045', color: '#ffffff' }}
               disabled={isSubmitting}
             >
               {isSubmitting ? "Signing In..." : "Sign In"}
-            </Button>
+            </button>
           </form>
-        </CardContent>
+        </div>
 
-        <CardFooter className="justify-center">
+        <div className="px-6 pb-6 text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
             <button
               type="button"
               onClick={onNavigateToRegistration}
-              className="hover:underline"
+              className="hover:underline transition-colors"
               style={{ color: '#00adb5' }}
             >
               Create one here
             </button>
           </p>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,12 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
-
 import { AlertCircle, User } from "lucide-react";
-import { Alert, AlertDescription } from "./ui/alert";
 
 interface RegistrationPageProps {
   onNavigateToLogin: () => void;
@@ -91,157 +85,167 @@ export function RegistrationPage({ onNavigateToLogin }: RegistrationPageProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#ffffff' }}>
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center" style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+        <div className="text-center p-6" style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
           <div className="flex items-center justify-center mb-2">
             <User className="h-8 w-8 mr-2" />
-            <CardTitle className="text-2xl">ELECTROMARKET</CardTitle>
+            <h1 className="text-2xl font-bold">ELECTROMARKET</h1>
           </div>
-          <CardDescription className="text-white/80">
+          <p className="text-white/80">
             Crea tu cuenta para comenzar a comprar o vender
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="p-6">
+          </p>
+        </div>
+
+        <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Nombre</Label>
-                <Input
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">Nombre</label>
+                <input
                   id="firstName"
                   type="text"
                   placeholder="Tu nombre"
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  className={errors.firstName ? "border-red-500" : ""}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
+                    errors.firstName ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
                 />
                 {errors.firstName && (
-                  <Alert variant="destructive" className="p-2">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="text-sm">{errors.firstName}</AlertDescription>
-                  </Alert>
+                  <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <p className="text-sm text-red-600">{errors.firstName}</p>
+                  </div>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="lastName">Apellido</Label>
-                <Input
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Apellido</label>
+                <input
                   id="lastName"
                   type="text"
                   placeholder="Tu apellido"
                   value={formData.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  className={errors.lastName ? "border-red-500" : ""}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
+                    errors.lastName ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
                 />
                 {errors.lastName && (
-                  <Alert variant="destructive" className="p-2">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="text-sm">{errors.lastName}</AlertDescription>
-                  </Alert>
+                  <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <p className="text-sm text-red-600">{errors.lastName}</p>
+                  </div>
                 )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Celular</Label>
-              <Input
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Celular</label>
+              <input
                 id="phone"
                 type="tel"
                 placeholder="+591XXXXXXXX"
                 value={formData.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
-                className={errors.phone ? "border-red-500" : ""}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
+                  errors.phone ? "border-red-500 bg-red-50" : "border-gray-300"
+                }`}
               />
               {errors.phone && (
-                <Alert variant="destructive" className="p-2">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-sm">{errors.phone}</AlertDescription>
-                </Alert>
+                <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <p className="text-sm text-red-600">{errors.phone}</p>
+                </div>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico</Label>
-              <Input
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo electrónico</label>
+              <input
                 id="email"
                 type="email"
                 placeholder="tu@correo.com"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                className={errors.email ? "border-red-500" : ""}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
+                  errors.email ? "border-red-500 bg-red-50" : "border-gray-300"
+                }`}
               />
               {errors.email && (
-                <Alert variant="destructive" className="p-2">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-sm">{errors.email}</AlertDescription>
-                </Alert>
+                <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <p className="text-sm text-red-600">{errors.email}</p>
+                </div>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>
+              <input
                 id="password"
                 type="password"
                 placeholder="Crea una contraseña"
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
-                className={errors.password ? "border-red-500" : ""}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
+                  errors.password ? "border-red-500 bg-red-50" : "border-gray-300"
+                }`}
               />
               {errors.password && (
-                <Alert variant="destructive" className="p-2">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-sm">{errors.password}</AlertDescription>
-                </Alert>
+                <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <p className="text-sm text-red-600">{errors.password}</p>
+                </div>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
-              <Input
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirmar contraseña</label>
+              <input
                 id="confirmPassword"
                 type="password"
                 placeholder="Confirma tu contraseña"
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                className={errors.confirmPassword ? "border-red-500" : ""}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
+                  errors.confirmPassword ? "border-red-500 bg-red-50" : "border-gray-300"
+                }`}
               />
               {errors.confirmPassword && (
-                <Alert variant="destructive" className="p-2">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-sm">{errors.confirmPassword}</AlertDescription>
-                </Alert>
+                <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <p className="text-sm text-red-600">{errors.confirmPassword}</p>
+                </div>
               )}
             </div>
 
-
-
-            <Button 
-              type="submit" 
-              className="w-full"
+            <button
+              type="submit"
+              className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               style={{ backgroundColor: '#9d0045', color: '#ffffff' }}
               disabled={isSubmitting}
             >
               {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
-            </Button>
+            </button>
           </form>
-        </CardContent>
+        </div>
 
-        <CardFooter className="justify-center">
+        <div className="px-6 pb-6 text-center">
           <p className="text-sm text-gray-600">
             ¿Ya tienes una cuenta?{" "}
             <button
               type="button"
               onClick={onNavigateToLogin}
-              className="hover:underline"
+              className="hover:underline transition-colors"
               style={{ color: '#00adb5' }}
             >
               Inicia sesión aquí
             </button>
           </p>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

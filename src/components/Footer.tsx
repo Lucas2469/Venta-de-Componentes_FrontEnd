@@ -1,6 +1,5 @@
 import React from "react";
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram } from "lucide-react";
-import { Button } from "./ui/button";
 
 interface FooterProps {
   onNavigate: (page: string) => void;
@@ -18,16 +17,15 @@ export function Footer({ onNavigate }: FooterProps) {
               El marketplace de electrónicos más confiable de Bolivia.
             </p>
             <div className="flex space-x-2">
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 p-1.5">
+              <button className="text-white hover:bg-white/10 p-1.5 rounded-md transition-colors">
                 <Facebook className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 p-1.5">
+              </button>
+              <button className="text-white hover:bg-white/10 p-1.5 rounded-md transition-colors">
                 <Twitter className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 p-1.5">
+              </button>
+              <button className="text-white hover:bg-white/10 p-1.5 rounded-md transition-colors">
                 <Instagram className="h-3.5 w-3.5" />
-
-              </Button>
+              </button>
             </div>
           </div>
 
