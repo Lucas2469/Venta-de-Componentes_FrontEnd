@@ -7,6 +7,7 @@ import {
   Zap,
   FileImage
 } from "lucide-react";
+import { SuccessModal } from "./reusables/SuccessModal";
 
 const API_BASE = "http://localhost:5000";
 
@@ -20,6 +21,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
   const [proofImage, setProofImage] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [creditPackages, setCreditPackages] = useState<any[]>([]);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Obtener los paquetes de créditos desde el backend
   useEffect(() => {
@@ -79,7 +81,9 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
       if (!file) throw new Error("No se encontró el archivo");
 
       const formData = new FormData();
-      formData.append("usuario_id", String(currentUser?.id));
+      // Hardcodeado: usuario real de la BD (Juan Carlos Pérez Mamani - id: 2)
+      // TODO: En producción, esto debería venir de un sistema de autenticación real
+      formData.append("usuario_id", "2"); // ID real de la base de datos
       formData.append("pack_creditos_id", selectedPkg.id);
       formData.append("comprobante_pago", file); // ← nada más; el backend deriva todo
 
@@ -91,8 +95,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
       if (!response.ok) throw new Error("Error en la solicitud");
 
       await response.json();
-      alert("Tu solicitud fue enviada correctamente. Será revisada en 24 horas.");
-      onBack();
+      setShowSuccessModal(true);
     } catch (error) {
       console.error("Error en handleSubmit:", error);
       alert("Hubo un error al enviar la solicitud, intenta nuevamente.");
@@ -101,6 +104,14 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
     }
   };
 
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    // Limpiar formulario
+    setSelectedPackage("");
+    setProofImage("");
+    // Volver al catálogo
+    onBack();
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -115,9 +126,13 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
             </p>
           </div>
           <div className="text-right">
+            <p className="text-sm text-gray-600">Usuario actual:</p>
+            <div className="text-sm font-medium text-gray-800">
+              Juan Carlos Pérez Mamani
+            </div>
             <p className="text-sm text-gray-600">Créditos actuales:</p>
             <div className="text-2xl font-bold text-pink-800">
-              {currentUser?.credits || 0}
+              45
             </div>
           </div>
         </div>
@@ -351,6 +366,15 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Modal de éxito */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={handleSuccessModalClose}
+        title="¡Solicitud Enviada!"
+        message="Tu solicitud fue enviada correctamente y será revisada en las próximas 24 horas. Te notificaremos cuando esté aprobada."
+        buttonText="Entendido"
+      />
     </div>
   );
 }

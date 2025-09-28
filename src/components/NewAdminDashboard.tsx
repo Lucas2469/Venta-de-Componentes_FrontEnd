@@ -230,13 +230,11 @@ export function NewAdminDashboard() {
       case "users":
         return <UsersList searchQuery="" onUserClick={(userId) => console.log('Usuario seleccionado:', userId)} />;
       case "payment-proofs":
-
-        return <div className="text-center py-20 text-gray-500">🚧 Sección en desarrollo</div>;
+        return <ComprobantesPage />;
       case "meeting-points":
         return <div className="text-center py-20 text-gray-500">🚧 Sección en desarrollo</div>;
       case "credit-packages":
-        return <div className="text-center py-20 text-gray-500">🚧 Sección en desarrollo</div>;
-
+        return <CreditPackagesPage />;
       case "ads-management":
         return <AdsManagement />;
       case "categories":

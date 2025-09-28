@@ -9,6 +9,7 @@ import CreateAdPage from "./components/CreateAdPage";
 import { ProductCatalog } from "./components/ProductCatalog";
 import { UsersList } from "./components/UsersList";
 import { ProductDetail } from "./components/ProductDetail";
+import { BuyCreditsPage } from "./components/BuyCreditsPage";
 import { User } from "./components/types";
 import { mockUsers } from "./components/mockData";
 
@@ -64,15 +65,32 @@ export default function App() {
           return;
         }
       }
-      // In a real app, validate other user credentials here
-      const user = mockUsers.find(u => u.username === credentials.username);
-      if (user) {
-        setCurrentUser(user);
-        navigate('/catalog');
-        return;
+
+      // Check for mock user credentials (hardcoded for testing)
+      const mockCredentials = [
+        { username: "juan_tech", password: "123" },
+        { username: "maria_buyer", password: "123" },
+        { username: "carlos_seller", password: "123" }
+      ];
+
+      const validCredential = mockCredentials.find(
+        c => c.username === credentials.username && c.password === credentials.password
+      );
+
+      if (validCredential) {
+        const user = mockUsers.find(u => u.username === validCredential.username);
+        if (user) {
+          setCurrentUser(user);
+          navigate('/catalog');
+          return;
+        }
       }
+
+      // If credentials don't match, show error (don't auto-login)
+      alert("Credenciales incorrectas. Usa:\n- Admin / 123456 (admin)\n- juan_tech / 123 (vendedor)\n- maria_buyer / 123 (comprador)");
+      return;
     }
-    // Default behavior for demo
+    // Default behavior for demo (only if no credentials provided)
     const user = mockUsers[0];
     setCurrentUser(user);
     navigate('/catalog');
@@ -154,6 +172,16 @@ export default function App() {
           <Route path="/create-ad" element={
             <ProtectedRoute currentUser={currentUser}>
               <CreateAdPage onBack={() => navigate('/catalog')} />
+            </ProtectedRoute>
+          } />
+
+          {/* Buy Credits Page - Para usuarios normales */}
+          <Route path="/buy-credits" element={
+            <ProtectedRoute currentUser={currentUser}>
+              <BuyCreditsPage
+                onBack={() => navigate('/catalog')}
+                currentUser={currentUser}
+              />
             </ProtectedRoute>
           } />
 

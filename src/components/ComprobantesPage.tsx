@@ -197,7 +197,7 @@ export default function ComprobantesPage() {
               <option value="all">Todos</option>
               {packs.map(p => (
                 <option key={p.id} value={String(p.id)}>
-                  {p.nombre}
+                  {p.nombre} ({p.cantidad_creditos} créditos)
                 </option>
               ))}
             </select>
@@ -261,7 +261,12 @@ export default function ComprobantesPage() {
               filtered.map((tx) => (
                 <tr key={tx.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.usuario}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.pack_nombre}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div>
+                      <div className="font-medium">{tx.pack_nombre}</div>
+                      <div className="text-xs text-gray-500">{tx.cantidad_creditos} créditos</div>
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatMonto(tx.monto_pagado)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {tx.comprobante_pago_url ? (
