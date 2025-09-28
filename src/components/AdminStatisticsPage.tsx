@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
   ResponsiveContainer,
   PieChart,
@@ -54,15 +53,15 @@ export default function AdminStatisticsPage() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i}>
-            <CardHeader className="pb-2">
-              <div className="h-4 w-32 bg-muted rounded" />
-            </CardHeader>
-            <CardContent>
-              <div className="h-8 w-20 bg-muted rounded mb-1" />
-              <div className="h-3 w-28 bg-muted rounded" />
-            </CardContent>
-          </Card>
+          <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 pb-2">
+              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+            </div>
+            <div className="px-6 pb-6">
+              <div className="h-8 w-20 bg-gray-200 rounded mb-1 animate-pulse" />
+              <div className="h-3 w-28 bg-gray-200 rounded animate-pulse" />
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -86,62 +85,62 @@ export default function AdminStatisticsPage() {
     <div className="space-y-6">
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Usuarios Activos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.usuariosActivosNoAdmin}</div>
-            <p className="text-xs text-muted-foreground">Usuarios no admin</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+            <h3 className="text-sm font-medium text-gray-700">Usuarios Activos</h3>
+            <Users className="h-4 w-4 text-gray-500" />
+          </div>
+          <div className="px-6 pb-6">
+            <div className="text-2xl font-bold text-gray-900">{stats.usuariosActivosNoAdmin}</div>
+            <p className="text-xs text-gray-500">Usuarios no admin</p>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Productos Activos</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.productosActivos}</div>
-            <p className="text-xs text-muted-foreground">Anuncios publicados</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+            <h3 className="text-sm font-medium text-gray-700">Productos Activos</h3>
+            <ShoppingBag className="h-4 w-4 text-gray-500" />
+          </div>
+          <div className="px-6 pb-6">
+            <div className="text-2xl font-bold text-gray-900">{stats.productosActivos}</div>
+            <p className="text-xs text-gray-500">Anuncios publicados</p>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Agendamientos Completados</CardTitle>
-            <Check className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.agendamientosCompletados}</div>
-            <p className="text-xs text-muted-foreground">Citas finalizadas</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+            <h3 className="text-sm font-medium text-gray-700">Agendamientos Completados</h3>
+            <Check className="h-4 w-4 text-gray-500" />
+          </div>
+          <div className="px-6 pb-6">
+            <div className="text-2xl font-bold text-gray-900">{stats.agendamientosCompletados}</div>
+            <p className="text-xs text-gray-500">Citas finalizadas</p>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Anuncios (7 días)</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.productosUltimos7Dias}</div>
-            <p className="text-xs text-muted-foreground">Incluye hoy</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+            <h3 className="text-sm font-medium text-gray-700">Anuncios (7 días)</h3>
+            <BarChart3 className="h-4 w-4 text-gray-500" />
+          </div>
+          <div className="px-6 pb-6">
+            <div className="text-2xl font-bold text-gray-900">{stats.productosUltimos7Dias}</div>
+            <p className="text-xs text-gray-500">Incluye hoy</p>
+          </div>
+        </div>
       </div>
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pie: Solicitudes de créditos por estado */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
               <PieChartIcon className="h-5 w-5" />
               <span>Solicitudes de Créditos</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h3>
+          </div>
+          <div className="px-6 pb-6">
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -162,18 +161,18 @@ export default function AdminStatisticsPage() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Barras: Ingresos por paquete */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
               <BarChart3 className="h-5 w-5" />
               <span>Ingresos por Paquete</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h3>
+          </div>
+          <div className="px-6 pb-6">
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData}>
@@ -189,12 +188,12 @@ export default function AdminStatisticsPage() {
               </ResponsiveContainer>
             </div>
             {!barData.length && (
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-xs text-gray-500 mt-2">
                 Sin transacciones aprobadas.
               </p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

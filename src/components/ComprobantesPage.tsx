@@ -1,13 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "./ui/dialog";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
-import { Input } from "./ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { FileImage, Check, X } from "lucide-react";
 
 import {
@@ -163,17 +154,19 @@ export default function ComprobantesPage() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Comprobantes de Pago</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900">Comprobantes de Pago</h3>
+      </div>
+      <div className="p-6">
 
         {/* Toolbar de filtros */}
         <div className="mb-4 grid gap-3 md:grid-cols-6">
           <div className="md:col-span-2">
-            <Label>Búsqueda</Label>
-            <Input
+            <label className="block text-sm font-medium text-gray-700 mb-1">Búsqueda</label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Usuario, paquete, estado, monto o fecha…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -181,199 +174,228 @@ export default function ComprobantesPage() {
           </div>
 
           <div>
-            <Label>Estado</Label>
-            <Select value={estadoFlt} onValueChange={(v: EstadoFiltro) => setEstadoFlt(v)}>
-              <SelectTrigger><SelectValue placeholder="Estado" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="pendiente">Pendiente</SelectItem>
-                <SelectItem value="aprobada">Aprobado</SelectItem>
-                <SelectItem value="rechazada">Rechazado</SelectItem>
-              </SelectContent>
-            </Select>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <select
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={estadoFlt}
+              onChange={(e) => setEstadoFlt(e.target.value as EstadoFiltro)}
+            >
+              <option value="all">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="aprobada">Aprobado</option>
+              <option value="rechazada">Rechazado</option>
+            </select>
           </div>
 
           <div>
-            <Label>Paquete</Label>
-            <Select value={packIdFlt} onValueChange={setPackIdFlt}>
-              <SelectTrigger><SelectValue placeholder="Paquete" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {packs.map(p => (
-                  <SelectItem key={p.id} value={String(p.id)}>
-                    {p.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Paquete</label>
+            <select
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={packIdFlt}
+              onChange={(e) => setPackIdFlt(e.target.value)}
+            >
+              <option value="all">Todos</option>
+              {packs.map(p => (
+                <option key={p.id} value={String(p.id)}>
+                  {p.nombre}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
-            <Label>Desde</Label>
-            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Desde</label>
+            <input
+              type="date"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            />
           </div>
 
           <div>
-            <Label>Hasta</Label>
-            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
+            <input
+              type="date"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+            />
           </div>
 
           <div className="md:col-span-6">
-            <Button variant="outline" onClick={resetFiltros}>Limpiar filtros</Button>
+            <button
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              onClick={resetFiltros}
+            >
+              Limpiar filtros
+            </button>
           </div>
         </div>
 
-        <div className="mb-2 text-sm text-muted-foreground">
+        <div className="mb-2 text-sm text-gray-600">
           {filtered.length} resultado{filtered.length === 1 ? "" : "s"}
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Usuario</TableHead>
-              <TableHead>Paquete</TableHead>
-              <TableHead>Monto</TableHead>
-              <TableHead>Comprobante</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paquete</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comprobante</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
             {filtered.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground">
+              <tr>
+                <td colSpan={7} className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                   No hay resultados con los filtros actuales.
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ) : (
               filtered.map((tx) => (
-                <TableRow key={tx.id}>
-                  <TableCell>{tx.usuario}</TableCell>
-                  <TableCell>{tx.pack_nombre}</TableCell>
-                  <TableCell>{formatMonto(tx.monto_pagado)}</TableCell>
-                  <TableCell>
+                <tr key={tx.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.usuario}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.pack_nombre}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatMonto(tx.monto_pagado)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {tx.comprobante_pago_url ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
+                      <button
+                        className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 gap-2"
                         onClick={() => handleViewProof(tx.comprobante_pago_url)}
-                        className="gap-2"
                       >
                         <FileImage className="h-4 w-4" /> Ver
-                      </Button>
+                      </button>
                     ) : (
                       <span className="text-gray-500 text-sm">Sin comprobante</span>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={estadoBadgeVariant(tx.estado)}>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      tx.estado === 'aprobada' ? 'bg-green-100 text-green-800' :
+                      tx.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
                       {estadoLabel(tx.estado)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{formatFecha(tx.fecha_compra)}</TableCell>
-                  <TableCell>
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatFecha(tx.fecha_compra)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex gap-2">
                       {tx.estado !== "aprobada" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
+                        <button
+                          className="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                           onClick={() => handleApprovePurchase(tx.id)}
                           disabled={loadingAction}
                           title="Aprobar"
                         >
                           <Check className="h-4 w-4" />
-                        </Button>
+                        </button>
                       )}
                       {tx.estado === "pendiente" && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
+                        <button
+                          className="inline-flex items-center p-2 border border-red-300 rounded-md text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:opacity-50"
                           onClick={() => openRejectModal(tx.id)}
                           disabled={loadingAction}
                           title="Rechazar"
                         >
                           <X className="h-4 w-4" />
-                        </Button>
+                        </button>
                       )}
                     </div>
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ))
             )}
-          </TableBody>
-        </Table>
-      </CardContent>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Modal: Ver comprobante */}
-      <Dialog open={proofOpen} onOpenChange={setProofOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Comprobante de Pago</DialogTitle>
-          </DialogHeader>
-          <div className="flex items-center justify-center p-2">
-            {proofSrc ? (
-              <img
-                src={proofSrc}
-                alt="Comprobante"
-                className="max-h-[70vh] w-auto rounded-md border object-contain"
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground">Sin imagen</p>
-            )}
+      {proofOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Comprobante de Pago</h3>
+            </div>
+            <div className="p-6 flex items-center justify-center">
+              {proofSrc ? (
+                <img
+                  src={proofSrc}
+                  alt="Comprobante"
+                  className="max-h-[70vh] w-auto rounded-md border object-contain"
+                />
+              ) : (
+                <p className="text-sm text-gray-600">Sin imagen</p>
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+              <button
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onClick={() => setProofOpen(false)}
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setProofOpen(false)}>
-              Cerrar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
 
       {/* Modal: Rechazar con motivo */}
-      <Dialog
-        open={showPurchaseRejectModal}
-        onOpenChange={(open: boolean) => {
-          setShowPurchaseRejectModal(open);
-          if (!open) {
-            setPurchaseRejectionReason("");
-            setSelectedPurchaseId(null);
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Rechazar Solicitud de Pago</DialogTitle>
-            <DialogDescription>
-              Indica el motivo del rechazo. Se guardará como comentario del administrador.
-            </DialogDescription>
-          </DialogHeader>
+      {showPurchaseRejectModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Rechazar Solicitud de Pago</h3>
+              <p className="mt-1 text-sm text-gray-600">
+                Indica el motivo del rechazo. Se guardará como comentario del administrador.
+              </p>
+            </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="purchase-rejection-reason">Motivo del rechazo</Label>
-            <Textarea
-              id="purchase-rejection-reason"
-              value={purchaseRejectionReason}
-              onChange={(e) => setPurchaseRejectionReason(e.target.value)}
-              placeholder="Describe el motivo del rechazo…"
-              rows={4}
-            />
+            <div className="p-6">
+              <div className="space-y-2">
+                <label htmlFor="purchase-rejection-reason" className="block text-sm font-medium text-gray-700">
+                  Motivo del rechazo
+                </label>
+                <textarea
+                  id="purchase-rejection-reason"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={purchaseRejectionReason}
+                  onChange={(e) => setPurchaseRejectionReason(e.target.value)}
+                  placeholder="Describe el motivo del rechazo…"
+                  rows={4}
+                />
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onClick={() => {
+                  setShowPurchaseRejectModal(false);
+                  setPurchaseRejectionReason("");
+                  setSelectedPurchaseId(null);
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
+                onClick={submitRejectPurchase}
+                disabled={loadingAction || !purchaseRejectionReason.trim()}
+              >
+                Rechazar Solicitud
+              </button>
+            </div>
           </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPurchaseRejectModal(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={submitRejectPurchase}
-              disabled={loadingAction || !purchaseRejectionReason.trim()}
-            >
-              Rechazar Solicitud
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 }
