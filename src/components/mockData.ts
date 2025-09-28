@@ -2,6 +2,7 @@ import { User, Product, MeetingPoint, CreditPackage, Category, Rating } from "./
 // cambios
 export const mockUsers: User[] = [
   {
+
     id: "1", // ID real del admin en la BD
     username: "Admin",
     email: "admin@electromarket.bo", // Email real de la BD
@@ -38,6 +39,19 @@ export const mockUsers: User[] = [
     isBuyer: true
   },
   {
+    id: "1",
+    username: "Admin",
+    email: "admin@electromarket.com", 
+    role: "admin",
+    registrationDate: "2023-12-01",
+    rating: 5.0,
+    totalTransactions: 0,
+    credits: 0,
+    isSeller: false,
+    isBuyer: false
+  },
+  {
+
     id: "4",
     username: "tech_seller",
     email: "tech@electromarket.com",
@@ -260,14 +274,14 @@ export const mockCreditPackages: CreditPackage[] = [
     name: "Paquete Básico",
     credits: 5,
     price: 50,
-    qrCodeUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+    qrCodeUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png"
   },
   {
     id: "2",
     name: "Paquete Estándar",
     credits: 10,
     price: 90,
-    qrCodeUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
+    qrCodeUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
     popular: true,
     bonus: 2
   },
@@ -276,7 +290,7 @@ export const mockCreditPackages: CreditPackage[] = [
     name: "Paquete Premium",
     credits: 25,
     price: 200,
-    qrCodeUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
+    qrCodeUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
     bonus: 5
   }
 ];

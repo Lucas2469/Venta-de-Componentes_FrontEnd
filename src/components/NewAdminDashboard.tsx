@@ -15,6 +15,9 @@ import {
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { UsersList } from './UsersList';
 import { AdsManagement } from './AdsManagement';
+import ComprobantesPage from "./ComprobantesPage";
+import CreditPackagesPage from "./CreditPackagesPage";
+import AdminStatisticsPage from "./AdminStatisticsPage";
 
 export function NewAdminDashboard() {
   const [activeSection, setActiveSection] = useState("statistics");
@@ -223,15 +226,17 @@ export function NewAdminDashboard() {
   const renderContent = () => {
     switch (activeSection) {
       case "statistics":
-        return renderStatistics();
+        return <AdminStatisticsPage />;
       case "users":
         return <UsersList searchQuery="" onUserClick={(userId) => console.log('Usuario seleccionado:', userId)} />;
       case "payment-proofs":
+
         return <div className="text-center py-20 text-gray-500">🚧 Sección en desarrollo</div>;
       case "meeting-points":
         return <div className="text-center py-20 text-gray-500">🚧 Sección en desarrollo</div>;
       case "credit-packages":
         return <div className="text-center py-20 text-gray-500">🚧 Sección en desarrollo</div>;
+
       case "ads-management":
         return <AdsManagement />;
       case "categories":
@@ -239,7 +244,7 @@ export function NewAdminDashboard() {
       case "ratings":
         return <div className="text-center py-20 text-gray-500">🚧 Sección en desarrollo</div>;
       default:
-        return renderStatistics();
+        return <AdminStatisticsPage />;
     }
   };
 
