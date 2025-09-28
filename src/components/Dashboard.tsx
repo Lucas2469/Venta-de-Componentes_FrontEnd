@@ -1,9 +1,4 @@
-<<<<<<< HEAD
 import React from "react";
-=======
->>>>>>> AnettG
-import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { ShoppingCart, Package, Users, TrendingUp, LogOut } from "lucide-react";
 
 interface DashboardProps {
@@ -12,157 +7,127 @@ interface DashboardProps {
 
 export function Dashboard({ onLogout }: DashboardProps) {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#ffffff' }}>
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b" style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
+      <header className="border-b bg-pink-800 text-white">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">ELECTROMARKET Dashboard</h1>
-          <Button 
-            variant="ghost" 
+          <button
             onClick={onLogout}
-            className="text-white hover:bg-white/10"
+            className="flex items-center px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Logout
-          </Button>
+          </button>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl mb-2" style={{ color: '#9d0045' }}>Welcome to ELECTROMARKET</h2>
+          <h2 className="text-3xl font-bold text-pink-800 mb-2">Welcome to ELECTROMARKET</h2>
           <p className="text-gray-600">Your electronics marketplace dashboard</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm">Total Products</CardTitle>
-              <Package className="h-4 w-4" style={{ color: '#00adb5' }} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl">1,234</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
-            </CardContent>
-          </Card>
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-gray-600">Total Products</h3>
+              <Package className="h-4 w-4 text-teal-600" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">1,234</div>
+            <p className="text-xs text-gray-500">+12% from last month</p>
+          </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm">Active Users</CardTitle>
-              <Users className="h-4 w-4" style={{ color: '#00adb5' }} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl">5,678</div>
-              <p className="text-xs text-muted-foreground">+8% from last month</p>
-            </CardContent>
-          </Card>
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-gray-600">Active Users</h3>
+              <Users className="h-4 w-4 text-teal-600" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">5,678</div>
+            <p className="text-xs text-gray-500">+8% from last month</p>
+          </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm">Orders</CardTitle>
-              <ShoppingCart className="h-4 w-4" style={{ color: '#00adb5' }} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl">892</div>
-              <p className="text-xs text-muted-foreground">+23% from last month</p>
-            </CardContent>
-          </Card>
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-gray-600">Orders</h3>
+              <ShoppingCart className="h-4 w-4 text-teal-600" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">892</div>
+            <p className="text-xs text-gray-500">+23% from last month</p>
+          </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm">Revenue</CardTitle>
-              <TrendingUp className="h-4 w-4" style={{ color: '#00adb5' }} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl">$45,231</div>
-              <p className="text-xs text-muted-foreground">+15% from last month</p>
-            </CardContent>
-          </Card>
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-gray-600">Revenue</h3>
+              <TrendingUp className="h-4 w-4 text-teal-600" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">$45,231</div>
+            <p className="text-xs text-gray-500">+15% from last month</p>
+          </div>
         </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription className="text-white/80">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-pink-800 text-white p-6">
+              <h3 className="text-lg font-bold">Quick Actions</h3>
+              <p className="text-white/80 text-sm">
                 Manage your marketplace activities
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
+              </p>
+            </div>
+            <div className="p-6">
               <div className="space-y-3">
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  style={{ borderColor: '#00adb5', color: '#00adb5' }}
-                >
+                <button className="w-full flex items-center justify-start px-4 py-3 border border-teal-600 text-teal-600 rounded-md hover:bg-teal-50 transition-colors">
                   <Package className="h-4 w-4 mr-2" />
                   Add New Product
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  style={{ borderColor: '#00adb5', color: '#00adb5' }}
-                >
+                </button>
+                <button className="w-full flex items-center justify-start px-4 py-3 border border-teal-600 text-teal-600 rounded-md hover:bg-teal-50 transition-colors">
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   View Orders
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  style={{ borderColor: '#00adb5', color: '#00adb5' }}
-                >
+                </button>
+                <button className="w-full flex items-center justify-start px-4 py-3 border border-teal-600 text-teal-600 rounded-md hover:bg-teal-50 transition-colors">
                   <Users className="h-4 w-4 mr-2" />
                   Manage Customers
-                </Button>
+                </button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription className="text-white/80">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-pink-800 text-white p-6">
+              <h3 className="text-lg font-bold">Recent Activity</h3>
+              <p className="text-white/80 text-sm">
                 Latest updates from your marketplace
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
+              </p>
+            </div>
+            <div className="p-6">
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
-                  <div 
-                    className="w-2 h-2 rounded-full mt-2" 
-                    style={{ backgroundColor: '#00adb5' }}
-                  />
+                  <div className="w-2 h-2 rounded-full mt-2 bg-teal-600" />
                   <div className="flex-1">
-                    <p className="text-sm">New order received</p>
-                    <p className="text-xs text-muted-foreground">2 minutes ago</p>
+                    <p className="text-sm text-gray-900">New order received</p>
+                    <p className="text-xs text-gray-500">2 minutes ago</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <div 
-                    className="w-2 h-2 rounded-full mt-2" 
-                    style={{ backgroundColor: '#00adb5' }}
-                  />
+                  <div className="w-2 h-2 rounded-full mt-2 bg-teal-600" />
                   <div className="flex-1">
-                    <p className="text-sm">Product stock updated</p>
-                    <p className="text-xs text-muted-foreground">1 hour ago</p>
+                    <p className="text-sm text-gray-900">Product stock updated</p>
+                    <p className="text-xs text-gray-500">1 hour ago</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <div 
-                    className="w-2 h-2 rounded-full mt-2" 
-                    style={{ backgroundColor: '#00adb5' }}
-                  />
+                  <div className="w-2 h-2 rounded-full mt-2 bg-teal-600" />
                   <div className="flex-1">
-                    <p className="text-sm">New user registered</p>
-                    <p className="text-xs text-muted-foreground">3 hours ago</p>
+                    <p className="text-sm text-gray-900">New user registered</p>
+                    <p className="text-xs text-gray-500">3 hours ago</p>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </main>
     </div>

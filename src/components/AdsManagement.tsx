@@ -508,12 +508,11 @@ export const AdsManagement: React.FC = () => {
           onClose={() => setShowConfirmModal(false)}
           onConfirm={confirmReactivation}
           title="Reactivar Producto"
-          message={`¿Estás seguro de que quieres reactivar el producto "${productToToggle.nombre}"?`}
-          description="El producto volverá a aparecer en el catálogo público y estará disponible para los compradores."
+          message={`¿Estás seguro de que quieres reactivar el producto "${productToToggle.nombre}"? El producto volverá a aparecer en el catálogo público y estará disponible para los compradores.`}
           confirmText="Reactivar"
           cancelText="Cancelar"
           type="success"
-          isLoading={isUpdatingStatus}
+          loading={isUpdatingStatus}
         />
       )}
 

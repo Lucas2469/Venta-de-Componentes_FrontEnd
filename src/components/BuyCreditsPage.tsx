@@ -1,14 +1,9 @@
-import React from "react";
-import { useState } from "react";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Badge } from "./ui/badge";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { 
-  CreditCard, 
-  Upload, 
-  Check, 
-  Star, 
+import React, { useState, useEffect } from "react";
+import {
+  CreditCard,
+  Upload,
+  Check,
+  Star,
   Zap,
   FileImage
 } from "lucide-react";
@@ -27,7 +22,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
   const [creditPackages, setCreditPackages] = useState<any[]>([]);
 
   // Obtener los paquetes de créditos desde el backend
-    useEffect(() => {
+  useEffect(() => {
     fetch(`${API_BASE}/api/packs`)
       .then(res => res.json())
       .then(data => {
@@ -112,7 +107,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: '#9d0045' }}>
+            <h1 className="text-3xl font-bold text-pink-800">
               Comprar Créditos
             </h1>
             <p className="text-gray-600 mt-2">
@@ -121,7 +116,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-600">Créditos actuales:</p>
-            <div className="text-2xl font-bold" style={{ color: '#9d0045' }}>
+            <div className="text-2xl font-bold text-pink-800">
               {currentUser?.credits || 0}
             </div>
           </div>
@@ -129,82 +124,81 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
 
         <form onSubmit={handleSubmit}>
           {/* Credit Packages */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+            <div className="border-b border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
                 <Zap className="h-5 w-5" />
                 <span>Selecciona un Paquete</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RadioGroup value={selectedPackage} onValueChange={setSelectedPackage}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {creditPackages.map((pkg) => (
-                    <div key={pkg.id} className="relative">
-                      <RadioGroupItem 
-                        value={pkg.id} 
-                        id={pkg.id}
-                        className="absolute top-4 left-4 z-10"
-                      />
-                      <label htmlFor={pkg.id} className="cursor-pointer">
-                        <Card className={`h-full transition-all duration-200 hover:shadow-lg ${
-                          selectedPackage === pkg.id 
-                            ? 'ring-2 ring-electromarket-maroon bg-blue-50' 
-                            : 'hover:shadow-md'
-                        }`}>
-                          <CardHeader className="text-center relative">
-                            {pkg.popular && (
-                              <Badge 
-                                className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-electromarket-teal text-white"
-                              >
-                                <Star className="h-3 w-3 mr-1" />
-                                Más Popular
-                              </Badge>
+              </h3>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {creditPackages.map((pkg) => (
+                  <div key={pkg.id} className="relative">
+                    <input
+                      type="radio"
+                      name="package"
+                      value={pkg.id}
+                      id={pkg.id}
+                      checked={selectedPackage === pkg.id}
+                      onChange={(e) => setSelectedPackage(e.target.value)}
+                      className="absolute top-4 left-4 z-10 h-4 w-4 text-pink-800 border-gray-300 focus:ring-pink-500"
+                    />
+                    <label htmlFor={pkg.id} className="cursor-pointer block">
+                      <div className={`h-full bg-white border rounded-lg transition-all duration-200 hover:shadow-lg ${
+                        selectedPackage === pkg.id
+                          ? 'ring-2 ring-pink-800 bg-blue-50'
+                          : 'border-gray-200 hover:shadow-md'
+                      }`}>
+                        <div className="text-center relative p-6">
+                          {pkg.popular && (
+                            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-teal-600 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center">
+                              <Star className="h-3 w-3 mr-1" />
+                              Más Popular
+                            </div>
+                          )}
+                          <h4 className="text-xl font-semibold text-gray-900 mb-2">{pkg.name}</h4>
+                          {pkg.description && (
+                            <p className="text-xs text-gray-500 mt-2">{pkg.description}</p>
+                          )}
+                          <div className="text-3xl font-bold text-pink-800">
+                            {pkg.credits}
+                          </div>
+                          <p className="text-sm text-gray-600">créditos</p>
+                        </div>
+                        <div className="text-center p-6 pt-0">
+                          <div className="text-2xl font-bold mb-2">
+                            Bs {pkg.price}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-4">
+                            Bs {(pkg.price / pkg.credits).toFixed(2)} por crédito
+                          </p>
+                          <div className="text-xs text-gray-500">
+                            {pkg.bonus > 0 && (
+                              <p className="text-green-600 font-medium">
+                                ¡{pkg.bonus} créditos extra gratis!
+                              </p>
                             )}
-                            <CardTitle className="text-xl mb-2">{pkg.name}</CardTitle>
-                            {pkg.description && (
-                              <p className="text-xs text-gray-500 mt-2">{pkg.description}</p>
-                            )}
-                            <div className="text-3xl font-bold" style={{ color: '#9d0045' }}>
-                              {pkg.credits}
-                            </div>
-                            <p className="text-sm text-gray-600">créditos</p>
-                          </CardHeader>
-                          <CardContent className="text-center">
-                            <div className="text-2xl font-bold mb-2">
-                              Bs {pkg.price}
-                            </div>
-                            <p className="text-sm text-gray-600 mb-4">
-                              Bs {(pkg.price / pkg.credits).toFixed(2)} por crédito
-                            </p>
-                            <div className="text-xs text-gray-500">
-                              {pkg.bonus > 0 && (
-                                <p className="text-green-600 font-medium">
-                                  ¡{pkg.bonus} créditos extra gratis!
-                                </p>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </RadioGroup>
-            </CardContent>
-
-          </Card>
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
           {/* Payment Instructions */}
           {selectedPackage && selectedPkg && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+              <div className="border-b border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
                   <CreditCard className="h-5 w-5" />
                   <span>Instrucciones de Pago</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </h3>
+              </div>
+              <div className="p-6 space-y-4">
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-medium mb-2">Resumen de tu compra:</h4>
                   <div className="flex justify-between items-center">
@@ -227,7 +221,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
                   <h4 className="font-medium">Pasos para completar tu pago:</h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-start space-x-3">
-                      <div className="bg-electromarket-maroon text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">
+                      <div className="bg-pink-800 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">
                         1
                       </div>
                       <div>
@@ -236,7 +230,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
-                      <div className="bg-electromarket-maroon text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">
+                      <div className="bg-pink-800 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">
                         2
                       </div>
                       <div>
@@ -245,7 +239,7 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
-                      <div className="bg-electromarket-maroon text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">
+                      <div className="bg-pink-800 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">
                         3
                       </div>
                       <div>
@@ -273,20 +267,20 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
                     Código QR<br />Bs {selectedPkg.price}
                   </p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Upload Proof */}
           {selectedPackage && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+              <div className="border-b border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
                   <Upload className="h-5 w-5" />
                   <span>Comprobante de Pago</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </h3>
+              </div>
+              <div className="p-6">
                 <div className="space-y-4">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     <input
@@ -321,29 +315,32 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Submit Button */}
           <div className="flex space-x-4">
-            <Button type="button" variant="outline" onClick={onBack} className="flex-1">
+            <button
+              type="button"
+              onClick={onBack}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors"
+            >
               Volver al Catálogo
-            </Button>
-            <Button 
-              type="submit" 
-              className="flex-1"
-              style={{ backgroundColor: '#9d0045', color: '#ffffff' }}
+            </button>
+            <button
+              type="submit"
               disabled={!selectedPkg || !proofImage || isSubmitting}
+              className="flex-1 px-4 py-2 bg-pink-800 text-white rounded-md hover:bg-pink-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
-            </Button>
+            </button>
           </div>
         </form>
 
         {/* Information Box */}
-        <Card className="mt-6 bg-blue-50 border-blue-200">
-          <CardContent className="p-4">
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="p-4">
             <h4 className="font-medium text-blue-800 mb-2">Información importante:</h4>
             <ul className="text-sm text-blue-700 space-y-1">
               <li>• Tu solicitud será revisada en un máximo de 24 horas</li>
@@ -351,8 +348,8 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
               <li>• Los créditos no caducan y pueden usarse en cualquier momento</li>
               <li>• Para dudas o problemas, contacta nuestro soporte</li>
             </ul>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

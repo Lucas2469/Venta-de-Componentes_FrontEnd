@@ -1,18 +1,6 @@
 import { useEffect, useMemo, useState, ReactElement } from "react";
 import { createSchedule, deleteSchedule, fetchSchedules, updateSchedule } from "../api/schedules";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../components/ui/dialog";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Card, CardContent } from "../components/ui/card";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, X } from "lucide-react";
 
 // =================== TIPOS ===================
 export interface ScheduleItem {
@@ -135,71 +123,107 @@ export default function ScheduleManager({ open, onOpenChange, vendedorId }: Sche
   }
 
   // =================== UI ===================
+  if (!open) return <></>;
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onOpenChange(false);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl">
-        <DialogHeader>
-          <DialogTitle>Mis horarios</DialogTitle>
-          <DialogDescription>
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-bold text-gray-900">Mis horarios</h2>
+            <button
+              onClick={() => onOpenChange(false)}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="h-5 w-5 text-gray-400" />
+            </button>
+          </div>
+          <p className="text-gray-600 text-sm">
             {title}. Define tus rangos por día (ej. 10:00–11:30).
-          </DialogDescription>
-        </DialogHeader>
+          </p>
+        </div>
 
-        <div className="grid gap-4">
-          {/* Formulario */}
-          <Card className="border-dashed">
-            <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-              <div className="md:col-span-1">
-                <Label>Día</Label>
-                <Select
-                  value={form.dia_semana}
-                  onValueChange={(v) => setForm((f) => ({ ...f, dia_semana: v }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona" />
-                  </SelectTrigger>
-                  <SelectContent>
+        {/* Content */}
+        <div className="p-6 overflow-y-auto">
+          <div className="grid gap-4">
+            {/* Formulario */}
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Día</label>
+                  <select
+                    value={form.dia_semana}
+                    onChange={(e) => setForm((f) => ({ ...f, dia_semana: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  >
+                    <option value="">Selecciona</option>
                     {DAYS.map((d) => (
-                      <SelectItem key={d.value} value={d.value}>
+                      <option key={d.value} value={d.value}>
                         {d.label}
-                      </SelectItem>
+                      </option>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  </select>
+                </div>
 
-              <div>
-                <Label>Hora inicio</Label>
-                <Input
-                  type="time"
-                  value={form.hora_inicio}
-                  onChange={(e) => setForm((f) => ({ ...f, hora_inicio: e.target.value }))}
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Hora inicio</label>
+                  <input
+                    type="time"
+                    value={form.hora_inicio}
+                    onChange={(e) => setForm((f) => ({ ...f, hora_inicio: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
 
-              <div>
-                <Label>Hora fin</Label>
-                <Input
-                  type="time"
-                  value={form.hora_fin}
-                  onChange={(e) => setForm((f) => ({ ...f, hora_fin: e.target.value }))}
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Hora fin</label>
+                  <input
+                    type="time"
+                    value={form.hora_fin}
+                    onChange={(e) => setForm((f) => ({ ...f, hora_fin: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
 
-              <div className="flex gap-2">
-                <Button onClick={handleSubmit} disabled={loading} className="w-full">
-                  {editingId ? (
-                    <span className="inline-flex items-center gap-2"><Pencil className="h-4 w-4" /> Guardar</span>
-                  ) : (
-                    <span className="inline-flex items-center gap-2"><Plus className="h-4 w-4" /> Agregar</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-pink-800 text-white rounded-md hover:bg-pink-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {editingId ? (
+                      <>
+                        <Pencil className="h-4 w-4" />
+                        Guardar
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4" />
+                        Agregar
+                      </>
+                    )}
+                  </button>
+                  {editingId && (
+                    <button
+                      onClick={resetForm}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+                    >
+                      Cancelar
+                    </button>
                   )}
-                </Button>
-                {editingId && (
-                  <Button onClick={resetForm}>Cancelar</Button>
-                )}
+                </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
           {/* Tabla */}
           <div className="overflow-x-auto">
@@ -220,19 +244,25 @@ export default function ScheduleManager({ open, onOpenChange, vendedorId }: Sche
                     <td className="py-2 pr-2">{it.hora_fin}</td>
                     <td className="py-2 pr-2">
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="icon" onClick={() => startEdit(it)}>
+                        <button
+                          onClick={() => startEdit(it)}
+                          className="p-2 border border-gray-300 text-gray-600 bg-white rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+                        >
                           <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button size="icon" onClick={() => handleDelete(it.id)}>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(it.id)}
+                          className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                        >
                           <Trash2 className="h-4 w-4" />
-                        </Button>
+                        </button>
                       </div>
                     </td>
                   </tr>
                 ))}
                 {items.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="py-6 text-center text-muted-foreground">
+                    <td colSpan={4} className="py-6 text-center text-gray-500">
                       Aún no tienes horarios. Agrega el primero con el formulario superior.
                     </td>
                   </tr>
@@ -241,9 +271,10 @@ export default function ScheduleManager({ open, onOpenChange, vendedorId }: Sche
             </table>
           </div>
 
-          {error && <div className="text-sm text-red-600">{error}</div>}
+          {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">{error}</div>}
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
