@@ -54,6 +54,8 @@ export interface ProductDetail {
     punto_encuentro_referencias?: string;
     coordenadas_lat?: number;
     coordenadas_lng?: number;
+    punto_encuentro_id: number;
+
 }
 
 export interface ProductSummary {
@@ -116,7 +118,7 @@ class ProductsApi {
     // Obtener todos los productos con filtros
     async getAllProducts(filters: ProductFilters = {}): Promise<PaginatedProductsResponse> {
         const queryParams = new URLSearchParams();
-        
+
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
                 queryParams.append(key, value.toString());
@@ -124,7 +126,7 @@ class ProductsApi {
         });
 
         const url = `${this.baseUrl}?${queryParams.toString()}`;
-        
+
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -154,7 +156,7 @@ class ProductsApi {
     // Buscar productos
     async searchProducts(query: string, filters: ProductFilters = {}): Promise<PaginatedProductsResponse> {
         const searchParams = new URLSearchParams({ q: query });
-        
+
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
                 searchParams.append(key, value.toString());
@@ -176,7 +178,7 @@ class ProductsApi {
     // Obtener productos por categoría
     async getProductsByCategory(categoryId: number, filters: ProductFilters = {}): Promise<PaginatedProductsResponse> {
         const queryParams = new URLSearchParams();
-        
+
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
                 queryParams.append(key, value.toString());
@@ -184,7 +186,7 @@ class ProductsApi {
         });
 
         const url = `${this.baseUrl}/category/${categoryId}?${queryParams.toString()}`;
-        
+
         try {
             const response = await fetch(url);
             if (!response.ok) {

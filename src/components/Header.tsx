@@ -142,16 +142,22 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
                       {isMenuOpen && (
                         <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
                           <div className="p-2">
-                            <button
-                              onClick={() => {
-                                onNavigate("profile");
-                                setIsMenuOpen(false);
-                              }}
-                              className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
-                            >
-                              <UserIcon className="h-4 w-4 mr-3" />
-                              Mi Perfil
-                            </button>
+                            {!isAdmin && (
+                              <button
+                                onClick={() => {
+                                  if (currentUser?.id) {
+                                    onNavigate(`/mis-horarios/${2}`); // Dynamic route with currentUser.id
+                                  } else {
+                                    onNavigate("/catalog"); // Fallback if no user
+                                  }
+                                  setIsMenuOpen(false);
+                                }}
+                                className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
+                              >
+                                <UserIcon className="h-4 w-4 mr-3" />
+                                Mis horarios
+                              </button>
+                            )}
 
                             {!isAdmin && (
                               <>

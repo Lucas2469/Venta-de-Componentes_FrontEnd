@@ -5,7 +5,7 @@ import { Footer } from "./components/Footer";
 import { RegistrationPage } from "./components/RegistrationPage";
 import { LoginPage } from "./components/LoginPage";
 import { ContactConfirmationModal } from "./components/ContactConfirmationModal";
-import { NewAdminDashboard } from "./components/NewAdminDashboard";
+import { NewAdminDashboard } from "./components/Admin/dashboard/NewAdminDashboard";
 import CreateAdPage from "./components/CreateAdPage";
 import { BuyCreditsPage } from "./components/BuyCreditsPage";
 import { ProductCatalog } from "./components/ProductCatalog";
@@ -13,6 +13,7 @@ import { UsersList } from "./components/UsersList";
 import { ProductDetail } from "./components/ProductDetail";
 import { User } from "./components/types";
 import { mockUsers } from "./components/mockData";
+import ScheduleManager from "./components/ScheduleManager";
 
 // Componente para rutas protegidas que recibe currentUser como prop
 const ProtectedRoute: React.FC<{ children: React.ReactNode; currentUser: User | null }> = ({ children, currentUser }) => {
@@ -130,7 +131,7 @@ export default function App() {
           <Route path="/catalog" element={<ProductCatalog searchQuery={searchQuery} onProductClick={handleProductClick} />} />
           <Route path="/login" element={<LoginPage onNavigateToRegistration={() => navigate('/register')} onLoginSuccess={handleLogin} />} />
           <Route path="/register" element={<RegistrationPage onNavigateToLogin={() => navigate('/login')} />} />
-
+          <Route path="/admin-prueba" element={<NewAdminDashboard />} />
           {/* Rutas de productos */}
           <Route path="/product/:id" element={<ProductDetailWrapper />} />
           <Route path="/products-catalog" element={
@@ -157,7 +158,8 @@ export default function App() {
               <BuyCreditsPage onBack={() => navigate('/catalog')} currentUser={currentUser} />
             </ProtectedRoute>
           } />
-          {/* 
+          {
+          /* 
           <Route path="/admin-dashboard" element={
             <ProtectedRoute currentUser={currentUser}>
               <NewAdminDashboard />
