@@ -4,8 +4,10 @@ import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { LoginPage } from "./components/LoginPage";
 import { RegistrationPage } from "./components/RegistrationPage";
-import { NewAdminDashboard } from "./components/NewAdminDashboard";
+import { ContactConfirmationModal } from "./components/ContactConfirmationModal";
+import { NewAdminDashboard } from "./components/Admin/dashboard/NewAdminDashboard";
 import CreateAdPage from "./components/CreateAdPage";
+import ScheduleManager from "./components/ScheduleManager";
 import { ProductCatalog } from "./components/ProductCatalog";
 import { UsersList } from "./components/UsersList";
 import { ProductDetail } from "./components/ProductDetail";
@@ -176,6 +178,9 @@ export default function App() {
               onNavigateToLogin={() => navigate('/login')}
             />
           } />
+
+          {/* Admin Dashboard - Ruta de prueba de AnettG */}
+          <Route path="/admin-prueba" element={<NewAdminDashboard />} />
 
           {/* Rutas de productos */}
           <Route path="/product/:id" element={<ProductDetailWrapper />} />

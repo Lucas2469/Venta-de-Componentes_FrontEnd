@@ -14,6 +14,7 @@ interface ScheduleMeetingModalProps {
     };
     quantity: number;
     unitPrice: number;
+    stock: number; // Nuevo prop para el stock (AnettG)
     onConfirm: (fecha: Date, horario: HorarioVendedor, cantidad: number) => void;
 }
 
@@ -26,10 +27,12 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
     puntoEncuentro,
     quantity,
     unitPrice,
+    stock,
     onConfirm
 }) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedHorario, setSelectedHorario] = useState<HorarioVendedor | null>(null);
+    const [cantidadSolicitada, setCantidadSolicitada] = useState<number>(quantity); // Estado para la cantidad (AnettG)
     const [errors, setErrors] = useState<string[]>([]);
 
     // Mapeo de días de la semana
@@ -113,6 +116,13 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
         setErrors([]);
     };
 
+    // Manejar cambio de cantidad (AnettG)
+    const handleCantidadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(e.target.value, 10) || 1;
+        setCantidadSolicitada(value);
+        setErrors([]);
+    };
+
     // Validar y confirmar
     const handleConfirm = () => {
         const newErrors = [];
@@ -129,10 +139,18 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
             newErrors.push('La fecha seleccionada no coincide con los horarios del vendedor');
         }
 
+        // Validación de cantidad (AnettG)
+        if (cantidadSolicitada <= 0) {
+            newErrors.push('La cantidad debe ser mayor a 0');
+        }
+        if (cantidadSolicitada > stock) {
+            newErrors.push(`La cantidad solicitada (${cantidadSolicitada}) excede el stock disponible (${stock})`);
+        }
+
         setErrors(newErrors);
 
         if (newErrors.length === 0 && selectedDate && selectedHorario) {
-            onConfirm(selectedDate, selectedHorario, quantity);
+            onConfirm(selectedDate, selectedHorario, cantidadSolicitada);
         }
     };
 
@@ -141,9 +159,10 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
         if (!isOpen) {
             setSelectedDate(null);
             setSelectedHorario(null);
+            setCantidadSolicitada(quantity); // Reset cantidad (AnettG)
             setErrors([]);
         }
-    }, [isOpen]);
+    }, [isOpen, quantity]);
 
     if (!isOpen) return null;
 
@@ -297,6 +316,25 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
                                 </p>
                             )}
                         </div>
+n                        {/* Cantidad solicitada (AnettG) */}
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                Cantidad solicitada
+                            </h3>
+                            <input
+                                type="number"
+                                min="1"
+                                max={stock}
+                                value={cantidadSolicitada}
+                                onChange={handleCantidadChange}
+                                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Ingrese la cantidad"
+                            />
+                            <p className="text-sm text-gray-600 mt-1">
+                                Stock disponible: {stock} unidades
+                            </p>
+                        </div>
+
 
                         {/* Punto de encuentro */}
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

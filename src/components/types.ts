@@ -39,11 +39,15 @@ export interface Product {
 
 export interface MeetingPoint {
   id: string;
-  name: string;
-  address: string;
-  coordinates: { lat: number; lng: number };
-  zone: 'norte' | 'centro' | 'sur';
+  nombre: string;
+  direccion: string;
+  referencias?: string;
+  coordenadas_lat: number | string;
+  coordenadas_lng: number | string;
+  estado: 'activo' | 'inactivo';
+  fecha_creacion?: string;
 }
+
 
 export interface CreditPackage {
   id: string;
@@ -68,8 +72,10 @@ export interface CreditPurchase {
 
 export interface Category {
   id: string;
-  name: string;
-  description: string;
+  nombre: string;
+  descripcion?: string;
+  estado: 'activo' | 'inactivo';
+  product_count?: number;
 }
 
 export interface Rating {

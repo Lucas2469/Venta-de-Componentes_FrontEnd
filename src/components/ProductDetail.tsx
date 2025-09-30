@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { productsApi, ProductDetail as ProductDetailType, HorarioVendedor } from '../api/productsApi';
 import { getImageUrl } from '../api/api';
 import { ScheduleMeetingModal } from './ScheduleMeetingModal';
+import { appointmentApi, CreateAppointmentRequest } from '../api/Appointment';
+import { Loader2 } from 'lucide-react';
 
 interface ProductDetailProps {
     productId: number;
@@ -15,6 +17,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack 
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [quantity, setQuantity] = useState(1);
+    const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
+    const comprador_id = 4; // Usuario de prueba para AnettG
 
     useEffect(() => {
         const loadProduct = async () => {
@@ -144,18 +148,37 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack 
         setShowScheduleModal(true);
     };
 
-    const handleScheduleConfirm = (fecha: Date, horario: HorarioVendedor, cantidad: number) => {
-        console.log('Agendamiento confirmado:', {
-            fecha: fecha.toISOString(),
-            horario,
-            producto: product?.nombre,
-            cantidad_solicitada: cantidad,
-            precio_total: product ? product.precio * cantidad : 0
-        });
+    const handleScheduleConfirm = async (fecha: Date, horario: HorarioVendedor, cantidad_solicitada: number) => {
+        if (!product) return;
 
-        alert(`Encuentro agendado para ${fecha.toLocaleDateString('es-ES')} de ${horario.hora_inicio} a ${horario.hora_fin}.\nCantidad: ${cantidad} unidad${cantidad !== 1 ? 'es' : ''}\nTotal: ${formatPrice((product?.precio || 0) * cantidad)}`);
+        // Validar stock disponible
+        if (cantidad_solicitada > product.stock) {
+            alert(`Stock insuficiente. Solo hay ${product.stock} unidad${product.stock !== 1 ? 'es' : ''} disponible${product.stock !== 1 ? 's' : ''}.`);
+            return;
+        }
 
-        setShowScheduleModal(false);
+        setIsCreatingAppointment(true);
+
+        try {
+            const appointmentData: CreateAppointmentRequest = {
+                producto_id: product.id,
+                comprador_id: comprador_id,
+                fecha_cita: fecha.toISOString().split('T')[0],
+                hora_cita: horario.hora_inicio,
+                cantidad_solicitada: cantidad_solicitada
+            };
+
+            const response = await appointmentApi.createAppointment(appointmentData);
+
+            alert(`Encuentro agendado exitosamente para ${fecha.toLocaleDateString('es-ES')} de ${horario.hora_inicio} a ${horario.hora_fin}.\nCantidad: ${cantidad_solicitada} unidad${cantidad_solicitada !== 1 ? 'es' : ''}\nTotal: ${formatPrice(product.precio * cantidad_solicitada)}`);
+
+            setShowScheduleModal(false);
+        } catch (error: any) {
+            console.error('Error al crear agendamiento:', error);
+            alert(error.response?.data?.message || 'Error al agendar el encuentro. Por favor intenta nuevamente.');
+        } finally {
+            setIsCreatingAppointment(false);
+        }
     };
 
     const images = product.imagenes || [];
