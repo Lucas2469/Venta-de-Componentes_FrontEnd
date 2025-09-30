@@ -4,16 +4,35 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // Fix para los iconos de Leaflet
-delete L.Icon.Default.prototype._getIconUrl;
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const LocationMarker = ({ initialPosition, onLocationSelect, disabled }) => {
-  const [position, setPosition] = useState(initialPosition);
-  const markerRef = useRef(null);
+// Types
+interface LatLng {
+  lat: number;
+  lng: number;
+}
+
+interface LocationMarkerProps {
+  initialPosition: LatLng;
+  onLocationSelect: (position: LatLng) => void;
+  disabled: boolean;
+}
+
+interface MapComponentProps {
+  onLocationSelect: (position: LatLng) => void;
+  initialPosition: LatLng;
+  mapCenter?: LatLng | null;
+  disabled?: boolean;
+}
+
+const LocationMarker: React.FC<LocationMarkerProps> = ({ initialPosition, onLocationSelect, disabled }) => {
+  const [position, setPosition] = useState<LatLng>(initialPosition);
+  const markerRef = useRef<L.Marker | null>(null);
 
   
   useEffect(() => {
@@ -23,26 +42,31 @@ const LocationMarker = ({ initialPosition, onLocationSelect, disabled }) => {
   useMapEvents({
     click(e) {
       if (!disabled) {
-        const newPosition = e.latlng;
+        const newPosition: LatLng = {
+          lat: e.latlng.lat,
+          lng: e.latlng.lng
+        };
         setPosition(newPosition);
         onLocationSelect(newPosition);
       }
     },
   });
 
-  return position === null ? null : (
+  return position ? (
     <Marker
-      position={position}
+      position={[position.lat, position.lng]}
       ref={markerRef}
       eventHandlers={{
         dragend: () => {
           if (!disabled && markerRef.current) {
             const marker = markerRef.current;
-            if (marker != null) {
-              const newPosition = marker.getLatLng();
-              setPosition(newPosition);
-              onLocationSelect(newPosition);
-            }
+            const leafletLatLng = marker.getLatLng();
+            const newPosition: LatLng = {
+              lat: leafletLatLng.lat,
+              lng: leafletLatLng.lng
+            };
+            setPosition(newPosition);
+            onLocationSelect(newPosition);
           }
         },
       }}
@@ -58,10 +82,10 @@ const LocationMarker = ({ initialPosition, onLocationSelect, disabled }) => {
         </div>
       </Popup>
     </Marker>
-  );
+  ) : null;
 };
 
-const MapComponent = ({ onLocationSelect, initialPosition, mapCenter = null, disabled = false }) => {
+const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect, initialPosition, mapCenter = null, disabled = false }) => {
   const safeInitialPosition = {
     lat: Number(initialPosition.lat) || -16.5000,
     lng: Number(initialPosition.lng) || -68.1193
@@ -79,7 +103,6 @@ const MapComponent = ({ onLocationSelect, initialPosition, mapCenter = null, dis
         zoom={13}
         style={{ height: '100%', width: '100%' }}
         className="rounded-md"
-        key={`${safeMapCenter.lat}-${safeMapCenter.lng}`}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

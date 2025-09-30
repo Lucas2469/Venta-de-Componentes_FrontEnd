@@ -18,6 +18,8 @@ import { AdsManagement } from './AdsManagement';
 import ComprobantesPage from "./ComprobantesPage";
 import CreditPackagesPage from "./CreditPackagesPage";
 import AdminStatisticsPage from "./AdminStatisticsPage";
+import { MeetingPointsSection } from './Admin/sections/MeetingPointsSection';
+import { CategoriesSection } from './Admin/sections/CategoriesSection';
 
 export function NewAdminDashboard() {
   const [activeSection, setActiveSection] = useState("statistics");
@@ -232,13 +234,13 @@ export function NewAdminDashboard() {
       case "payment-proofs":
         return <ComprobantesPage />;
       case "meeting-points":
-        return <div className="text-center py-20 text-gray-500">🚧 Sección en desarrollo</div>;
+        return <MeetingPointsSection />;
       case "credit-packages":
         return <CreditPackagesPage />;
       case "ads-management":
         return <AdsManagement />;
       case "categories":
-        return <div className="text-center py-20 text-gray-500">🚧 Sección en desarrollo</div>;
+        return <CategoriesSection />;
       case "ratings":
         return <div className="text-center py-20 text-gray-500">🚧 Sección en desarrollo</div>;
       default:

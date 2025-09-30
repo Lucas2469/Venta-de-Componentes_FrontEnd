@@ -148,7 +148,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack 
         setShowScheduleModal(true);
     };
 
-    const handleScheduleConfirm = async (fecha: Date, horario: HorarioVendedor, cantidad_solicitada: number) => {
+    const handleScheduleConfirm = async (fecha: Date, horario: HorarioVendedor, cantidad_solicitada: number, precio_total: number) => {
         if (!product) return;
 
         // Validar stock disponible
@@ -165,12 +165,13 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack 
                 comprador_id: comprador_id,
                 fecha_cita: fecha.toISOString().split('T')[0],
                 hora_cita: horario.hora_inicio,
-                cantidad_solicitada: cantidad_solicitada
+                cantidad_solicitada: cantidad_solicitada,
+                precio_total: precio_total
             };
 
             const response = await appointmentApi.createAppointment(appointmentData);
 
-            alert(`Encuentro agendado exitosamente para ${fecha.toLocaleDateString('es-ES')} de ${horario.hora_inicio} a ${horario.hora_fin}.\nCantidad: ${cantidad_solicitada} unidad${cantidad_solicitada !== 1 ? 'es' : ''}\nTotal: ${formatPrice(product.precio * cantidad_solicitada)}`);
+            alert(`Encuentro agendado exitosamente para ${fecha.toLocaleDateString('es-ES')} de ${horario.hora_inicio} a ${horario.hora_fin}.\nCantidad: ${cantidad_solicitada} unidad${cantidad_solicitada !== 1 ? 'es' : ''}\nTotal: ${formatPrice(precio_total)}`);
 
             setShowScheduleModal(false);
         } catch (error: any) {

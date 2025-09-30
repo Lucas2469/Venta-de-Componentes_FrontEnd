@@ -1,17 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { Button } from "../../ui/button";
-import { Input } from "../../ui/input";
-import { Label } from "../../ui/label";
-import { Textarea } from "../../ui/textarea";
-import { Badge } from "../../ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../../ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import { Loader2, Plus, Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import { categoriesAPI } from '../../../api/categoriesApi';
 import { Category } from "../../types";
 import { mockProducts } from "../../mockData";
+import { ConfirmationModal } from '../../reusables/ConfirmationModal';
 
 export function CategoriesSection() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -27,6 +19,8 @@ export function CategoriesSection() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
   const [categoryActionLoading, setCategoryActionLoading] = useState<string | null>(null);
+  const [showStatusConfirm, setShowStatusConfirm] = useState(false);
+  const [categoryToToggle, setCategoryToToggle] = useState<Category | null>(null);
   const [categoryErrors, setCategoryErrors] = useState({
     nombre: "",
     descripcion: ""
@@ -141,11 +135,15 @@ export function CategoriesSection() {
     }
   };
 
-  const handleToggleCategoryStatus = async (categoryId: string) => {
+  const handleToggleCategoryStatus = async () => {
+    if (!categoryToToggle) return;
+
     try {
-      setCategoryActionLoading(categoryId);
-      await categoriesAPI.toggleStatus(categoryId);
+      setCategoryActionLoading(categoryToToggle.id);
+      await categoriesAPI.toggleStatus(categoryToToggle.id);
       await loadCategories();
+      setShowStatusConfirm(false);
+      setCategoryToToggle(null);
     } catch (error) {
       console.error("Error al cambiar estado de categoría:", error);
     } finally {
@@ -171,235 +169,266 @@ export function CategoriesSection() {
     setShowDeleteConfirm(true);
   };
 
+  const openStatusToggleConfirm = (category: Category) => {
+    setCategoryToToggle(category);
+    setShowStatusConfirm(true);
+  };
+
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Categorías</CardTitle>
-          <Button onClick={openCreateCategoryDialog} disabled={isCategoriesLoading}>
+      {/* Categories Card */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200 flex flex-row items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">Categorías</h3>
+          <button
+            onClick={openCreateCategoryDialog}
+            disabled={isCategoriesLoading}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {isCategoriesLoading ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
               <Plus className="h-4 w-4 mr-2" />
             )}
             Agregar Categoría
-          </Button>
-        </CardHeader>
-        <CardContent>
+          </button>
+        </div>
+        <div className="px-6 py-4">
           {isCategoriesLoading && categories.length === 0 ? (
             <div className="flex justify-center items-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Descripción</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Productos</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {categories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell className="font-medium">{category.nombre}</TableCell>
-                    <TableCell className="max-w-xs truncate">{category.descripcion}</TableCell>
-                    <TableCell>
-                      <Badge variant={category.estado === "activo" ? "default" : "secondary"}>
-                        {category.estado === "activo" ? "Activo" : "Inactivo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge>
-                        {typeof category.product_count === 'number' ? category.product_count : products.filter(p => p.category === category.id).length}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleToggleCategoryStatus(category.id)}
-                          disabled={categoryActionLoading === category.id}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Nombre
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Descripción
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Productos
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {categories.map((category) => (
+                    <tr key={category.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {category.nombre}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">
+                        {category.descripcion}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            category.estado === "activo"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
                         >
-                          {categoryActionLoading === category.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : category.estado === "activo" ? (
-                            <ToggleLeft className="h-4 w-4" />
-                          ) : (
-                            <ToggleRight className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => openEditCategoryDialog(category)}
-                          disabled={isCategoriesLoading}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="destructive" 
-                          size="sm"
-                          onClick={() => openDeleteCategoryConfirm(category.id)}
-                          disabled={isCategoriesLoading}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                          {category.estado === "activo" ? "Activo" : "Inactivo"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                          {typeof category.product_count === 'number' ? category.product_count : products.filter(p => p.category === category.id).length}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => openStatusToggleConfirm(category)}
+                            disabled={categoryActionLoading === category.id}
+                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {categoryActionLoading === category.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : category.estado === "activo" ? (
+                              <ToggleLeft className="h-4 w-4" />
+                            ) : (
+                              <ToggleRight className="h-4 w-4" />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => openEditCategoryDialog(category)}
+                            disabled={isCategoriesLoading}
+                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => openDeleteCategoryConfirm(category.id)}
+                            disabled={isCategoriesLoading}
+                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingCategory ? "Editar Categoría" : "Nueva Categoría"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="category-name">Nombre *</Label>
-              <Input
-                id="category-name"
-                placeholder="Nombre de la categoría"
-                value={editingCategory ? editingCategory.nombre : newCategory.nombre}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value.length > 20) {
-                    return;
-                  }
-                  if (editingCategory) {
-                    setEditingCategory({...editingCategory, nombre: value});
-                  } else {
-                    setNewCategory({...newCategory, nombre: value});
-                  }
-                  const error = validateCategoryName(value);
-                  setCategoryErrors(prev => ({ ...prev, nombre: error }));
-                }}
-                disabled={isCategoriesLoading}
-                className={categoryErrors.nombre ? "border-red-500" : ""}
-              />
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-xs text-red-500">{categoryErrors.nombre}</span>
-                <span className="text-xs text-gray-500">
-                  {(editingCategory ? editingCategory.nombre : newCategory.nombre || '').length}/20
-                </span>
-              </div>
+      {/* Create/Edit Dialog */}
+      {showCategoryDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setShowCategoryDialog(false)} />
+          <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {editingCategory ? "Editar Categoría" : "Nueva Categoría"}
+              </h3>
             </div>
-            <div>
-              <Label htmlFor="category-description">Descripción</Label>
-              <Textarea
-                id="category-description"
-                placeholder="Descripción de la categoría"
-                value={editingCategory ? editingCategory.descripcion : newCategory.descripcion}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value.length > 70) {
-                    return;
-                  }
-                  if (editingCategory) {
-                    setEditingCategory({...editingCategory, descripcion: value});
-                  } else {
-                    setNewCategory({...newCategory, descripcion: value});
-                  }
-                  const error = validateCategoryDescription(value);
-                  setCategoryErrors(prev => ({ ...prev, descripcion: error }));
-                }}
-                disabled={isCategoriesLoading}
-                className={categoryErrors.descripcion ? "border-red-500" : ""}
-              />
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-xs text-red-500">{categoryErrors.descripcion}</span>
-                <span className="text-xs text-gray-500">
-                  {(editingCategory ? editingCategory.descripcion || '' : newCategory.descripcion || '').length}/70
-                </span>
+            <div className="px-6 py-4 space-y-4">
+              <div>
+                <label htmlFor="category-name" className="block text-sm font-medium text-gray-700 mb-2">
+                  Nombre *
+                </label>
+                <input
+                  id="category-name"
+                  type="text"
+                  placeholder="Nombre de la categoría"
+                  value={editingCategory ? editingCategory.nombre : newCategory.nombre}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length > 20) {
+                      return;
+                    }
+                    if (editingCategory) {
+                      setEditingCategory({...editingCategory, nombre: value});
+                    } else {
+                      setNewCategory({...newCategory, nombre: value});
+                    }
+                    const error = validateCategoryName(value);
+                    setCategoryErrors(prev => ({ ...prev, nombre: error }));
+                  }}
+                  disabled={isCategoriesLoading}
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 ${
+                    categoryErrors.nombre ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-xs text-red-500">{categoryErrors.nombre}</span>
+                  <span className="text-xs text-gray-500">
+                    {(editingCategory ? editingCategory.nombre : newCategory.nombre || '').length}/20
+                  </span>
+                </div>
               </div>
+
+              <div>
+                <label htmlFor="category-description" className="block text-sm font-medium text-gray-700 mb-2">
+                  Descripción
+                </label>
+                <textarea
+                  id="category-description"
+                  placeholder="Descripción de la categoría"
+                  rows={3}
+                  value={editingCategory ? editingCategory.descripcion : newCategory.descripcion}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length > 70) {
+                      return;
+                    }
+                    if (editingCategory) {
+                      setEditingCategory({...editingCategory, descripcion: value});
+                    } else {
+                      setNewCategory({...newCategory, descripcion: value});
+                    }
+                    const error = validateCategoryDescription(value);
+                    setCategoryErrors(prev => ({ ...prev, descripcion: error }));
+                  }}
+                  disabled={isCategoriesLoading}
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 resize-none ${
+                    categoryErrors.descripcion ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-xs text-red-500">{categoryErrors.descripcion}</span>
+                  <span className="text-xs text-gray-500">
+                    {(editingCategory ? editingCategory.descripcion || '' : newCategory.descripcion || '').length}/70
+                  </span>
+                </div>
+              </div>
+
             </div>
-            <div>
-              <Label htmlFor="category-status">Estado</Label>
-              <Select
-                value={editingCategory ? editingCategory.estado : newCategory.estado}
-                onValueChange={(value: "activo" | "inactivo") => 
-                  editingCategory 
-                    ? setEditingCategory({...editingCategory, estado: value})
-                    : setNewCategory({...newCategory, estado: value})
-                }
+            <div className="px-6 py-4 border-t border-gray-200 flex space-x-3">
+              <button
+                onClick={() => setShowCategoryDialog(false)}
                 disabled={isCategoriesLoading}
+                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="activo">Activo</SelectItem>
-                  <SelectItem value="inactivo">Inactivo</SelectItem>
-                </SelectContent>
-              </Select>
+                Cancelar
+              </button>
+              <button
+                onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}
+                disabled={
+                  isCategoriesLoading ||
+                  (!editingCategory && !newCategory.nombre?.trim()) ||
+                  (!!editingCategory && !editingCategory.nombre?.trim()) ||
+                  categoryErrors.nombre !== "" ||
+                  categoryErrors.descripcion !== ""
+                }
+                className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCategoriesLoading && (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                )}
+                {editingCategory ? "Actualizar" : "Crear"} Categoría
+              </button>
             </div>
           </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setShowCategoryDialog(false)}
-              disabled={isCategoriesLoading}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}
-              disabled={isCategoriesLoading || 
-                (!editingCategory && !newCategory.nombre.trim()) ||
-                (editingCategory && !editingCategory.nombre.trim()) ||
-                categoryErrors.nombre !== "" ||
-                categoryErrors.descripcion !== ""
-              }
-            >
-              {isCategoriesLoading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : null}
-              {editingCategory ? "Actualizar" : "Crear"} Categoría
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
 
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>¿Estás seguro de eliminar esta categoría?</DialogTitle>
-            <DialogDescription>
-              Esta acción no se puede deshacer. Los productos asociados a esta categoría quedarán sin categoría.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setShowDeleteConfirm(false)}
-              disabled={isCategoriesLoading}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDeleteCategory}
-              disabled={isCategoriesLoading}
-            >
-              {isCategoriesLoading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : null}
-              Eliminar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Status Toggle Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showStatusConfirm}
+        onClose={() => setShowStatusConfirm(false)}
+        onConfirm={handleToggleCategoryStatus}
+        title="¿Confirmar cambio de estado?"
+        message={
+          categoryToToggle
+            ? `¿Estás seguro de ${categoryToToggle.estado === "activo" ? "desactivar" : "activar"} la categoría "${categoryToToggle.nombre}"?${
+                categoryToToggle.estado === "activo"
+                  ? "\n\nLos productos de esta categoría podrían verse afectados."
+                  : ""
+              }`
+            : ""
+        }
+        confirmText={categoryToToggle?.estado === "activo" ? "Desactivar" : "Activar"}
+        cancelText="Cancelar"
+        type={categoryToToggle?.estado === "activo" ? "warning" : "success"}
+        loading={categoryActionLoading === categoryToToggle?.id}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteCategory}
+        title="¿Eliminar categoría?"
+        message="Esta acción no se puede deshacer. Los productos asociados a esta categoría quedarán sin categoría."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+        loading={categoryActionLoading === categoryToDelete}
+      />
     </div>
   );
 }

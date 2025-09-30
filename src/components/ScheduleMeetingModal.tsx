@@ -15,7 +15,7 @@ interface ScheduleMeetingModalProps {
     quantity: number;
     unitPrice: number;
     stock: number; // Nuevo prop para el stock (AnettG)
-    onConfirm: (fecha: Date, horario: HorarioVendedor, cantidad: number) => void;
+    onConfirm: (fecha: Date, horario: HorarioVendedor, cantidad: number, precioTotal: number) => void;
 }
 
 export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
@@ -49,23 +49,101 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
     // Obtener días disponibles del vendedor
     const availableDays = horarios.map(h => h.dia_semana);
 
-    // Verificar si una fecha es válida (el vendedor trabaja ese día)
+    // Verificar si una fecha es válida (el vendedor trabaja ese día y tiene horarios disponibles)
     const isDateValid = (date: Date): boolean => {
+        const today = new Date();
+        const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const dateNormalized = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+        // No permitir fechas pasadas
+        if (dateNormalized < todayNormalized) {
+            return false;
+        }
+
         const dayOfWeek = dayMap[date.getDay() as keyof typeof dayMap];
-        return availableDays.includes(dayOfWeek as any);
+
+        // Verificar si el vendedor trabaja ese día
+        if (!availableDays.includes(dayOfWeek as any)) {
+            return false;
+        }
+
+        // Si es hoy, verificar que tenga horarios disponibles
+        const isToday = dateNormalized.getTime() === todayNormalized.getTime();
+        if (isToday) {
+            // Para hoy, verificar manualmente si hay horarios disponibles
+            const horariosDelDia = horarios.filter(h => h.dia_semana === dayOfWeek);
+
+            if (horariosDelDia.length === 0) {
+                return false;
+            }
+
+            const now = new Date();
+            const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+
+            const horariosDisponibles = horariosDelDia.filter(horario => {
+                const [endHour, endMinute] = horario.hora_fin.split(':').map(Number);
+                const endTimeInMinutes = endHour * 60 + endMinute;
+                return endTimeInMinutes > (currentTimeInMinutes + 30);
+            });
+
+            return horariosDisponibles.length > 0;
+        }
+
+        // Para fechas futuras, si el vendedor trabaja ese día, es válida
+        return true;
     };
 
     // Obtener horarios disponibles para la fecha seleccionada
     const getAvailableHorariosForDate = (date: Date): HorarioVendedor[] => {
         const dayOfWeek = dayMap[date.getDay() as keyof typeof dayMap];
-        return horarios.filter(h => h.dia_semana === dayOfWeek);
+        const horariosDelDia = horarios.filter(h => h.dia_semana === dayOfWeek);
+
+        // Si la fecha seleccionada es hoy, filtrar horarios que ya pasaron
+        const today = new Date();
+        const isToday = date.toDateString() === today.toDateString();
+
+        if (isToday) {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+            return horariosDelDia.filter(horario => {
+                // Parsear hora_fin del horario (formato: "HH:MM")
+                const [endHour, endMinute] = horario.hora_fin.split(':').map(Number);
+                const endTimeInMinutes = endHour * 60 + endMinute;
+
+                // Solo mostrar horarios que aún no han terminado (con margen de 30 minutos)
+                return endTimeInMinutes > (currentTimeInMinutes + 30);
+            });
+        }
+
+        // Para fechas futuras, devolver todos los horarios del día
+        return horariosDelDia;
     };
 
     // Generar días del calendario
     const generateCalendarDays = () => {
         const today = new Date();
-        const currentMonth = today.getMonth();
-        const currentYear = today.getFullYear();
+        today.setHours(0, 0, 0, 0); // Normalizar la hora para comparaciones
+
+        // Si estamos en los últimos días del mes y no hay fechas válidas restantes,
+        // mostrar el próximo mes
+        let displayMonth = today.getMonth();
+        let displayYear = today.getFullYear();
+
+        // Verificar si hay fechas válidas en el mes actual
+        const daysLeftInMonth = new Date(displayYear, displayMonth + 1, 0).getDate() - today.getDate();
+        if (daysLeftInMonth <= 2) { // Si quedan 2 días o menos, mostrar próximo mes
+            displayMonth = displayMonth + 1;
+            if (displayMonth > 11) {
+                displayMonth = 0;
+                displayYear = displayYear + 1;
+            }
+        }
+
+        const currentMonth = displayMonth;
+        const currentYear = displayYear;
 
         // Primer día del mes
         const firstDay = new Date(currentYear, currentMonth, 1);
@@ -81,18 +159,25 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 
         for (let i = 0; i < 42; i++) {
             const date = new Date(currentDate);
+            date.setHours(0, 0, 0, 0); // Normalizar la hora para comparaciones
+
             const isCurrentMonth = date.getMonth() === currentMonth;
             const isPast = date < today;
+            const isToday = date.getTime() === today.getTime();
+            const hasVendorSchedule = (() => {
+                const dayOfWeek = dayMap[date.getDay() as keyof typeof dayMap];
+                return availableDays.includes(dayOfWeek as any);
+            })();
             const isValid = isDateValid(date);
-            const isToday = date.toDateString() === today.toDateString();
 
             days.push({
                 date,
                 isCurrentMonth,
                 isPast,
-                isValid: isCurrentMonth && !isPast && isValid,
+                isValid: isCurrentMonth && isValid,
                 isToday,
-                isSelected: selectedDate?.toDateString() === date.toDateString()
+                isSelected: selectedDate?.toDateString() === date.toDateString(),
+                hasVendorSchedule
             });
 
             currentDate.setDate(currentDate.getDate() + 1);
@@ -103,7 +188,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 
     // Manejar selección de fecha
     const handleDateSelect = (date: Date) => {
-        if (date < new Date() || !isDateValid(date)) return;
+        if (!isDateValid(date)) return;
 
         setSelectedDate(date);
         setSelectedHorario(null); // Reset horario cuando cambia la fecha
@@ -150,7 +235,8 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
         setErrors(newErrors);
 
         if (newErrors.length === 0 && selectedDate && selectedHorario) {
-            onConfirm(selectedDate, selectedHorario, cantidadSolicitada);
+            const precioTotal = unitPrice * cantidadSolicitada;
+            onConfirm(selectedDate, selectedHorario, cantidadSolicitada, precioTotal);
         }
     };
 
@@ -204,17 +290,39 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
                 <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Calendario */}
                     <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
                             Seleccionar fecha
                         </h3>
+                        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-blue-800 text-sm">
+                                💡 <strong>Información:</strong> Solo se muestran los días donde el vendedor tiene horarios disponibles.
+                                Para hoy, solo aparecen horarios que aún no han terminado.
+                            </p>
+                        </div>
 
                         {/* Cabecera del calendario */}
                         <div className="mb-4">
                             <h4 className="text-center font-medium text-gray-900">
-                                {new Date().toLocaleDateString('es-ES', {
-                                    month: 'long',
-                                    year: 'numeric'
-                                }).toUpperCase()}
+                                {(() => {
+                                    const today = new Date();
+                                    let displayMonth = today.getMonth();
+                                    let displayYear = today.getFullYear();
+
+                                    // Misma lógica para mostrar el mes correcto
+                                    const daysLeftInMonth = new Date(displayYear, displayMonth + 1, 0).getDate() - today.getDate();
+                                    if (daysLeftInMonth <= 2) {
+                                        displayMonth = displayMonth + 1;
+                                        if (displayMonth > 11) {
+                                            displayMonth = 0;
+                                            displayYear = displayYear + 1;
+                                        }
+                                    }
+
+                                    return new Date(displayYear, displayMonth, 1).toLocaleDateString('es-ES', {
+                                        month: 'long',
+                                        year: 'numeric'
+                                    }).toUpperCase();
+                                })()}
                             </h4>
                         </div>
 
@@ -256,12 +364,16 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
                                 <span>Fecha seleccionada</span>
                             </div>
                             <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-blue-50 border border-blue-200 rounded"></div>
-                                <span>Días disponibles</span>
+                                <div className="w-3 h-3 bg-blue-50 border border-blue-300 rounded"></div>
+                                <span>Días con horarios disponibles</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <div className="w-3 h-3 bg-blue-100 border border-blue-400 rounded font-bold"></div>
+                                <span>Hoy (solo si tiene horarios disponibles)</span>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <div className="w-3 h-3 bg-gray-50 border border-gray-200 rounded"></div>
-                                <span>Días no disponibles</span>
+                                <span>Días sin horarios o pasados</span>
                             </div>
                         </div>
                     </div>
@@ -286,28 +398,64 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 
                                     {availableHorariosForSelectedDate.length > 0 ? (
                                         <div className="space-y-2">
-                                            {availableHorariosForSelectedDate.map((horario, index) => (
-                                                <button
-                                                    key={index}
-                                                    onClick={() => handleHorarioSelect(horario)}
-                                                    className={`
-                                                        w-full p-3 rounded-lg border transition-colors text-left
-                                                        ${selectedHorario === horario
-                                                            ? 'border-blue-600 bg-blue-50 text-blue-900'
-                                                            : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-                                                        }
-                                                    `}
-                                                >
-                                                    <div className="font-medium">
-                                                        {horario.hora_inicio} - {horario.hora_fin}
-                                                    </div>
-                                                </button>
-                                            ))}
+                                            {availableHorariosForSelectedDate.map((horario, index) => {
+                                                const isToday = selectedDate?.toDateString() === new Date().toDateString();
+                                                let statusText = '';
+                                                let statusColor = '';
+
+                                                if (isToday) {
+                                                    const now = new Date();
+                                                    const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+                                                    const [startHour, startMinute] = horario.hora_inicio.split(':').map(Number);
+                                                    const startTimeInMinutes = startHour * 60 + startMinute;
+
+                                                    if (currentTimeInMinutes < startTimeInMinutes) {
+                                                        statusText = 'Disponible hoy';
+                                                        statusColor = 'text-green-600';
+                                                    } else {
+                                                        statusText = 'Disponible (ya iniciado)';
+                                                        statusColor = 'text-orange-600';
+                                                    }
+                                                } else {
+                                                    statusText = 'Disponible';
+                                                    statusColor = 'text-green-600';
+                                                }
+
+                                                return (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => handleHorarioSelect(horario)}
+                                                        className={`
+                                                            w-full p-3 rounded-lg border transition-colors text-left
+                                                            ${selectedHorario === horario
+                                                                ? 'border-blue-600 bg-blue-50 text-blue-900'
+                                                                : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                                                            }
+                                                        `}
+                                                    >
+                                                        <div className="flex justify-between items-center">
+                                                            <div className="font-medium">
+                                                                {horario.hora_inicio} - {horario.hora_fin}
+                                                            </div>
+                                                            <div className={`text-xs font-medium ${statusColor}`}>
+                                                                {statusText}
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     ) : (
-                                        <p className="text-red-600 text-sm">
-                                            No hay horarios disponibles para esta fecha
-                                        </p>
+                                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                            <p className="text-yellow-800 text-sm font-medium">
+                                                ⚠️ No hay horarios disponibles para esta fecha
+                                            </p>
+                                            <p className="text-yellow-700 text-xs mt-1">
+                                                {selectedDate?.toDateString() === new Date().toDateString()
+                                                    ? 'Los horarios del vendedor para hoy ya han pasado'
+                                                    : 'El vendedor no tiene horarios configurados para este día'}
+                                            </p>
+                                        </div>
                                     )}
                                 </div>
                             ) : (
@@ -316,7 +464,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
                                 </p>
                             )}
                         </div>
-n                        {/* Cantidad solicitada (AnettG) */}
+                        {/* Cantidad solicitada (AnettG) */}
                         <div className="mb-6">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">
                                 Cantidad solicitada
@@ -334,7 +482,6 @@ n                        {/* Cantidad solicitada (AnettG) */}
                                 Stock disponible: {stock} unidades
                             </p>
                         </div>
-
 
                         {/* Punto de encuentro */}
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -359,7 +506,7 @@ n                        {/* Cantidad solicitada (AnettG) */}
                                 <div className="flex justify-between items-center">
                                     <span className="text-green-800">Cantidad:</span>
                                     <span className="font-medium text-green-900">
-                                        {quantity} unidad{quantity !== 1 ? 'es' : ''}
+                                        {cantidadSolicitada} unidad{cantidadSolicitada !== 1 ? 'es' : ''}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
@@ -372,7 +519,7 @@ n                        {/* Cantidad solicitada (AnettG) */}
                                     <div className="flex justify-between items-center">
                                         <span className="font-semibold text-green-900">Total a pagar:</span>
                                         <span className="text-lg font-bold text-green-900">
-                                            {formatPrice(unitPrice * quantity)}
+                                            {formatPrice(unitPrice * cantidadSolicitada)}
                                         </span>
                                     </div>
                                 </div>

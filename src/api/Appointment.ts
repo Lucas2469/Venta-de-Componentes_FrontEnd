@@ -7,6 +7,7 @@ export interface CreateAppointmentRequest {
   fecha_cita: string; // YYYY-MM-DD format
   hora_cita: string; // HH:mm format
   cantidad_solicitada: number;
+  precio_total: number;
 }
 export interface CreateAppointmentResponse {
   id: number;

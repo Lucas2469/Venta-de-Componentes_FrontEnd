@@ -5,7 +5,7 @@ import { Footer } from "./components/Footer";
 import { LoginPage } from "./components/LoginPage";
 import { RegistrationPage } from "./components/RegistrationPage";
 import { ContactConfirmationModal } from "./components/ContactConfirmationModal";
-import { NewAdminDashboard } from "./components/Admin/dashboard/NewAdminDashboard";
+import { NewAdminDashboard } from "./components/NewAdminDashboard";
 import CreateAdPage from "./components/CreateAdPage";
 import ScheduleManager from "./components/ScheduleManager";
 import { ProductCatalog } from "./components/ProductCatalog";
