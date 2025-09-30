@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, User as UserIcon, LogOut, Settings, Package, CreditCard, BarChart3, Menu, Bell, Grid } from "lucide-react";
 import { User } from "./types";
+import ScheduleManager from "./ScheduleManager";
+import { NotificationPanel } from "./NotificationPanel";
+import { fetchUnreadNotificationsCount } from "../api/notifications";
 
 interface HeaderProps {
   currentUser: User | null;
@@ -14,9 +17,38 @@ interface HeaderProps {
 export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery, onSearchChange }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isScheduleManagerOpen, setIsScheduleManagerOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const isAdmin = currentUser?.role === "admin";
   const userCredits = currentUser?.credits ?? 0;
+
+  // Para demo: usar userId = 2 (Juan Carlos) para vendedor/comprador, 1 para admin
+  const userId = isAdmin ? 1 : 2;
+
+  // Cargar contador de notificaciones no leídas
+  useEffect(() => {
+    if (currentUser) {
+      loadUnreadCount();
+      // Actualizar cada 30 segundos
+      const interval = setInterval(loadUnreadCount, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [currentUser]);
+
+  async function loadUnreadCount() {
+    try {
+      const count = await fetchUnreadNotificationsCount(userId);
+      setUnreadCount(count);
+    } catch (error) {
+      console.error('Error loading unread count:', error);
+    }
+  }
+
+  function handleNavigateToNotifications(notificationId?: number) {
+    const url = notificationId ? `notifications?expand=${notificationId}` : 'notifications';
+    onNavigate(url);
+  }
 
   return (
     <header className="bg-gradient-to-r from-pink-700 to-pink-800 border-b border-pink-600 shadow-lg z-50">
@@ -52,46 +84,28 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
             <div className="flex items-center space-x-3">
               {currentUser ? (
                 <>
-                  {/* Notifications - Solo para admin */}
-                  {isAdmin && (
+                  {/* Notifications - Para todos los usuarios logueados */}
+                  {currentUser && (
                     <div className="relative">
                       <button
                         onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
                         className="relative p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-105"
                       >
                         <Bell className="h-5 w-5" />
-                        <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                          3
-                        </span>
+                        {unreadCount > 0 && (
+                          <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )}
                       </button>
 
-                      {/* Notifications Dropdown */}
-                      {isNotificationsOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
-                          <div className="p-4 border-b border-gray-200">
-                            <h3 className="font-semibold text-gray-900">Notificaciones</h3>
-                          </div>
-                          <div className="max-h-80 overflow-y-auto">
-                            <div className="p-4 hover:bg-gray-50 border-b border-gray-100">
-                              <p className="text-sm text-gray-900">Nueva solicitud de créditos pendiente</p>
-                              <p className="text-xs text-gray-500 mt-1">hace 5 min</p>
-                            </div>
-                            <div className="p-4 hover:bg-gray-50 border-b border-gray-100">
-                              <p className="text-sm text-gray-900">Nuevo anuncio requiere aprobación</p>
-                              <p className="text-xs text-gray-500 mt-1">hace 10 min</p>
-                            </div>
-                            <div className="p-4 hover:bg-gray-50">
-                              <p className="text-sm text-gray-900">Usuario reportado por comportamiento inapropiado</p>
-                              <p className="text-xs text-gray-500 mt-1">hace 1 hora</p>
-                            </div>
-                          </div>
-                          <div className="p-3 border-t border-gray-200">
-                            <button className="w-full px-3 py-2 text-sm text-pink-700 hover:bg-pink-50 rounded-md transition-colors">
-                              Ver todas las notificaciones
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                      {/* Notification Panel */}
+                      <NotificationPanel
+                        isOpen={isNotificationsOpen}
+                        onClose={() => setIsNotificationsOpen(false)}
+                        userId={userId}
+                        onNavigateToNotifications={handleNavigateToNotifications}
+                      />
                     </div>
                   )}
                   {/* User Info & Menu */}
@@ -124,7 +138,11 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
                           <div className="p-2">
                             <button
                               onClick={() => {
-                                onNavigate("profile");
+                                if (isAdmin) {
+                                  setIsScheduleManagerOpen(true);
+                                } else {
+                                  onNavigate("profile");
+                                }
                                 setIsMenuOpen(false);
                               }}
                               className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
@@ -229,6 +247,15 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
 
         </div>
       </div>
+
+      {/* ScheduleManager Modal - Solo para admin */}
+      {isAdmin && (
+        <ScheduleManager
+          open={isScheduleManagerOpen}
+          onOpenChange={setIsScheduleManagerOpen}
+          vendedorId={2} // Para admin, usar vendedor_id = 2 (Juan Carlos Pérez Mamani)
+        />
+      )}
     </header>
   );
 }

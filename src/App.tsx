@@ -10,6 +10,7 @@ import { ProductCatalog } from "./components/ProductCatalog";
 import { UsersList } from "./components/UsersList";
 import { ProductDetail } from "./components/ProductDetail";
 import { BuyCreditsPage } from "./components/BuyCreditsPage";
+import { NotificationsPage } from "./components/NotificationsPage";
 import { User } from "./components/types";
 import { mockUsers } from "./components/mockData";
 
@@ -37,6 +38,24 @@ const ProductDetailWrapper: React.FC = () => {
     <ProductDetail
       productId={productId}
       onBack={() => navigate('/catalog')}
+    />
+  );
+};
+
+// Wrapper para NotificationsPage que maneja los parámetros de URL
+const NotificationsPageWrapper: React.FC<{ currentUser: User | null }> = ({ currentUser }) => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const expandId = searchParams.get('expand');
+
+  // Para demo: usar userId = 2 (Juan Carlos) para vendedor/comprador, 1 para admin
+  const isAdmin = currentUser?.role === "admin";
+  const userId = isAdmin ? 1 : 2;
+
+  return (
+    <NotificationsPage
+      userId={userId}
+      expandNotificationId={expandId ? parseInt(expandId) : undefined}
     />
   );
 };
@@ -182,6 +201,13 @@ export default function App() {
                 onBack={() => navigate('/catalog')}
                 currentUser={currentUser}
               />
+            </ProtectedRoute>
+          } />
+
+          {/* Notifications Page - Para usuarios logueados */}
+          <Route path="/notifications" element={
+            <ProtectedRoute currentUser={currentUser}>
+              <NotificationsPageWrapper currentUser={currentUser} />
             </ProtectedRoute>
           } />
 
