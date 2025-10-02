@@ -183,3 +183,12 @@ export const useToast = () => {
     ToastComponent
   };
 };
+
+// Función showToast independiente para componentes que no usan el hook
+export const showToast = (type: ToastType, title: string, message?: string) => {
+  // Crear evento personalizado para mostrar toast
+  const event = new CustomEvent('showToast', {
+    detail: { type, title, message }
+  });
+  window.dispatchEvent(event);
+};

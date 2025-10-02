@@ -7,12 +7,14 @@ import { RegistrationPage } from "./components/RegistrationPage";
 import { ContactConfirmationModal } from "./components/ContactConfirmationModal";
 import { NewAdminDashboard } from "./components/NewAdminDashboard";
 import CreateAdPage from "./components/CreateAdPage";
-import ScheduleManager from "./components/ScheduleManager";
 import { ProductCatalog } from "./components/ProductCatalog";
 import { UsersList } from "./components/UsersList";
 import { ProductDetail } from "./components/ProductDetail";
 import { BuyCreditsPage } from "./components/BuyCreditsPage";
 import { NotificationsPage } from "./components/NotificationsPage";
+import VendorAppointmentsPage from "./components/VendorAppointmentsPage";
+import MyAppointmentsPage from "./components/MyAppointmentsPage";
+import MisHorariosPage from "./components/MisHorariosPage";
 import { User } from "./components/types";
 import { mockUsers } from "./components/mockData";
 
@@ -213,6 +215,30 @@ export default function App() {
           <Route path="/notifications" element={
             <ProtectedRoute currentUser={currentUser}>
               <NotificationsPageWrapper currentUser={currentUser} />
+            </ProtectedRoute>
+          } />
+
+          {/* Vendor Appointments Page - Para vendedores */}
+          <Route path="/vendor-appointments" element={
+            <ProtectedRoute currentUser={currentUser}>
+              <VendorAppointmentsPage currentUser={currentUser} />
+            </ProtectedRoute>
+          } />
+
+          {/* My Appointments Page - Para compradores */}
+          <Route path="/my-appointments" element={
+            <ProtectedRoute currentUser={currentUser}>
+              <MyAppointmentsPage currentUser={currentUser} />
+            </ProtectedRoute>
+          } />
+
+          {/* Mis Horarios Page - Para vendedores */}
+          <Route path="/mis-horarios" element={
+            <ProtectedRoute currentUser={currentUser}>
+              <MisHorariosPage
+                currentUser={currentUser}
+                onNavigate={handleNavigate}
+              />
             </ProtectedRoute>
           } />
 

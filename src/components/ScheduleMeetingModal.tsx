@@ -394,7 +394,8 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
                                             day: 'numeric',
                                             month: 'long'
                                         })}:
-                                    </p>
+                                    </p>/
+                                    /
 
                                     {availableHorariosForSelectedDate.length > 0 ? (
                                         <div className="space-y-2">

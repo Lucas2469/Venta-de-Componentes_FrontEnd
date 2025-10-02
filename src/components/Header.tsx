@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Search, User as UserIcon, LogOut, Settings, Package, CreditCard, BarChart3, Menu, Bell, Grid } from "lucide-react";
+import { Search, User as UserIcon, LogOut, Settings, Package, CreditCard, BarChart3, Menu, Bell, Grid, Calendar, Clock } from "lucide-react";
 import { User } from "./types";
-import ScheduleManager from "./ScheduleManager";
 import { NotificationPanel } from "./NotificationPanel";
 import { fetchUnreadNotificationsCount } from "../api/notifications";
 
@@ -17,14 +16,13 @@ interface HeaderProps {
 export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery, onSearchChange }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isScheduleManagerOpen, setIsScheduleManagerOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const isAdmin = currentUser?.role === "admin";
   const userCredits = currentUser?.credits ?? 0;
 
-  // Para demo: usar userId = 2 (Juan Carlos) para vendedor/comprador, 1 para admin
-  const userId = isAdmin ? 1 : 2;
+  // Usar el ID real del usuario logueado
+  const userId = currentUser?.id ? parseInt(currentUser.id.toString()) : (isAdmin ? 1 : 2);
 
   // Cargar contador de notificaciones no leídas
   useEffect(() => {
@@ -139,11 +137,7 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
                             {/* Mi Perfil - Para todos los usuarios */}
                             <button
                               onClick={() => {
-                                if (isAdmin) {
-                                  setIsScheduleManagerOpen(true);
-                                } else {
-                                  onNavigate("profile");
-                                }
+                                onNavigate("profile");
                                 setIsMenuOpen(false);
                               }}
                               className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
@@ -152,21 +146,45 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
                               Mi Perfil
                             </button>
 
-                            {/* Mis horarios - Solo para usuarios NO admin (funcionalidad de AnettG) */}
-                            {!isAdmin && (
+                            {/* Mis horarios - Solo para vendedores */}
+                            {!isAdmin && currentUser?.isSeller && (
                               <button
                                 onClick={() => {
-                                  if (currentUser?.id) {
-                                    onNavigate(`mis-horarios/${2}`);
-                                  } else {
-                                    onNavigate("catalog");
-                                  }
+                                  onNavigate("mis-horarios");
                                   setIsMenuOpen(false);
                                 }}
                                 className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
                               >
-                                <UserIcon className="h-4 w-4 mr-3" />
+                                <Clock className="h-4 w-4 mr-3" />
                                 Mis horarios
+                              </button>
+                            )}
+
+                            {/* Agendamientos del vendedor - Solo para usuarios que pueden vender */}
+                            {!isAdmin && currentUser?.isSeller && (
+                              <button
+                                onClick={() => {
+                                  onNavigate("vendor-appointments");
+                                  setIsMenuOpen(false);
+                                }}
+                                className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
+                              >
+                                <Calendar className="h-4 w-4 mr-3" />
+                                Mis Agendamientos
+                              </button>
+                            )}
+
+                            {/* Mis citas - Solo para usuarios que pueden comprar */}
+                            {!isAdmin && currentUser?.isBuyer && (
+                              <button
+                                onClick={() => {
+                                  onNavigate("my-appointments");
+                                  setIsMenuOpen(false);
+                                }}
+                                className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
+                              >
+                                <Calendar className="h-4 w-4 mr-3" />
+                                Mis Citas
                               </button>
                             )}
 
@@ -267,14 +285,6 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
         </div>
       </div>
 
-      {/* ScheduleManager Modal - Solo para admin */}
-      {isAdmin && (
-        <ScheduleManager
-          open={isScheduleManagerOpen}
-          onOpenChange={setIsScheduleManagerOpen}
-          vendedorId={2} // Para admin, usar vendedor_id = 2 (Juan Carlos Pérez Mamani)
-        />
-      )}
     </header>
   );
 }
