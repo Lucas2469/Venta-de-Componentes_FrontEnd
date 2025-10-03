@@ -398,7 +398,6 @@ export function NewAdminDashboard() {
                   <TableCell>
                         <Button 
                           variant="outline" 
-                          size="sm"
                       onClick={() => handleToggleUserStatus(user.id)}
                         >
                       {user.isActive ? "Desactivar" : "Activar"}
@@ -466,14 +465,12 @@ export function NewAdminDashboard() {
                           <>
                         <Button 
                           variant="outline" 
-                          size="sm"
                               onClick={() => handleApprovePurchase(purchase.id)}
                             >
                               Aprobar
                         </Button>
                         <Button 
-                          variant="destructive" 
-                          size="sm"
+                          variant="outline" 
                               onClick={() => handleRejectPurchase(purchase.id)}
                         >
                               Rechazar
@@ -572,14 +569,12 @@ export function NewAdminDashboard() {
                           <>
                     <Button 
                               variant="outline"
-                      size="sm"
                               onClick={() => handleApproveProduct(product.id)}
                             >
                               Aprobar
                     </Button>
                       <Button 
-                              variant="destructive"
-                        size="sm"
+                              variant="outline"
                               onClick={() => handleRejectProduct(product.id)}
                       >
                               Rechazar
@@ -589,7 +584,6 @@ export function NewAdminDashboard() {
                         {product.status === 'active' && (
                         <Button 
                           variant="outline" 
-                          size="sm"
                             onClick={() => handleDisableAd(product.id)}
                           >
                             Desactivar
@@ -747,7 +741,6 @@ export function NewAdminDashboard() {
             <div className="flex space-x-2">
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() => setCalificationFilters({
                   search: "",
                   minRating: 0,
