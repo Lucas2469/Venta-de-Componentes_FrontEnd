@@ -31,7 +31,8 @@ export const meetingPointsAPI = {
       });
       
       console.log("Respuesta del servidor:", response.data);
-      return response.data;
+      // El backend devuelve { message, meetingPoint }
+      return response.data?.meetingPoint ?? response.data;
     } catch (error: any) {
       console.error("Error completo al crear punto de encuentro:", error);
       
@@ -58,7 +59,8 @@ export const meetingPointsAPI = {
   update: async (id: string, updatedPoint: any) => {
     try {
       const response = await axios.put(`${API_URL}/puntosencuentro/${id}`, updatedPoint);
-      return response.data;
+      // El backend puede devolver el objeto actualizado directamente o envuelto
+      return response.data?.meetingPoint ?? response.data;
     } catch (error: any) {
       console.error("Error al actualizar punto de encuentro:", error);
       if (error.response) {
@@ -79,6 +81,23 @@ export const meetingPointsAPI = {
         throw new Error(`Error del servidor: ${error.response.data.error || error.response.status}`);
       }
       throw new Error("No se pudo eliminar el punto de encuentro");
+    }
+  },
+
+  // Alternar estado (activo/inactivo)
+  toggleStatus: async (id: string) => {
+    try {
+      const detail = await axios.get(`${API_URL}/puntosencuentro/${id}`).then(r => r.data);
+      const nextEstado = (detail?.estado === 'activo') ? 'inactivo' : 'activo';
+      const payload = { ...detail, estado: nextEstado };
+      const response = await axios.put(`${API_URL}/puntosencuentro/${id}`, payload);
+      return response.data?.meetingPoint ?? { ...detail, estado: nextEstado };
+    } catch (error: any) {
+      console.error("Error al alternar estado del punto de encuentro:", error);
+      if (error.response) {
+        throw new Error(`Error del servidor: ${error.response.data.error || error.response.status}`);
+      }
+      throw new Error("No se pudo alternar el estado del punto de encuentro");
     }
   }
 };

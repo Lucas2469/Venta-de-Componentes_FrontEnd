@@ -15,6 +15,7 @@ const LocationMarker = ({ initialPosition, onLocationSelect, disabled }) => {
   const [position, setPosition] = useState(initialPosition);
   const markerRef = useRef(null);
 
+  
   useEffect(() => {
     setPosition(initialPosition);
   }, [initialPosition]);
@@ -60,19 +61,25 @@ const LocationMarker = ({ initialPosition, onLocationSelect, disabled }) => {
   );
 };
 
-const MapComponent = ({ onLocationSelect, initialPosition, disabled = false }) => {
+const MapComponent = ({ onLocationSelect, initialPosition, mapCenter = null, disabled = false }) => {
   const safeInitialPosition = {
     lat: Number(initialPosition.lat) || -16.5000,
     lng: Number(initialPosition.lng) || -68.1193
   };
 
+  const safeMapCenter = mapCenter ? {
+    lat: Number(mapCenter.lat) || safeInitialPosition.lat,
+    lng: Number(mapCenter.lng) || safeInitialPosition.lng
+  } : safeInitialPosition;
+
   return (
     <div className="h-64 w-full rounded-md overflow-hidden border border-gray-300">
       <MapContainer
-        center={[safeInitialPosition.lat, safeInitialPosition.lng]}
+        center={[safeMapCenter.lat, safeMapCenter.lng]}
         zoom={13}
         style={{ height: '100%', width: '100%' }}
         className="rounded-md"
+        key={`${safeMapCenter.lat}-${safeMapCenter.lng}`}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

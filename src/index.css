@@ -1,4 +1,5 @@
 /*! tailwindcss v4.1.3 | MIT License | https://tailwindcss.com */
+@import 'leaflet/dist/leaflet.css';
 @layer properties {
   @supports (((-webkit-hyphens: none)) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color: rgb(from red r g b)))) {
     *, :before, :after, ::backdrop {
@@ -5333,8 +5334,6 @@ html {
     opacity: 0;
   }
 }
-/* Asegúrate de que Leaflet se vea correctamente */
-@import 'leaflet/dist/leaflet.css';
 
 .leaflet-container {
   height: 100%;

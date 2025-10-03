@@ -1,3 +1,4 @@
+import React from "react";
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram } from "lucide-react";
 import { Button } from "./ui/button";
 
