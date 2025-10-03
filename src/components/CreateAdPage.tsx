@@ -1,4 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  createAdProduct,
+  getCategorias,
+  getPuntosEncuentro,
+  getCreditosDisponibles,
+} from "../api/AdProduct";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -6,157 +13,198 @@ import { Textarea } from "./ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
-import { 
-  Upload, 
-  X, 
-  Plus, 
-  Clock, 
-  DollarSign, 
-  Package, 
-  FileText, 
-  Image as ImageIcon,
-  Calendar
-} from "lucide-react";
-import { mockCategories } from "./mockData";
+import { Upload, X, FileText, Image as ImageIcon, DollarSign } from "lucide-react";
+
+const VENDEDOR_ID = 2; // TODO: reemplazar por el id real del usuario logueado (JWT)
+
+type Categoria = { id: number; nombre: string };
+type Punto = { id: number; nombre: string };
 
 interface CreateAdPageProps {
-  onBack: () => void;
+  onBack?: () => void; // opcional para evitar errores en rutas
 }
 
-interface WeeklySchedule {
-  [key: string]: string[];
-}
+export default function CreateAdPage({ onBack }: CreateAdPageProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-const DAYS_OF_WEEK = [
-  { key: 'lunes', label: 'Lunes' },
-  { key: 'martes', label: 'Martes' },
-  { key: 'miercoles', label: 'Miércoles' },
-  { key: 'jueves', label: 'Jueves' },
-  { key: 'viernes', label: 'Viernes' },
-  { key: 'sabado', label: 'Sábado' },
-  { key: 'domingo', label: 'Domingo' }
-];
+  // datos dinámicos
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [puntos, setPuntos] = useState<Punto[]>([]);
+  const [creditos, setCreditos] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export function CreateAdPage({ onBack }: CreateAdPageProps) {
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    price: "",
-    quantity: "",
-    category: ""
+  // formulario
+  const [form, setForm] = useState({
+    categoriaId: "",
+    puntoEncuentroId: "",
+    nombre: "",
+    descripcion: "",
+    precio: "",
+    stock: "",
   });
 
+  // imágenes (previews y archivos reales)
   const [images, setImages] = useState<string[]>([]);
-  const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule>({
-    lunes: [],
-    martes: [],
-    miercoles: [],
-    jueves: [],
-    viernes: [],
-    sabado: [],
-    domingo: []
-  });
-  const [newTimeForDay, setNewTimeForDay] = useState<{[key: string]: string}>({});
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const redirectedRef = useRef(false); // anti doble redirección
+
+  // Cargar combos + créditos
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const [cats, pts, creds] = await Promise.all([
+          getCategorias(),           // [{id, nombre}]
+          getPuntosEncuentro(),      // [{id, nombre}]
+          getCreditosDisponibles(VENDEDOR_ID), // { creditos_disponibles: number }
+        ]);
+
+        if (!mounted) return;
+        setCategorias(Array.isArray(cats) ? cats : []);
+        setPuntos(Array.isArray(pts) ? pts : []);
+
+        const parsedCredits = Number(
+          (creds && (creds.creditos_disponibles ?? creds.creditos ?? creds[0]?.creditos_disponibles)) ?? 0
+        );
+        setCreditos(Number.isFinite(parsedCredits) ? parsedCredits : 0);
+      } catch (e) {
+        console.error("[CreateAdPage] load error:", e);
+        if (mounted) setCreditos(0);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Redirigir a compra de créditos si no alcanza (evitar bucle si ya estás ahí)
+  useEffect(() => {
+    if (loading) return;
+    if (location.pathname === "/buy-credits") return;
+    if (redirectedRef.current) return;
+
+    if ((creditos ?? 0) < 1) {
+      redirectedRef.current = true;
+      navigate("/buy-credits");
+    }
+  }, [loading, creditos, location.pathname, navigate]);
+
+  const handleInput = (field: keyof typeof form, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: "" }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
+
+  const onSelectCategoria = (value: string) => handleInput("categoriaId", value);
+  const onSelectPunto = (value: string) => handleInput("puntoEncuentroId", value);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files) {
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (e.target?.result) {
-            setImages(prev => [...prev, e.target!.result as string]);
-          }
-        };
-        reader.readAsDataURL(file);
-      });
+    if (!files) return;
+
+    const selected = Array.from(files);
+    const total = imageFiles.length + selected.length;
+    if (total > 6) {
+      setErrors((p) => ({ ...p, images: "Máximo 6 imágenes permitidas" }));
+      return;
     }
+
+    setImageFiles((prev) => [...prev, ...selected]);
+    selected.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setImages((prev) => [...prev, e.target!.result as string]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const addTimeForDay = (day: string) => {
-    const time = newTimeForDay[day];
-    if (time && !weeklySchedule[day].includes(time)) {
-      setWeeklySchedule(prev => ({
-        ...prev,
-        [day]: [...prev[day], time].sort()
-      }));
-      setNewTimeForDay(prev => ({ ...prev, [day]: "" }));
-    }
-  };
+  const validateForm = useMemo(() => {
+    return () => {
+      const errs: Record<string, string> = {};
+      if (!form.nombre.trim()) errs.nombre = "El título es requerido";
+      if (!form.descripcion.trim()) errs.descripcion = "La descripción es requerida";
+      if (!form.precio || Number(form.precio) <= 0) errs.precio = "El precio debe ser mayor a 0";
+      if (!form.stock || Number(form.stock) <= 0) errs.stock = "La cantidad debe ser mayor a 0";
+      if (!form.categoriaId) errs.categoriaId = "Selecciona una categoría";
+      if (!form.puntoEncuentroId) errs.puntoEncuentroId = "Selecciona un punto de encuentro";
+      if (imageFiles.length === 0) errs.images = "Debes subir al menos una imagen";
+      setErrors(errs);
+      return Object.keys(errs).length === 0;
+    };
+  }, [form, imageFiles.length]);
 
-  const removeTimeFromDay = (day: string, time: string) => {
-    setWeeklySchedule(prev => ({
-      ...prev,
-      [day]: prev[day].filter(t => t !== time)
-    }));
-  };
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.title.trim()) {
-      newErrors.title = "El título es requerido";
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = "La descripción es requerida";
-    }
-    if (!formData.price || Number(formData.price) <= 0) {
-      newErrors.price = "El precio debe ser mayor a 0";
-    }
-    if (!formData.quantity || Number(formData.quantity) <= 0) {
-      newErrors.quantity = "La cantidad debe ser mayor a 0";
-    }
-    if (!formData.category) {
-      newErrors.category = "Selecciona una categoría";
-    }
-
-    if (images.length === 0) {
-      newErrors.images = "Debes subir al menos una imagen";
-    }
-    const hasSchedule = Object.values(weeklySchedule).some(times => times.length > 0);
-    if (!hasSchedule) {
-      newErrors.schedule = "Debes agregar al menos un horario en cualquier día";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      // Here you would submit the ad
-      alert("Anuncio creado exitosamente y enviado para revisión.");
-      onBack();
+    if (!validateForm()) return;
+
+    try {
+      setSubmitting(true);
+      const res = await createAdProduct(
+        {
+          vendedorId: VENDEDOR_ID,
+          categoriaId: Number(form.categoriaId),
+          puntoEncuentroId: Number(form.puntoEncuentroId),
+          nombre: form.nombre,
+          descripcion: form.descripcion,
+          precio: Number(form.precio),
+          stock: Number(form.stock),
+        },
+        imageFiles
+      );
+
+      alert(res.message || "Producto creado con éxito.");
+      // Vuelve al catálogo (si pasó onBack lo usamos, sino navegamos)
+      if (onBack) onBack();
+      else navigate("/catalog");
+    } catch (err: any) {
+      console.error(err);
+      setErrors((p) => ({ ...p, submit: err?.message || "Error al crear el anuncio" }));
+    } finally {
+      setSubmitting(false);
     }
   };
+
+  if (loading || creditos === null) {
+    return <p className="px-4 py-8">Cargando...</p>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold" style={{ color: '#9d0045' }}>
+          <h1 className="text-3xl font-bold" style={{ color: "#9d0045" }}>
             Crear Nuevo Anuncio
           </h1>
-          <Button variant="outline" onClick={onBack}>
+          <Button variant="outline" onClick={onBack ? onBack : () => navigate("/catalog")}>
             Volver al Catálogo
           </Button>
         </div>
 
+        {/* Aviso de créditos + política */}
+        <div className="mb-4 flex items-center gap-3">
+          <Badge variant="secondary">Créditos: {creditos}</Badge>
+          <span className="text-sm text-red-600">
+            ⚠️ Una vez publicado, no podrás editar este producto. Solo podrás eliminarlo.
+          </span>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information */}
+          {/* Info Básica */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -166,88 +214,97 @@ export function CreateAdPage({ onBack }: CreateAdPageProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="title">Título del Anuncio *</Label>
+                <Label htmlFor="nombre">Título del Anuncio *</Label>
                 <Input
-                  id="title"
+                  id="nombre"
                   placeholder="Ej: Arduino UNO R3 Original con Cable USB"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
-                  className={errors.title ? "border-red-500" : ""}
+                  value={form.nombre}
+                  onChange={(e) => handleInput("nombre", e.target.value)}
+                  className={errors.nombre ? "border-red-500" : ""}
                 />
-                {errors.title && (
-                  <p className="text-red-500 text-sm mt-1">{errors.title}</p>
-                )}
+                {errors.nombre && <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>}
               </div>
 
               <div>
-                <Label htmlFor="description">Descripción *</Label>
+                <Label htmlFor="descripcion">Descripción *</Label>
                 <Textarea
-                  id="description"
-                  placeholder="Describe tu componente electrónico en detalle: estado, especificaciones, compatibilidad..."
+                  id="descripcion"
+                  placeholder="Describe tu componente: estado, especificaciones, compatibilidad..."
                   rows={4}
-                  value={formData.description}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
-                  className={errors.description ? "border-red-500" : ""}
+                  value={form.descripcion}
+                  onChange={(e) => handleInput("descripcion", e.target.value)}
+                  className={errors.descripcion ? "border-red-500" : ""}
                 />
-                {errors.description && (
-                  <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-                )}
+                {errors.descripcion && <p className="text-red-500 text-sm mt-1">{errors.descripcion}</p>}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="price">Precio (Bs) *</Label>
+                  <Label htmlFor="precio">Precio (Bs) *</Label>
                   <Input
-                    id="price"
+                    id="precio"
                     type="number"
                     placeholder="25"
-                    value={formData.price}
-                    onChange={(e) => handleInputChange("price", e.target.value)}
-                    className={errors.price ? "border-red-500" : ""}
+                    value={form.precio}
+                    onChange={(e) => handleInput("precio", e.target.value)}
+                    className={errors.precio ? "border-red-500" : ""}
                   />
-                  {errors.price && (
-                    <p className="text-red-500 text-sm mt-1">{errors.price}</p>
-                  )}
+                  {errors.precio && <p className="text-red-500 text-sm mt-1">{errors.precio}</p>}
                 </div>
 
                 <div>
-                  <Label htmlFor="quantity">Cantidad *</Label>
+                  <Label htmlFor="stock">Stock *</Label>
                   <Input
-                    id="quantity"
+                    id="stock"
                     type="number"
                     placeholder="1"
-                    value={formData.quantity}
-                    onChange={(e) => handleInputChange("quantity", e.target.value)}
-                    className={errors.quantity ? "border-red-500" : ""}
+                    value={form.stock}
+                    onChange={(e) => handleInput("stock", e.target.value)}
+                    className={errors.stock ? "border-red-500" : ""}
                   />
-                  {errors.quantity && (
-                    <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>
-                  )}
+                  {errors.stock && <p className="text-red-500 text-sm mt-1">{errors.stock}</p>}
                 </div>
 
                 <div>
-                  <Label htmlFor="category">Categoría *</Label>
-                  <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                    <SelectTrigger className={errors.category ? "border-red-500" : ""}>
+                  <Label htmlFor="categoria">Categoría *</Label>
+                  <Select value={form.categoriaId} onValueChange={onSelectCategoria}>
+                    <SelectTrigger className={errors.categoriaId ? "border-red-500" : ""}>
                       <SelectValue placeholder="Seleccionar" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockCategories.map(category => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.nombre}
+                      {categorias.map((c) => (
+                        <SelectItem key={c.id} value={String(c.id)}>
+                          {c.nombre}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors.category && (
-                    <p className="text-red-500 text-sm mt-1">{errors.category}</p>
-                  )}
+                  {errors.categoriaId && <p className="text-red-500 text-sm mt-1">{errors.categoriaId}</p>}
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="punto">Punto de encuentro *</Label>
+                <Select value={form.puntoEncuentroId} onValueChange={onSelectPunto}>
+                  <SelectTrigger className={errors.puntoEncuentroId ? "border-red-500" : ""}>
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {puntos.map((p) => (
+                      <SelectItem key={p.id} value={String(p.id)}>
+                        {p.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.puntoEncuentroId && (
+                  <p className="text-red-500 text-sm mt-1">{errors.puntoEncuentroId}</p>
+                )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Images */}
+          {/* Imágenes */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -259,37 +316,30 @@ export function CreateAdPage({ onBack }: CreateAdPageProps) {
               <div className="space-y-4">
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                   <input
+                    id="image-upload"
                     type="file"
                     multiple
                     accept="image/*"
                     onChange={handleImageUpload}
                     className="hidden"
-                    id="image-upload"
                   />
                   <label htmlFor="image-upload" className="cursor-pointer">
                     <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-600">
-                      Haz clic aquí para subir imágenes
-                    </p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Puedes subir múltiples imágenes (máx. 5)
-                    </p>
+                    <p className="text-gray-600">Haz clic aquí para subir imágenes</p>
+                    <p className="text-sm text-gray-500 mt-2">Puedes subir múltiples imágenes (máx. 6)</p>
                   </label>
                 </div>
 
                 {images.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {images.map((image, index) => (
+                    {images.map((src, index) => (
                       <div key={index} className="relative">
-                        <img
-                          src={image}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
+                        <img src={src} alt={`Preview ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
                         <button
                           type="button"
                           onClick={() => removeImage(index)}
                           className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                          aria-label="Eliminar imagen"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -298,85 +348,12 @@ export function CreateAdPage({ onBack }: CreateAdPageProps) {
                   </div>
                 )}
 
-                {errors.images && (
-                  <p className="text-red-500 text-sm">{errors.images}</p>
-                )}
+                {errors.images && <p className="text-red-500 text-sm">{errors.images}</p>}
               </div>
             </CardContent>
           </Card>
 
-          {/* Schedule */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Clock className="h-5 w-5" />
-                <span>Horarios de Disponibilidad *</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-
-              <div>
-                <Label>Horarios de disponibilidad por día *</Label>
-                <div className="mt-4 space-y-4">
-                  {DAYS_OF_WEEK.map((day) => (
-                    <div key={day.key} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium">{day.label}</h4>
-                        <Badge variant="secondary">
-                          {weeklySchedule[day.key].length} horarios
-                        </Badge>
-                      </div>
-                      
-                      <div className="flex space-x-2 mb-3">
-                        <Input
-                          type="time"
-                          placeholder="Agregar horario"
-                          value={newTimeForDay[day.key] || ""}
-                          onChange={(e) => setNewTimeForDay(prev => ({ 
-                            ...prev, 
-                            [day.key]: e.target.value 
-                          }))}
-                        />
-                        <Button 
-                          type="button" 
-                          onClick={() => addTimeForDay(day.key)}
-                          disabled={!newTimeForDay[day.key]}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-
-                      {weeklySchedule[day.key].length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {weeklySchedule[day.key].map((time) => (
-                            <div 
-                              key={time} 
-                              className="flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-full"
-                            >
-                              <span className="text-sm">{time}</span>
-                              <button
-                                type="button"
-                                onClick={() => removeTimeFromDay(day.key, time)}
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {errors.schedule && (
-                  <p className="text-red-500 text-sm mt-1">{errors.schedule}</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Cost Information */}
+          {/* Info de costos */}
           <Card className="bg-yellow-50 border-yellow-200">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-yellow-800">
@@ -385,29 +362,24 @@ export function CreateAdPage({ onBack }: CreateAdPageProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-yellow-700">
-              <p>
-                • Publicar este anuncio costará <strong>5 créditos</strong>
-              </p>
-              <p>
-                • El anuncio estará activo hasta que sea vendido o lo desactives
-              </p>
-              <p>
-                • Puedes renovar el anuncio pagando 3 créditos adicionales
-              </p>
+              <p>• Al publicar se descuentan créditos iguales al <strong>stock</strong> (p. ej. stock 5 ⇒ 5 créditos).</p>
+              <p>• El anuncio queda activo; no es editable. Puedes eliminarlo.</p>
+              {errors.submit && <p className="text-red-600 mt-2">{errors.submit}</p>}
             </CardContent>
           </Card>
 
-          {/* Submit Buttons */}
-          <div className="flex space-x-4">
-            <Button type="button" variant="outline" onClick={onBack} className="flex-1">
+          {/* Botones */}
+          <div className="flex gap-4">
+            <Button type="button" variant="outline" onClick={onBack ? onBack : () => navigate("/catalog")} className="flex-1">
               Cancelar
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="flex-1"
-              style={{ backgroundColor: '#9d0045', color: '#ffffff' }}
+              disabled={submitting}
+              style={{ backgroundColor: "#9d0045", color: "#ffffff" }}
             >
-              Crear Anuncio (5 Créditos)
+              {submitting ? "Creando..." : "Crear Anuncio"}
             </Button>
           </div>
         </form>
