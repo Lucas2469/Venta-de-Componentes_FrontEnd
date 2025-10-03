@@ -30,7 +30,8 @@ export const categoriesAPI = {
       });
       
       console.log("Respuesta del servidor:", response.data);
-      return response.data;
+      // El backend devuelve { message, category }
+      return response.data?.category ?? response.data;
     } catch (error: any) {
       console.error("Error completo al crear categoría:", error);
       
@@ -53,7 +54,8 @@ export const categoriesAPI = {
   update: async (id: string, updatedCategory: any) => {
     try {
       const response = await axios.put(`${API_URL}/categorias/${id}`, updatedCategory);
-      return response.data;
+      // El backend puede devolver el objeto actualizado directamente o envuelto
+      return response.data?.category ?? response.data;
     } catch (error: any) {
       console.error("Error al actualizar categoría:", error);
       if (error.response) {
@@ -74,6 +76,23 @@ export const categoriesAPI = {
         throw new Error(`Error del servidor: ${error.response.data.error || error.response.status}`);
       }
       throw new Error("No se pudo eliminar la categoría");
+    }
+  },
+
+  // Alternar estado (activo/inactivo). Hace GET para leer y luego PUT con el estado invertido
+  toggleStatus: async (id: string) => {
+    try {
+      const detail = await axios.get(`${API_URL}/categorias/${id}`).then(r => r.data);
+      const nextEstado = (detail?.estado === 'activo') ? 'inactivo' : 'activo';
+      const payload = { ...detail, estado: nextEstado };
+      const response = await axios.put(`${API_URL}/categorias/${id}`, payload);
+      return response.data?.category ?? { ...detail, estado: nextEstado };
+    } catch (error: any) {
+      console.error("Error al alternar estado de categoría:", error);
+      if (error.response) {
+        throw new Error(`Error del servidor: ${error.response.data.error || error.response.status}`);
+      }
+      throw new Error("No se pudo alternar el estado de la categoría");
     }
   }
 };

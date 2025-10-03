@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -90,16 +90,19 @@ export function LoginPage({ onNavigateToRegistration, onLoginSuccess }: LoginPag
           </CardHeader>
           
           <CardContent className="p-6">
-            <form onSubmit={handleForgotPassword} className="space-y-4">
+            <form onSubmit={handleForgotPassword} className="space-y-4" method="post" action="#">
               <div className="space-y-2">
                 <Label htmlFor="emailOrUsername">Email or Username</Label>
                 <Input
                   id="emailOrUsername"
+                  name="username"
                   type="text"
+                  autoComplete="username"
                   placeholder="Enter your email or username"
                   value={formData.emailOrUsername}
                   onChange={(e) => handleInputChange("emailOrUsername", e.target.value)}
                   className={errors.emailOrUsername ? "border-red-500" : ""}
+                  required
                 />
                 {errors.emailOrUsername && (
                   <Alert variant="destructive" className="p-2">
@@ -148,16 +151,19 @@ export function LoginPage({ onNavigateToRegistration, onLoginSuccess }: LoginPag
         </CardHeader>
         
         <CardContent className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" method="post" action="#">
             <div className="space-y-2">
               <Label htmlFor="emailOrUsername">Email or Username</Label>
               <Input
                 id="emailOrUsername"
+                name="username"
                 type="text"
+                autoComplete="username"
                 placeholder="Enter your email or username"
                 value={formData.emailOrUsername}
                 onChange={(e) => handleInputChange("emailOrUsername", e.target.value)}
                 className={errors.emailOrUsername ? "border-red-500" : ""}
+                required
               />
               {errors.emailOrUsername && (
                 <Alert variant="destructive" className="p-2">
@@ -171,11 +177,14 @@ export function LoginPage({ onNavigateToRegistration, onLoginSuccess }: LoginPag
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
                 className={errors.password ? "border-red-500" : ""}
+                required
               />
               {errors.password && (
                 <Alert variant="destructive" className="p-2">

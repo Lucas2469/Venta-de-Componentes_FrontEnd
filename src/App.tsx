@@ -10,6 +10,7 @@ import { NewAdminDashboard } from "./components/NewAdminDashboard";
 import { CreateAdPage } from "./components/CreateAdPage";
 import { BuyCreditsPage } from "./components/BuyCreditsPage";
 import { MeetingPointsPage } from "./components/MeetingPointsPage";
+import { MainContent } from "./components/Admin/MainContent";
 import { User } from "./components/types";
 import { mockUsers } from "./components/mockData";
 
@@ -24,7 +25,8 @@ type AppState =
   | "admin-dashboard"
   | "profile"
   | "settings"
-  | "meeting-points";
+  | "meeting-points"
+  | "califications";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<AppState>("catalog");
@@ -40,6 +42,9 @@ export default function App() {
     selectedDate: Date;
     meetingPointId: string;
   } | null>(null);
+
+  // Debug: Log current state
+  console.log("App rendered, currentPage:", currentPage, "currentUser:", currentUser);
 
   // Rest of your component logic (e.g., navigateToLogin, handleLogin, etc.)
   const navigateToLogin = () => setCurrentPage("login");
@@ -92,6 +97,7 @@ export default function App() {
       case 'buy-credits':
       case 'admin-dashboard':
       case 'meeting-points':
+      case 'califications':
         if (!currentUser) {
           navigateToLogin();
         } else {
@@ -160,6 +166,17 @@ export default function App() {
       
       case "meeting-points":
         return <MeetingPointsPage onBack={navigateToCatalog} />;
+      
+      case "califications":
+        return (
+          <div className="min-h-screen bg-gray-50">
+            <div className="flex">
+              <div className="flex-1">
+                <MainContent currentSection="califications" />
+              </div>
+            </div>
+          </div>
+        );
       
       case "profile":
         return (

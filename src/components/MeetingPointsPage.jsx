@@ -25,6 +25,9 @@ export const MeetingPointsPage = ({ onBack }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchAddress, setSearchAddress] = useState('');
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const [mapCenter, setMapCenter] = useState({ lat: -17.3895, lng: -66.1568 });
 
   // Opciones para el dropdown de referencias
   const referenceOptions = [
@@ -87,6 +90,45 @@ export const MeetingPointsPage = ({ onBack }) => {
       coordenadas_lat: position.lat,
       coordenadas_lng: position.lng
     }));
+  };
+
+  const handleSearchAddress = async () => {
+    if (!searchAddress.trim()) return;
+    
+    try {
+      setIsSearchingAddress(true);
+      
+      // Usar Nominatim (OpenStreetMap) para geocoding
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=5&accept-language=es&countrycodes=bo`
+      );
+      
+      const results = await response.json();
+      
+      if (results && results.length > 0) {
+        const firstResult = results[0];
+        const lat = parseFloat(firstResult.lat);
+        const lng = parseFloat(firstResult.lon);
+        const address = firstResult.display_name;
+        
+        setFormData(prev => ({
+          ...prev,
+          direccion: address,
+          coordenadas_lat: lat,
+          coordenadas_lng: lng
+        }));
+        
+        // Actualizar la posición del mapa
+        setMapCenter({ lat, lng });
+      } else {
+        setError("No se encontraron resultados para la dirección ingresada");
+      }
+    } catch (error) {
+      console.error("Error en la búsqueda de dirección:", error);
+      setError("Error al buscar la dirección. Intenta nuevamente.");
+    } finally {
+      setIsSearchingAddress(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -475,6 +517,42 @@ export const MeetingPointsPage = ({ onBack }) => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Buscar Dirección
+                  </label>
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      value={searchAddress}
+                      onChange={(e) => setSearchAddress(e.target.value)}
+                      placeholder="Ej: Av. Arce, La Paz, Bolivia"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      disabled={submitting || isSearchingAddress}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSearchAddress();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSearchAddress}
+                      disabled={submitting || isSearchingAddress || !searchAddress.trim()}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center"
+                    >
+                      {isSearchingAddress ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Search className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Ej: "Calle Comercio, La Paz" o "Plaza Murillo, Bolivia"
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Zona/Referencias
                   </label>
                   <select
@@ -521,6 +599,7 @@ export const MeetingPointsPage = ({ onBack }) => {
                       lat: formData.coordenadas_lat,
                       lng: formData.coordenadas_lng
                     }}
+                    mapCenter={mapCenter}
                     disabled={submitting}
                   />
                   <div className="mt-2 text-xs text-gray-500">

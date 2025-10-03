@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -234,7 +234,7 @@ export function CreateAdPage({ onBack }: CreateAdPageProps) {
                     <SelectContent>
                       {mockCategories.map(category => (
                         <SelectItem key={category.id} value={category.id}>
-                          {category.name}
+                          {category.nombre}
                         </SelectItem>
                       ))}
                     </SelectContent>

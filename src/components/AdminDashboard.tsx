@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -462,10 +462,10 @@ export function AdminDashboard() {
                 <TableBody>
                   {meetingPoints.map((point) => (
                     <TableRow key={point.id}>
-                      <TableCell>{point.name}</TableCell>
-                      <TableCell className="max-w-xs truncate">{point.address}</TableCell>
+                      <TableCell>{point.nombre}</TableCell>
+                      <TableCell className="max-w-xs truncate">{point.direccion}</TableCell>
                       <TableCell>
-                        {point.coordinates.lat.toFixed(4)}, {point.coordinates.lng.toFixed(4)}
+                        {Number(point.coordenadas_lat).toFixed(4)}, {Number(point.coordenadas_lng).toFixed(4)}
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
@@ -535,10 +535,10 @@ export function AdminDashboard() {
                 <TableBody>
                   {categories.map((category) => (
                     <TableRow key={category.id}>
-                      <TableCell>{category.name}</TableCell>
-                      <TableCell className="max-w-xs truncate">{category.description}</TableCell>
+                      <TableCell>{category.nombre}</TableCell>
+                      <TableCell className="max-w-xs truncate">{category.descripcion}</TableCell>
                       <TableCell>
-                        <Badge>{products.filter(p => p.category === category.id).length}</Badge>
+                        <Badge>{(category as any).product_count ?? products.filter(p => p.category === category.id).length}</Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">

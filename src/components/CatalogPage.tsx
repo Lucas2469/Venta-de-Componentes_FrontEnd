@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -113,7 +113,7 @@ export function CatalogPage({ searchQuery, onProductClick, currentUser, onNaviga
             Bs {product.price}
           </div>
           <Badge variant="outline" className="text-xs">
-            {mockCategories.find(c => c.id === product.category)?.name}
+            {mockCategories.find(c => c.id === product.category)?.nombre}
           </Badge>
         </div>
         
@@ -198,7 +198,7 @@ export function CatalogPage({ searchQuery, onProductClick, currentUser, onNaviga
                   <SelectItem value="all">Todas las categorías</SelectItem>
                   {mockCategories.map(category => (
                     <SelectItem key={category.id} value={category.id}>
-                      {category.name}
+                      {category.nombre}
                     </SelectItem>
                   ))}
                 </SelectContent>
