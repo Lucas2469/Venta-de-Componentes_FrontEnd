@@ -94,7 +94,7 @@ export default function App() {
           email: userData.email,
           nombre: userData.nombre,
           apellido: userData.apellido,
-          role: userData.tipo_usuario === 'admin' ? 'admin' : 'user',
+          role: (userData.tipo_usuario === 'admin' ? 'admin' : 'user') as 'admin' | 'user',
           registrationDate: userData.fecha_registro ? userData.fecha_registro.split('T')[0] : '',
           rating: userData.calificacion_promedio || 0,
           totalTransactions: userData.total_intercambios_vendedor || 0,
