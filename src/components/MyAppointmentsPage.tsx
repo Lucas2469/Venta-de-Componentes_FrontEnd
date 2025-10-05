@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Clock, MapPin, User, Phone, Package, DollarSign, Calendar, CheckCircle, AlertCircle, XCircle, Star } from 'lucide-react';
 import { appointmentApi, Appointment } from '../api/Appointment';
 import { ratingApi, CreateRatingRequest } from '../api/Rating';
+import { getRatingsWithAppointmentDetails } from '../api/ratings';
 import { showToast } from './Toast';
 import RatingModal from './RatingModal';
+import RatingDisplay, { RatingSummary } from './RatingDisplay';
 
 interface MyAppointmentsPageProps {
   currentUser: {
-    id: number;
+    id: string | number;
     nombre?: string;
     name?: string;
     tipo_usuario?: string;
@@ -19,6 +21,8 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = ({ currentUser }) 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('');
+  const [expandedAppointment, setExpandedAppointment] = useState<number | null>(null);
+  const [appointmentRatings, setAppointmentRatings] = useState<{[key: number]: any}>({});
 
   // Estados para el modal de calificación
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -47,6 +51,32 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = ({ currentUser }) 
       setAppointments([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función para cargar calificaciones de un agendamiento específico
+  const loadAppointmentRatings = async (appointmentId: number) => {
+    try {
+      const ratingsData = await getRatingsWithAppointmentDetails(appointmentId);
+      setAppointmentRatings(prev => ({
+        ...prev,
+        [appointmentId]: ratingsData
+      }));
+    } catch (error) {
+      console.error('Error loading ratings:', error);
+    }
+  };
+
+  // Función para expandir/contraer detalles de cita
+  const toggleExpanded = async (appointmentId: number) => {
+    if (expandedAppointment === appointmentId) {
+      setExpandedAppointment(null);
+    } else {
+      setExpandedAppointment(appointmentId);
+      // Cargar calificaciones si no están cargadas
+      if (!appointmentRatings[appointmentId]) {
+        await loadAppointmentRatings(appointmentId);
+      }
     }
   };
 
@@ -336,15 +366,77 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = ({ currentUser }) 
                     </div>
                   )}
 
+                  {/* Sección de calificaciones para citas completadas */}
                   {appointment.estado === 'completado' && (
-                    <div className="mt-4 text-center">
-                      <button
-                        onClick={() => handleRateVendor(appointment)}
-                        className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
-                      >
-                        <Star className="h-4 w-4 mr-2" />
-                        Calificar al Vendedor
-                      </button>
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-sm font-medium text-gray-700">Calificaciones</h4>
+                        <button
+                          onClick={() => toggleExpanded(appointment.id)}
+                          className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                        >
+                          {expandedAppointment === appointment.id ? 'Ocultar detalles' : 'Ver detalles'}
+                        </button>
+                      </div>
+
+                      {/* Vista compacta de calificaciones */}
+                      {expandedAppointment === appointment.id && appointmentRatings[appointment.id] && appointmentRatings[appointment.id].calificaciones && Object.keys(appointmentRatings[appointment.id].calificaciones).length > 0 && (
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          {/* Calificación que dí al vendedor */}
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <div className="text-xs text-blue-600 font-medium mb-1">Mi calificación al vendedor</div>
+                            {appointmentRatings[appointment.id].calificaciones?.comprador_a_vendedor ? (
+                              <div className="flex items-center space-x-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`h-4 w-4 ${
+                                      star <= appointmentRatings[appointment.id].calificaciones.comprador_a_vendedor.calificacion
+                                        ? 'text-yellow-400 fill-current'
+                                        : 'text-gray-300'
+                                    }`}
+                                  />
+                                ))}
+                                <span className="text-sm text-gray-600 ml-2">
+                                  {appointmentRatings[appointment.id].calificaciones.comprador_a_vendedor.calificacion}/5
+                                </span>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleRateVendor(appointment)}
+                                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                              >
+                                Calificar vendedor
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Calificación que me dio el vendedor */}
+                          <div className="bg-green-50 p-3 rounded-lg">
+                            <div className="text-xs text-green-600 font-medium mb-1">Calificación del vendedor</div>
+                            {appointmentRatings[appointment.id].calificaciones?.vendedor_a_comprador ? (
+                              <div className="flex items-center space-x-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`h-4 w-4 ${
+                                      star <= appointmentRatings[appointment.id].calificaciones.vendedor_a_comprador.calificacion
+                                        ? 'text-yellow-400 fill-current'
+                                        : 'text-gray-300'
+                                    }`}
+                                  />
+                                ))}
+                                <span className="text-sm text-gray-600 ml-2">
+                                  {appointmentRatings[appointment.id].calificaciones.vendedor_a_comprador.calificacion}/5
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-gray-500">Pendiente</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                     </div>
                   )}
                 </div>

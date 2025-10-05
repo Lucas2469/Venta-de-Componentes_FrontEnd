@@ -12,11 +12,12 @@ export const mockUsers: User[] = [
     rating: 0.0,
     totalTransactions: 0,
     credits: 0,
+    creditos_disponibles: 0,
     isSeller: false,
     isBuyer: false
   },
   {
-    // JUAN CARLOS PÉREZ MAMANI (ID: 2) - VENDEDOR CON 45 CRÉDITOS
+    // JUAN CARLOS PÉREZ MAMANI (ID: 2) - VENDEDOR CON 50 CRÉDITOS
     id: "2",
     username: "juan_tech",
     email: "juan.perez@email.com",
@@ -24,12 +25,13 @@ export const mockUsers: User[] = [
     registrationDate: "2025-09-21",
     rating: 0.0,
     totalTransactions: 0,
-    credits: 45,
+    credits: 50,
+    creditos_disponibles: 50,
     isSeller: true,
     isBuyer: true
   },
   {
-    // MARÍA ELENA LÓPEZ VARGAS (ID: 3) - COMPRADOR CON 0 CRÉDITOS
+    // MARÍA ELENA LÓPEZ VARGAS (ID: 3) - COMPRADOR CON 10 CRÉDITOS (ACTUALIZADO)
     id: "3",
     username: "maria_buyer",
     email: "maria.lopez@email.com",
@@ -37,12 +39,13 @@ export const mockUsers: User[] = [
     registrationDate: "2025-09-21",
     rating: 5.0,
     totalTransactions: 0,
-    credits: 0,
-    isSeller: false,
+    credits: 10,
+    creditos_disponibles: 10,
+    isSeller: true,  // ← Ahora puede vender porque tiene créditos
     isBuyer: true
   },
   {
-    // CARLOS ALBERTO QUISPE CONDORI (ID: 4) - VENDEDOR CON 50 CRÉDITOS
+    // CARLOS ALBERTO QUISPE CONDORI (ID: 4) - VENDEDOR CON 53 CRÉDITOS
     id: "4",
     username: "carlos_seller",
     email: "carlos.quispe@email.com",
@@ -50,7 +53,8 @@ export const mockUsers: User[] = [
     registrationDate: "2025-09-21",
     rating: 5.0,
     totalTransactions: 0,
-    credits: 50,
+    credits: 53,
+    creditos_disponibles: 53,
     isSeller: true,
     isBuyer: true  // ← Corregido: también puede comprar
   }

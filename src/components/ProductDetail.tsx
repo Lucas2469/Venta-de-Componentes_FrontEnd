@@ -7,10 +7,11 @@ import { Loader2 } from 'lucide-react';
 
 interface ProductDetailProps {
     productId: number;
+    currentUser: { id: string | number; role?: string } | null;
     onBack: () => void;
 }
 
-export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack }) => {
+export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, currentUser, onBack }) => {
     const [product, setProduct] = useState<ProductDetailType | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -18,7 +19,16 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack 
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [quantity, setQuantity] = useState(1);
     const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
-    const comprador_id = 4; // Usuario de prueba para AnettG
+    // Calcular ID real del usuario logueado (misma lógica que Header.tsx)
+    const isAdmin = currentUser?.role === "admin";
+    const comprador_id = currentUser?.id ? parseInt(currentUser.id.toString()) : (isAdmin ? 1 : 2);
+
+    // Debug: Verificar los IDs
+    console.log("🔍 DEBUG - ProductDetail:");
+    console.log("currentUser:", currentUser);
+    console.log("currentUser.id:", currentUser?.id);
+    console.log("comprador_id calculado:", comprador_id);
+    console.log("isAdmin:", isAdmin);
 
     useEffect(() => {
         const loadProduct = async () => {
@@ -148,7 +158,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack 
         setShowScheduleModal(true);
     };
 
-    const handleScheduleConfirm = async (fecha: Date, horario: HorarioVendedor, cantidad_solicitada: number, precio_total: number) => {
+    const handleScheduleConfirm = async (fecha: Date, horario: HorarioVendedor, horaExacta: string, cantidad_solicitada: number, precio_total: number) => {
         if (!product) return;
 
         // Validar stock disponible
@@ -164,7 +174,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack 
                 producto_id: product.id,
                 comprador_id: comprador_id,
                 fecha_cita: fecha.toISOString().split('T')[0],
-                hora_cita: horario.hora_inicio,
+                hora_cita: horaExacta,
                 cantidad_solicitada: cantidad_solicitada,
                 precio_total: precio_total
             };
@@ -528,6 +538,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack 
                     }}
                     quantity={quantity}
                     unitPrice={product.precio}
+                    stock={product.stock}
                     onConfirm={handleScheduleConfirm}
                 />
             )}

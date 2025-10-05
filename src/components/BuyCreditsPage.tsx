@@ -5,7 +5,8 @@ import {
   Check,
   Star,
   Zap,
-  FileImage
+  FileImage,
+  RefreshCw
 } from "lucide-react";
 import { SuccessModal } from "./reusables/SuccessModal";
 
@@ -14,14 +15,54 @@ const API_BASE = "http://localhost:5000";
 interface BuyCreditsPageProps {
   onBack: () => void;
   currentUser?: any;
+  onCreditsUpdated?: (newCredits: number) => void;
 }
 
-export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
+export function BuyCreditsPage({ onBack, currentUser, onCreditsUpdated }: BuyCreditsPageProps) {
   const [selectedPackage, setSelectedPackage] = useState<string>("");
   const [proofImage, setProofImage] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [creditPackages, setCreditPackages] = useState<any[]>([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Función para verificar créditos actualizados desde el backend
+  const checkUpdatedCredits = async () => {
+    if (!currentUser?.id) return;
+
+    try {
+      console.log('🔍 Verificando créditos para usuario ID:', currentUser.id);
+      const response = await fetch(`${API_BASE}/api/users/${currentUser.id}`);
+
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log('📊 Respuesta del backend:', responseData);
+
+        // El backend devuelve { success: true, data: { usuario... } }
+        const userData = responseData.data || responseData;
+        console.log('👤 Datos del usuario extraídos:', userData);
+        const newCredits = userData.creditos_disponibles || 0;
+
+        // Solo actualizar si los créditos han cambiado
+        const currentCredits = currentUser?.creditos_disponibles || currentUser?.credits || 0;
+        console.log('💰 Créditos actuales:', currentCredits, '| Nuevos créditos:', newCredits);
+
+        if (newCredits !== currentCredits && onCreditsUpdated) {
+          console.log('✅ Actualizando créditos del usuario');
+          onCreditsUpdated(newCredits);
+        }
+      } else {
+        console.log('❌ Error en respuesta:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Error verificando créditos:', error);
+    }
+  };
+
+  // Verificar créditos cada 5 segundos (solo cuando está en esta página)
+  useEffect(() => {
+    const interval = setInterval(checkUpdatedCredits, 5000);
+    return () => clearInterval(interval);
+  }, [currentUser?.id]);
 
   // Obtener los paquetes de créditos desde el backend
   useEffect(() => {
@@ -81,9 +122,9 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
       if (!file) throw new Error("No se encontró el archivo");
 
       const formData = new FormData();
-      // Hardcodeado: usuario real de la BD (Juan Carlos Pérez Mamani - id: 2)
-      // TODO: En producción, esto debería venir de un sistema de autenticación real
-      formData.append("usuario_id", "2"); // ID real de la base de datos
+      // Usar el ID del usuario logueado
+      const userId = currentUser?.id ? currentUser.id.toString() : "2";
+      formData.append("usuario_id", userId);
       formData.append("pack_creditos_id", selectedPkg.id);
       formData.append("comprobante_pago", file); // ← nada más; el backend deriva todo
 
@@ -128,11 +169,22 @@ export function BuyCreditsPage({ onBack, currentUser }: BuyCreditsPageProps) {
           <div className="text-right">
             <p className="text-sm text-gray-600">Usuario actual:</p>
             <div className="text-sm font-medium text-gray-800">
-              Juan Carlos Pérez Mamani
+              {currentUser?.nombre} {currentUser?.apellido}
             </div>
             <p className="text-sm text-gray-600">Créditos actuales:</p>
-            <div className="text-2xl font-bold text-pink-800">
-              45
+            <div className="flex items-center gap-3">
+              <div className="text-2xl font-bold text-pink-800">
+                {currentUser?.creditos_disponibles || 0}
+              </div>
+              <button
+                type="button"
+                onClick={checkUpdatedCredits}
+                className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors flex items-center gap-1"
+                title="Verificar créditos actualizados"
+              >
+                <RefreshCw className="h-3 w-3" />
+                Actualizar
+              </button>
             </div>
           </div>
         </div>

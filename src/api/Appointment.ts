@@ -194,8 +194,8 @@ class AppointmentApi {
    */
   async confirmAppointment(appointmentId: number, vendedorId: number): Promise<any> {
     try {
-      const response = await fetch(`${API_URL}/confirmacion/agendamiento/${appointmentId}`, {
-        method: 'PUT',
+      const response = await fetch(`${API_URL}/confirmacion/${appointmentId}`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },

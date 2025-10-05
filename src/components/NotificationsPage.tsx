@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Bell,
   Eye,
@@ -13,7 +14,9 @@ import {
   User as UserIcon,
   Package,
   CreditCard,
-  Star
+  Star,
+  Calendar,
+  FileCheck
 } from 'lucide-react';
 import {
   Notification,
@@ -29,6 +32,7 @@ interface NotificationsPageProps {
 }
 
 export function NotificationsPage({ userId, expandNotificationId }: NotificationsPageProps) {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -371,6 +375,41 @@ export function NotificationsPage({ userId, expandNotificationId }: Notification
                               {notification.mensaje}
                             </p>
                           </div>
+
+                          {/* Botón de acción para notificaciones de agendamiento */}
+                          {notification.tipo_notificacion === 'agendamiento' && (
+                            <div className="mt-4 pt-3 border-t border-gray-100">
+                              <button
+                                onClick={() => {
+                                  // Detectar si es notificación para comprador o vendedor
+                                  if (notification.titulo.includes('confirmado') || notification.titulo.includes('rechazada')) {
+                                    navigate('/my-appointments'); // Comprador va a "Mis Citas"
+                                  } else {
+                                    navigate('/vendor-appointments'); // Vendedor va a "Mis Agendamientos"
+                                  }
+                                }}
+                                className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                              >
+                                <Calendar className="h-4 w-4 mr-2" />
+                                {(notification.titulo.includes('confirmado') || notification.titulo.includes('rechazada')) ? 'Ver Mis Citas' : 'Ver Mis Agendamientos'}
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Botón de acción para notificaciones de créditos */}
+                          {notification.tipo_notificacion === 'creditos' && notification.titulo.includes('solicitud') && (
+                            <div className="mt-4 pt-3 border-t border-gray-100">
+                              <button
+                                onClick={() => {
+                                  navigate('/admin-dashboard?section=payment-proofs'); // Navegar directamente a la sección de comprobantes
+                                }}
+                                className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                              >
+                                <FileCheck className="h-4 w-4 mr-2" />
+                                Revisar Comprobantes
+                              </button>
+                            </div>
+                          )}
 
                           {notification.fecha_vista && (
                             <div className="mt-3 pt-3 border-t border-gray-100">

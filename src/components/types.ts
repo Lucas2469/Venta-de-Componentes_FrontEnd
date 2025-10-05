@@ -3,11 +3,14 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  nombre?: string;
+  apellido?: string;
   role: 'user' | 'admin';
   registrationDate: string;
   rating: number;
   totalTransactions: number;
   credits: number;
+  creditos_disponibles?: number;
   isSeller?: boolean;
   isBuyer?: boolean;
   isActive?: boolean;

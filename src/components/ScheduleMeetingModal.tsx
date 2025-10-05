@@ -15,7 +15,7 @@ interface ScheduleMeetingModalProps {
     quantity: number;
     unitPrice: number;
     stock: number; // Nuevo prop para el stock (AnettG)
-    onConfirm: (fecha: Date, horario: HorarioVendedor, cantidad: number, precioTotal: number) => void;
+    onConfirm: (fecha: Date, horario: HorarioVendedor, horaExacta: string, cantidad: number, precioTotal: number) => void;
 }
 
 export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
@@ -32,6 +32,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 }) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedHorario, setSelectedHorario] = useState<HorarioVendedor | null>(null);
+    const [selectedExactTime, setSelectedExactTime] = useState<string>(''); // Nueva state para hora exacta
     const [cantidadSolicitada, setCantidadSolicitada] = useState<number>(quantity); // Estado para la cantidad (AnettG)
     const [errors, setErrors] = useState<string[]>([]);
 
@@ -83,7 +84,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
             const horariosDisponibles = horariosDelDia.filter(horario => {
                 const [endHour, endMinute] = horario.hora_fin.split(':').map(Number);
                 const endTimeInMinutes = endHour * 60 + endMinute;
-                return endTimeInMinutes > (currentTimeInMinutes + 30);
+                return endTimeInMinutes > (currentTimeInMinutes + 5);
             });
 
             return horariosDisponibles.length > 0;
@@ -113,8 +114,8 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
                 const [endHour, endMinute] = horario.hora_fin.split(':').map(Number);
                 const endTimeInMinutes = endHour * 60 + endMinute;
 
-                // Solo mostrar horarios que aún no han terminado (con margen de 30 minutos)
-                return endTimeInMinutes > (currentTimeInMinutes + 30);
+                // Solo mostrar horarios que aún no han terminado (con margen de 5 minutos para pruebas)
+                return endTimeInMinutes > (currentTimeInMinutes + 5);
             });
         }
 
@@ -198,6 +199,52 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
     // Manejar selección de horario
     const handleHorarioSelect = (horario: HorarioVendedor) => {
         setSelectedHorario(horario);
+        setSelectedExactTime(''); // Reset hora exacta cuando cambia el rango
+        setErrors([]);
+    };
+
+    // Generar opciones de horarios específicos dentro del rango seleccionado
+    const generateSpecificTimeOptions = (horario: HorarioVendedor): string[] => {
+        if (!horario) return [];
+
+        const times: string[] = [];
+        const [startHour, startMinute] = horario.hora_inicio.split(':').map(Number);
+        const [endHour, endMinute] = horario.hora_fin.split(':').map(Number);
+
+        // Convertir a minutos para facilitar el cálculo
+        let currentTimeInMinutes = startHour * 60 + startMinute;
+        const endTimeInMinutes = endHour * 60 + endMinute;
+
+        // Si es hoy, considerar la hora actual
+        const isToday = selectedDate?.toDateString() === new Date().toDateString();
+        if (isToday) {
+            const now = new Date();
+            const currentActualTimeInMinutes = now.getHours() * 60 + now.getMinutes() + 5; // Agregar 5 min de margen para pruebas
+            if (currentActualTimeInMinutes > currentTimeInMinutes) {
+                currentTimeInMinutes = currentActualTimeInMinutes;
+                // Redondear al próximo cuarto de hora
+                const remainder = currentTimeInMinutes % 15;
+                if (remainder !== 0) {
+                    currentTimeInMinutes += (15 - remainder);
+                }
+            }
+        }
+
+        // Generar horarios cada 15 minutos
+        while (currentTimeInMinutes < endTimeInMinutes) {
+            const hour = Math.floor(currentTimeInMinutes / 60);
+            const minute = currentTimeInMinutes % 60;
+            const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+            times.push(timeString);
+            currentTimeInMinutes += 15; // Incremento de 15 minutos
+        }
+
+        return times;
+    };
+
+    // Manejar selección de hora exacta
+    const handleExactTimeSelect = (time: string) => {
+        setSelectedExactTime(time);
         setErrors([]);
     };
 
@@ -220,6 +267,10 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
             newErrors.push('Debe seleccionar un horario');
         }
 
+        if (!selectedExactTime) {
+            newErrors.push('Debe seleccionar una hora exacta de encuentro');
+        }
+
         if (selectedDate && !isDateValid(selectedDate)) {
             newErrors.push('La fecha seleccionada no coincide con los horarios del vendedor');
         }
@@ -234,9 +285,9 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 
         setErrors(newErrors);
 
-        if (newErrors.length === 0 && selectedDate && selectedHorario) {
+        if (newErrors.length === 0 && selectedDate && selectedHorario && selectedExactTime) {
             const precioTotal = unitPrice * cantidadSolicitada;
-            onConfirm(selectedDate, selectedHorario, cantidadSolicitada, precioTotal);
+            onConfirm(selectedDate, selectedHorario, selectedExactTime, cantidadSolicitada, precioTotal);
         }
     };
 
@@ -245,6 +296,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
         if (!isOpen) {
             setSelectedDate(null);
             setSelectedHorario(null);
+            setSelectedExactTime(''); // Reset hora exacta
             setCantidadSolicitada(quantity); // Reset cantidad (AnettG)
             setErrors([]);
         }
@@ -465,6 +517,53 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
                                 </p>
                             )}
                         </div>
+
+                        {/* Selector de hora exacta */}
+                        {selectedHorario && (
+                            <div className="mb-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                    Seleccionar hora exacta
+                                </h3>
+                                <div className="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                                    <p className="text-purple-800 text-sm">
+                                        🕐 <strong>Rango disponible:</strong> {selectedHorario.hora_inicio} - {selectedHorario.hora_fin}
+                                    </p>
+                                    <p className="text-purple-700 text-xs mt-1">
+                                        Selecciona la hora exacta para tu encuentro (intervalos de 15 minutos)
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-4 gap-2 max-h-32 overflow-y-auto">
+                                    {generateSpecificTimeOptions(selectedHorario).map((timeOption) => (
+                                        <button
+                                            key={timeOption}
+                                            onClick={() => handleExactTimeSelect(timeOption)}
+                                            className={`
+                                                p-2 rounded-lg border text-sm font-medium transition-colors
+                                                ${selectedExactTime === timeOption
+                                                    ? 'border-purple-600 bg-purple-100 text-purple-900'
+                                                    : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-700'
+                                                }
+                                            `}
+                                        >
+                                            {timeOption}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {generateSpecificTimeOptions(selectedHorario).length === 0 && (
+                                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                                        <p className="text-orange-800 text-sm font-medium">
+                                            ⏰ No hay horarios específicos disponibles
+                                        </p>
+                                        <p className="text-orange-700 text-xs mt-1">
+                                            El horario seleccionado ya ha pasado o es muy próximo
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Cantidad solicitada (AnettG) */}
                         <div className="mb-6">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">

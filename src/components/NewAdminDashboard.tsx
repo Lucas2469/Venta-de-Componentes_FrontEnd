@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Users,
   MapPin,
@@ -22,8 +23,24 @@ import { MeetingPointsSection } from './Admin/sections/MeetingPointsSection';
 import { CategoriesSection } from './Admin/sections/CategoriesSection';
 
 export function NewAdminDashboard() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState("statistics");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Leer parámetro de sección de la URL al cargar
+  useEffect(() => {
+    const section = searchParams.get('section');
+    const validSections = ["statistics", "users", "payment-proofs", "meeting-points", "credit-packages", "ads-management", "categories", "ratings"];
+    if (section && validSections.includes(section)) {
+      setActiveSection(section);
+    }
+  }, [searchParams]);
+
+  // Función para cambiar sección y actualizar URL
+  const handleSectionChange = (sectionId: string) => {
+    setActiveSection(sectionId);
+    setSearchParams({ section: sectionId });
+  };
 
   // Estadísticas básicas (datos simulados simples)
   const statistics = {
@@ -285,7 +302,7 @@ export function NewAdminDashboard() {
           {menuItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveSection(item.id)}
+              onClick={() => handleSectionChange(item.id)}
               className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition-all duration-200 transform hover:scale-105 ${
                 activeSection === item.id
                   ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg'

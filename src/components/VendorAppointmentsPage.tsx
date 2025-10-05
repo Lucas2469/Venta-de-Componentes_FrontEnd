@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Clock, MapPin, User, Phone, Package, DollarSign, Calendar, CheckCircle, X, Star, AlertTriangle } from 'lucide-react';
 import { appointmentApi, Appointment } from '../api/Appointment';
 import { ratingApi, CreateRatingRequest } from '../api/Rating';
+import { getRatingsWithAppointmentDetails } from '../api/ratings';
 import { showToast } from './Toast';
 import RatingModal from './RatingModal';
+import RatingDisplay, { RatingSummary } from './RatingDisplay';
 
 interface VendorAppointmentsPageProps {
   currentUser: {
-    id: number;
+    id: string | number;
     nombre?: string;
     name?: string;
     tipo_usuario?: string;
@@ -24,6 +26,8 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ current
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
+  const [expandedAppointment, setExpandedAppointment] = useState<number | null>(null);
+  const [appointmentRatings, setAppointmentRatings] = useState<{[key: number]: any}>({});
 
   // Estados para el modal de calificación
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -55,6 +59,32 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ current
     }
   };
 
+  // Función para cargar calificaciones de un agendamiento específico
+  const loadAppointmentRatings = async (appointmentId: number) => {
+    try {
+      const ratingsData = await getRatingsWithAppointmentDetails(appointmentId);
+      setAppointmentRatings(prev => ({
+        ...prev,
+        [appointmentId]: ratingsData
+      }));
+    } catch (error) {
+      console.error('Error loading ratings:', error);
+    }
+  };
+
+  // Función para expandir/contraer detalles de cita
+  const toggleExpanded = async (appointmentId: number) => {
+    if (expandedAppointment === appointmentId) {
+      setExpandedAppointment(null);
+    } else {
+      setExpandedAppointment(appointmentId);
+      // Cargar calificaciones si no están cargadas
+      if (!appointmentRatings[appointmentId]) {
+        await loadAppointmentRatings(appointmentId);
+      }
+    }
+  };
+
   const handleConfirm = async (appointmentId: number) => {
     const appointment = appointments.find(app => app.id === appointmentId);
     if (!appointment) return;
@@ -64,11 +94,7 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ current
       const response = await appointmentApi.confirmAppointment(appointmentId, parseInt(currentUser.id.toString()));
 
       if (response.success) {
-        showToast('success', '¡Agendamiento confirmado!', 'La cita ha sido confirmada. Ahora debes calificar al comprador.');
-
-        // Abrir modal de calificación obligatoria
-        setRatingAppointment(appointment);
-        setShowRatingModal(true);
+        showToast('success', '¡Agendamiento confirmado!', 'La cita ha sido confirmada. Podrás calificar al comprador después del encuentro.');
 
         await fetchAppointments();
       } else {
@@ -114,6 +140,12 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ current
     }
   };
 
+  // Función para abrir modal de calificación al comprador
+  const handleRateBuyer = (appointment: Appointment) => {
+    setRatingAppointment(appointment);
+    setShowRatingModal(true);
+  };
+
   const handleRatingSubmit = async (rating: number, comment: string) => {
     if (!ratingAppointment) return;
 
@@ -137,19 +169,6 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ current
     }
   };
 
-  const markAsCompleted = async (appointmentId: number) => {
-    try {
-      const response = await appointmentApi.markAsCompleted(appointmentId);
-      if (response.success) {
-        showToast('success', 'Transacción completada', 'El encuentro se ha marcado como completado');
-        await fetchAppointments();
-      } else {
-        showToast('error', 'Error', response.error || 'No se pudo completar la transacción');
-      }
-    } catch (error: any) {
-      showToast('error', 'Error', error.message || 'No se pudo completar la transacción');
-    }
-  };
 
   const getStatusBadge = (estado: string) => {
     const statusConfig = {
@@ -366,15 +385,12 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ current
                 {appointment.estado === 'confirmado' && (
                   <div className="space-y-3">
                     <div className="text-center text-green-600 font-medium">
-                      ✓ Cita confirmada - Esperando encuentro
+                      ✓ Cita confirmada
                     </div>
-                    <button
-                      onClick={() => markAsCompleted(appointment.id)}
-                      className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
-                    >
-                      <Star className="h-4 w-4 mr-2" />
-                      Marcar como Completado
-                    </button>
+                    <div className="text-center text-blue-600 text-sm">
+                      <Star className="h-4 w-4 mx-auto mb-1" />
+                      Se completará automáticamente cuando ambos se califiquen
+                    </div>
                   </div>
                 )}
 
@@ -389,9 +405,77 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ current
                   </div>
                 )}
 
+                {/* Sección de calificaciones para citas completadas */}
                 {appointment.estado === 'completado' && (
-                  <div className="text-center text-blue-600 font-medium">
-                    ★ Transacción completada
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-medium text-gray-700">Calificaciones</h4>
+                      <button
+                        onClick={() => toggleExpanded(appointment.id)}
+                        className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                      >
+                        {expandedAppointment === appointment.id ? 'Ocultar detalles' : 'Ver detalles'}
+                      </button>
+                    </div>
+
+                    {/* Vista compacta de calificaciones */}
+                    {expandedAppointment === appointment.id && appointmentRatings[appointment.id] && appointmentRatings[appointment.id].calificaciones && Object.keys(appointmentRatings[appointment.id].calificaciones).length > 0 && (
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        {/* Calificación que dí al comprador */}
+                        <div className="bg-green-50 p-3 rounded-lg">
+                          <div className="text-xs text-green-600 font-medium mb-1">Mi calificación al comprador</div>
+                          {appointmentRatings[appointment.id].calificaciones?.vendedor_a_comprador ? (
+                            <div className="flex items-center space-x-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`h-4 w-4 ${
+                                    star <= appointmentRatings[appointment.id].calificaciones.vendedor_a_comprador.calificacion
+                                      ? 'text-yellow-400 fill-current'
+                                      : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                              <span className="text-sm text-gray-600 ml-2">
+                                {appointmentRatings[appointment.id].calificaciones.vendedor_a_comprador.calificacion}/5
+                              </span>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleRateBuyer(appointment)}
+                              className="text-sm text-green-600 hover:text-green-700 font-medium"
+                            >
+                              Calificar comprador
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Calificación que me dio el comprador */}
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <div className="text-xs text-blue-600 font-medium mb-1">Calificación del comprador</div>
+                          {appointmentRatings[appointment.id].calificaciones?.comprador_a_vendedor ? (
+                            <div className="flex items-center space-x-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`h-4 w-4 ${
+                                    star <= appointmentRatings[appointment.id].calificaciones.comprador_a_vendedor.calificacion
+                                      ? 'text-yellow-400 fill-current'
+                                      : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                              <span className="text-sm text-gray-600 ml-2">
+                                {appointmentRatings[appointment.id].calificaciones.comprador_a_vendedor.calificacion}/5
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-gray-500">Pendiente</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                   </div>
                 )}
               </div>

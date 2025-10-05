@@ -19,10 +19,14 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
   const [unreadCount, setUnreadCount] = useState(0);
 
   const isAdmin = currentUser?.role === "admin";
-  const userCredits = currentUser?.credits ?? 0;
+  const userCredits = currentUser?.creditos_disponibles || currentUser?.credits || 0;
 
   // Usar el ID real del usuario logueado
   const userId = currentUser?.id ? parseInt(currentUser.id.toString()) : (isAdmin ? 1 : 2);
+
+  // Lógica dinámica para determinar capacidades del usuario basada en créditos
+  const canSell = !isAdmin && userCredits > 0; // Puede vender si tiene créditos
+  const canBuy = !isAdmin; // Cualquier usuario no-admin puede comprar
 
   // Cargar contador de notificaciones no leídas
   useEffect(() => {
@@ -146,8 +150,8 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
                               Mi Perfil
                             </button>
 
-                            {/* Mis horarios - Solo para vendedores */}
-                            {!isAdmin && currentUser?.isSeller && (
+                            {/* Mis horarios - Solo para usuarios que pueden vender (tienen créditos) */}
+                            {canSell && (
                               <button
                                 onClick={() => {
                                   onNavigate("mis-horarios");
@@ -161,7 +165,7 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
                             )}
 
                             {/* Agendamientos del vendedor - Solo para usuarios que pueden vender */}
-                            {!isAdmin && currentUser?.isSeller && (
+                            {canSell && (
                               <button
                                 onClick={() => {
                                   onNavigate("vendor-appointments");
@@ -175,7 +179,7 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
                             )}
 
                             {/* Mis citas - Solo para usuarios que pueden comprar */}
-                            {!isAdmin && currentUser?.isBuyer && (
+                            {canBuy && (
                               <button
                                 onClick={() => {
                                   onNavigate("my-appointments");
@@ -213,17 +217,19 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
                               </>
                             )}
 
-                            {/* Admin Dashboard - Temporarily visible to all users */}
-                            <button
-                              onClick={() => {
-                                onNavigate("admin-dashboard");
-                                setIsMenuOpen(false);
-                              }}
-                              className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
-                            >
-                              <BarChart3 className="h-4 w-4 mr-3" />
-                              Panel Administrativo {!isAdmin && "(Demo)"}
-                            </button>
+                            {/* Admin Dashboard - Solo para administradores */}
+                            {isAdmin && (
+                              <button
+                                onClick={() => {
+                                  onNavigate("admin-dashboard");
+                                  setIsMenuOpen(false);
+                                }}
+                                className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
+                              >
+                                <BarChart3 className="h-4 w-4 mr-3" />
+                                Panel Administrativo
+                              </button>
+                            )}
 
                             <button
                               onClick={() => {

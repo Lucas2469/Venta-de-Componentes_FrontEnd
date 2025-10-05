@@ -15,6 +15,7 @@ import { NotificationsPage } from "./components/NotificationsPage";
 import VendorAppointmentsPage from "./components/VendorAppointmentsPage";
 import MyAppointmentsPage from "./components/MyAppointmentsPage";
 import MisHorariosPage from "./components/MisHorariosPage";
+import RatingSystemManager from "./components/RatingSystemManager";
 import { User } from "./components/types";
 import { mockUsers } from "./components/mockData";
 
@@ -32,7 +33,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; currentUser: User | 
 };
 
 // Wrapper para ProductDetail que extrae el ID de la URL
-const ProductDetailWrapper: React.FC = () => {
+const ProductDetailWrapper: React.FC<{ currentUser: User | null }> = ({ currentUser }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -41,6 +42,7 @@ const ProductDetailWrapper: React.FC = () => {
   return (
     <ProductDetail
       productId={productId}
+      currentUser={currentUser}
       onBack={() => navigate('/catalog')}
     />
   );
@@ -52,9 +54,9 @@ const NotificationsPageWrapper: React.FC<{ currentUser: User | null }> = ({ curr
   const searchParams = new URLSearchParams(location.search);
   const expandId = searchParams.get('expand');
 
-  // Para demo: usar userId = 2 (Juan Carlos) para vendedor/comprador, 1 para admin
+  // Usar ID real del usuario logueado (misma lógica que Header.tsx y ProductDetail.tsx)
   const isAdmin = currentUser?.role === "admin";
-  const userId = isAdmin ? 1 : 2;
+  const userId = currentUser?.id ? parseInt(currentUser.id.toString()) : (isAdmin ? 1 : 2);
 
   return (
     <NotificationsPage
@@ -77,23 +79,55 @@ export default function App() {
     meetingPointId: string;
   } | null>(null);
 
-  const handleLogin = (credentials?: { username: string; password: string }) => {
+  // Función para obtener datos reales del usuario desde la base de datos
+  const fetchUserDataFromDB = async (userId: string) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/users/${userId}`);
+      if (response.ok) {
+        const responseData = await response.json();
+        const userData = responseData.data || responseData;
+
+        // Mapear datos de la BD al formato del frontend
+        return {
+          id: userData.id.toString(),
+          username: userData.email.split('@')[0], // Usar parte del email como username
+          email: userData.email,
+          nombre: userData.nombre,
+          apellido: userData.apellido,
+          role: userData.tipo_usuario === 'admin' ? 'admin' : 'user',
+          registrationDate: userData.fecha_registro ? userData.fecha_registro.split('T')[0] : '',
+          rating: userData.calificacion_promedio || 0,
+          totalTransactions: userData.total_intercambios_vendedor || 0,
+          credits: userData.creditos_disponibles || 0,
+          creditos_disponibles: userData.creditos_disponibles || 0,
+          isSeller: userData.creditos_disponibles > 0,
+          isBuyer: userData.tipo_usuario !== 'admin'
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      return null;
+    }
+  };
+
+  const handleLogin = async (credentials?: { username: string; password: string }) => {
     if (credentials) {
       // Check for admin credentials
       if (credentials.username === "Admin" && credentials.password === "123456") {
-        const adminUser = mockUsers.find(u => u.username === "Admin" && u.role === "admin");
-        if (adminUser) {
-          setCurrentUser(adminUser);
-          navigate('/admin-dashboard'); // Navegación directa a admin dashboard (de Anett)
+        const realUserData = await fetchUserDataFromDB("1");
+        if (realUserData) {
+          setCurrentUser(realUserData);
+          navigate('/admin-dashboard');
           return;
         }
       }
 
       // Check for mock user credentials (hardcoded for testing)
       const mockCredentials = [
-        { username: "juan_tech", password: "123" },
-        { username: "maria_buyer", password: "123" },
-        { username: "carlos_seller", password: "123" }
+        { username: "juan_tech", password: "123", userId: "2" },
+        { username: "maria_buyer", password: "123", userId: "3" },
+        { username: "carlos_seller", password: "123", userId: "4" }
       ];
 
       const validCredential = mockCredentials.find(
@@ -101,9 +135,10 @@ export default function App() {
       );
 
       if (validCredential) {
-        const user = mockUsers.find(u => u.username === validCredential.username);
-        if (user) {
-          setCurrentUser(user);
+        // Obtener datos reales de la base de datos
+        const realUserData = await fetchUserDataFromDB(validCredential.userId);
+        if (realUserData) {
+          setCurrentUser(realUserData);
           navigate('/catalog');
           return;
         }
@@ -122,6 +157,17 @@ export default function App() {
   const logout = () => {
     setCurrentUser(null);
     navigate('/catalog');
+  };
+
+  // Función para actualizar créditos del usuario actual
+  const updateUserCredits = (newCredits: number) => {
+    if (currentUser) {
+      setCurrentUser({
+        ...currentUser,
+        credits: newCredits,
+        creditos_disponibles: newCredits
+      });
+    }
   };
 
   const handleNavigate = (page: string) => {
@@ -185,7 +231,7 @@ export default function App() {
           <Route path="/admin-prueba" element={<NewAdminDashboard />} />
 
           {/* Rutas de productos */}
-          <Route path="/product/:id" element={<ProductDetailWrapper />} />
+          <Route path="/product/:id" element={<ProductDetailWrapper currentUser={currentUser} />} />
           <Route path="/products-catalog" element={
             <div className="container mx-auto px-4 py-8">
               <ProductCatalog searchQuery={searchQuery} onProductClick={(id) => navigate(`/product/${id}`)} />
@@ -197,7 +243,7 @@ export default function App() {
           {/* Rutas protegidas - Usando CreateAdPage funcional de Anett */}
           <Route path="/create-ad" element={
             <ProtectedRoute currentUser={currentUser}>
-              <CreateAdPage onBack={() => navigate('/catalog')} />
+              <CreateAdPage onBack={() => navigate('/catalog')} currentUser={currentUser} />
             </ProtectedRoute>
           } />
 
@@ -206,7 +252,8 @@ export default function App() {
             <ProtectedRoute currentUser={currentUser}>
               <BuyCreditsPage
                 onBack={() => navigate('/catalog')}
-                currentUser={currentUser}
+                currentUser={currentUser!}
+                onCreditsUpdated={updateUserCredits}
               />
             </ProtectedRoute>
           } />
@@ -214,21 +261,21 @@ export default function App() {
           {/* Notifications Page - Para usuarios logueados */}
           <Route path="/notifications" element={
             <ProtectedRoute currentUser={currentUser}>
-              <NotificationsPageWrapper currentUser={currentUser} />
+              <NotificationsPageWrapper currentUser={currentUser!} />
             </ProtectedRoute>
           } />
 
           {/* Vendor Appointments Page - Para vendedores */}
           <Route path="/vendor-appointments" element={
             <ProtectedRoute currentUser={currentUser}>
-              <VendorAppointmentsPage currentUser={currentUser} />
+              <VendorAppointmentsPage currentUser={currentUser!} />
             </ProtectedRoute>
           } />
 
           {/* My Appointments Page - Para compradores */}
           <Route path="/my-appointments" element={
             <ProtectedRoute currentUser={currentUser}>
-              <MyAppointmentsPage currentUser={currentUser} />
+              <MyAppointmentsPage currentUser={currentUser!} />
             </ProtectedRoute>
           } />
 
@@ -236,7 +283,7 @@ export default function App() {
           <Route path="/mis-horarios" element={
             <ProtectedRoute currentUser={currentUser}>
               <MisHorariosPage
-                currentUser={currentUser}
+                currentUser={currentUser!}
                 onNavigate={handleNavigate}
               />
             </ProtectedRoute>
@@ -286,6 +333,14 @@ export default function App() {
       </main>
 
       <Footer onNavigate={handleNavigate} />
+
+      {/* Sistema de calificaciones automático */}
+      {currentUser && (
+        <RatingSystemManager
+          currentUserId={currentUser?.id ? parseInt(currentUser.id.toString()) : (currentUser.role === "admin" ? 1 : 2)}
+          isActive={true}
+        />
+      )}
     </div>
   );
 }

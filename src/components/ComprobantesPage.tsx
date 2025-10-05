@@ -10,6 +10,7 @@ import {
 } from "../api/creditosApi";
 
 import { listPacks, type CreditPack } from "../api/packsApi";
+import { ConfirmationModal } from './reusables/ConfirmationModal';
 
 type EstadoFiltro = "all" | "aprobada" | "pendiente" | "rechazada";
 
@@ -31,6 +32,10 @@ export default function ComprobantesPage() {
   const [selectedPurchaseId, setSelectedPurchaseId] = useState<number | null>(null);
   const [showPurchaseRejectModal, setShowPurchaseRejectModal] = useState(false);
   const [purchaseRejectionReason, setPurchaseRejectionReason] = useState("");
+
+  // Estados para modal de confirmación de aprobación
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [selectedApprovalTx, setSelectedApprovalTx] = useState<CreditTx | null>(null);
 
   useEffect(() => {
     refreshTransactions();
@@ -72,11 +77,27 @@ export default function ComprobantesPage() {
   const estadoLabel = (estado: CreditTx["estado"]) =>
     estado === "aprobada" ? "Aprobado" : estado === "pendiente" ? "Pendiente" : "Rechazado";
 
-  const handleApprovePurchase = async (id: number) => {
+  // Función para abrir modal de confirmación de aprobación
+  const openApprovalModal = (tx: CreditTx) => {
+    setSelectedApprovalTx(tx);
+    setShowApprovalModal(true);
+  };
+
+  // Función para cerrar modal de confirmación de aprobación
+  const closeApprovalModal = () => {
+    setShowApprovalModal(false);
+    setSelectedApprovalTx(null);
+  };
+
+  // Función para aprobar después de confirmación
+  const handleConfirmApproval = async () => {
+    if (!selectedApprovalTx) return;
+
     try {
       setLoadingAction(true);
-      await aprobarTransaccion(id);
+      await aprobarTransaccion(selectedApprovalTx.id);
       await refreshTransactions();
+      closeApprovalModal();
     } catch (e) {
       console.error(e);
       alert("No se pudo aprobar la transacción.");
@@ -295,7 +316,7 @@ export default function ComprobantesPage() {
                       {tx.estado !== "aprobada" && (
                         <button
                           className="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
-                          onClick={() => handleApprovePurchase(tx.id)}
+                          onClick={() => openApprovalModal(tx)}
                           disabled={loadingAction}
                           title="Aprobar"
                         >
@@ -401,6 +422,26 @@ export default function ComprobantesPage() {
           </div>
         </div>
       )}
+
+      {/* Modal de confirmación para aprobar créditos */}
+      <ConfirmationModal
+        isOpen={showApprovalModal}
+        onClose={closeApprovalModal}
+        onConfirm={handleConfirmApproval}
+        title="Aprobar Compra de Créditos"
+        message={selectedApprovalTx ?
+          `¿Estás seguro de que quieres aprobar la compra de ${selectedApprovalTx.cantidad_creditos} créditos por ${formatMonto(selectedApprovalTx.monto_pagado)} del usuario ${selectedApprovalTx.usuario}?
+
+⚠️ IMPORTANTE: Esta acción es irreversible y acreditará los créditos inmediatamente a la cuenta del usuario.
+
+Asegúrate de haber verificado correctamente el comprobante de pago antes de confirmar.`
+          : ""
+        }
+        confirmText="Sí, Aprobar Créditos"
+        cancelText="Cancelar"
+        type="warning"
+        loading={loadingAction}
+      />
     </div>
   );
 }

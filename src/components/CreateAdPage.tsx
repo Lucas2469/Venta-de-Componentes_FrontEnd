@@ -9,16 +9,15 @@ import {
 } from "../api/AdProduct";
 import { Upload, X, FileText, Image as ImageIcon, DollarSign, ChevronDown } from "lucide-react";
 
-const VENDEDOR_ID = 2; // TODO: reemplazar por el id real del usuario logueado (JWT)
-
 type Categoria = { id: number; nombre: string };
 type Punto = { id: number; nombre: string };
 
 interface CreateAdPageProps {
   onBack?: () => void; // opcional para evitar errores en rutas
+  currentUser?: any; // usuario logueado
 }
 
-export default function CreateAdPage({ onBack }: CreateAdPageProps) {
+export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -51,10 +50,11 @@ export default function CreateAdPage({ onBack }: CreateAdPageProps) {
     let mounted = true;
     (async () => {
       try {
+        const vendedorId = currentUser?.id ? parseInt(currentUser.id.toString()) : 2;
         const [cats, pts, creds] = await Promise.all([
           getCategorias(),           // [{id, nombre}]
           getPuntosEncuentro(),      // [{id, nombre}]
-          getCreditosDisponibles(VENDEDOR_ID), // { creditos_disponibles: number }
+          getCreditosDisponibles(vendedorId), // { creditos_disponibles: number }
         ]);
 
         if (!mounted) return;
@@ -75,7 +75,7 @@ export default function CreateAdPage({ onBack }: CreateAdPageProps) {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [currentUser?.id]);
 
   // Redirigir a compra de créditos si no alcanza (evitar bucle si ya estás ahí)
   useEffect(() => {
@@ -148,9 +148,10 @@ export default function CreateAdPage({ onBack }: CreateAdPageProps) {
 
     try {
       setSubmitting(true);
+      const vendedorId = currentUser?.id ? parseInt(currentUser.id.toString()) : 2;
       const res = await createAdProduct(
         {
-          vendedorId: VENDEDOR_ID,
+          vendedorId: vendedorId,
           categoriaId: Number(form.categoriaId),
           puntoEncuentroId: Number(form.puntoEncuentroId),
           nombre: form.nombre,
