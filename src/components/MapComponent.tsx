@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -30,11 +30,31 @@ interface MapComponentProps {
   disabled?: boolean;
 }
 
+// Componente para actualizar el centro del mapa dinámicamente
+interface MapUpdaterProps {
+  center: LatLng;
+  zoom?: number;
+}
+
+const MapUpdater: React.FC<MapUpdaterProps> = ({ center, zoom = 15 }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    // Centrar y hacer zoom a la nueva ubicación
+    map.setView([center.lat, center.lng], zoom, {
+      animate: true,
+      duration: 1 // Animación suave de 1 segundo
+    });
+  }, [center.lat, center.lng, zoom, map]);
+
+  return null;
+};
+
 const LocationMarker: React.FC<LocationMarkerProps> = ({ initialPosition, onLocationSelect, disabled }) => {
   const [position, setPosition] = useState<LatLng>(initialPosition);
   const markerRef = useRef<L.Marker | null>(null);
 
-  
+
   useEffect(() => {
     setPosition(initialPosition);
   }, [initialPosition]);
@@ -108,6 +128,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect, initialPo
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        {/* Componente para actualizar centro/zoom dinámicamente */}
+        {mapCenter && <MapUpdater center={safeMapCenter} zoom={15} />}
         <LocationMarker
           initialPosition={safeInitialPosition}
           onLocationSelect={onLocationSelect}

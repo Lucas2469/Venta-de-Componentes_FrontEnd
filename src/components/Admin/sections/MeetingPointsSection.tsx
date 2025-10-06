@@ -127,24 +127,32 @@ export function MeetingPointsSection() {
   };
 
   const openEditMeetingPointDialog = (meetingPoint: MeetingPoint) => {
+    const lat = Number(meetingPoint.coordenadas_lat) || -16.5000;
+    const lng = Number(meetingPoint.coordenadas_lng) || -68.1193;
     setEditingMeetingPoint({
       ...meetingPoint,
-      coordenadas_lat: Number(meetingPoint.coordenadas_lat) || -16.5000,
-      coordenadas_lng: Number(meetingPoint.coordenadas_lng) || -68.1193
+      coordenadas_lat: lat,
+      coordenadas_lng: lng
     });
+    setMapCenter({ lat, lng });
+    setSearchAddress("");
     setShowMeetingPointDialog(true);
   };
 
   const openCreateMeetingPointDialog = () => {
     setEditingMeetingPoint(null);
+    const lat = -17.3935419;
+    const lng = -66.1570139;
     setNewMeetingPoint({
       nombre: "",
       direccion: "",
       referencias: "",
-      coordenadas_lat: -17.3935419,
-      coordenadas_lng: -66.1570139,
+      coordenadas_lat: lat,
+      coordenadas_lng: lng,
       estado: "activo"
     });
+    setMapCenter({ lat, lng });
+    setSearchAddress("");
     setShowMeetingPointDialog(true);
   };
 
@@ -508,10 +516,7 @@ export function MeetingPointsSection() {
                     lat: editingMeetingPoint ? Number(editingMeetingPoint.coordenadas_lat) : Number(newMeetingPoint.coordenadas_lat),
                     lng: editingMeetingPoint ? Number(editingMeetingPoint.coordenadas_lng) : Number(newMeetingPoint.coordenadas_lng)
                   }}
-                  mapCenter={editingMeetingPoint ? {
-                    lat: Number(editingMeetingPoint.coordenadas_lat),
-                    lng: Number(editingMeetingPoint.coordenadas_lng)
-                  } : null}
+                  mapCenter={mapCenter}
                   disabled={isMeetingPointsLoading}
                 />
                 <div className="text-xs text-gray-500 mt-1">

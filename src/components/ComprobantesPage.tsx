@@ -313,7 +313,7 @@ export default function ComprobantesPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatFecha(tx.fecha_compra)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex gap-2">
-                      {tx.estado !== "aprobada" && (
+                      {tx.estado === "pendiente" && (
                         <button
                           className="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                           onClick={() => openApprovalModal(tx)}
