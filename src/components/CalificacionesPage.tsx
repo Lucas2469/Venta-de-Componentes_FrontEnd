@@ -48,6 +48,14 @@ export default function CalificacionesPage() {
     }
   };
 
+  // Función para normalizar texto: quita acentos y convierte a minúsculas
+  const normalizeText = (text: string): string => {
+    return text
+      .toLowerCase()
+      .normalize("NFD") // Descompone caracteres con acento
+      .replace(/[\u0300-\u036f]/g, ""); // Elimina los diacríticos (acentos)
+  };
+
   const renderStars = (rating: number | null) => {
     if (!rating) return <span className="text-gray-400 text-sm">Sin calificar</span>;
 
@@ -67,12 +75,13 @@ export default function CalificacionesPage() {
   const uniqueMeetingPoints = [...new Set(calificaciones.map(c => c.puntoEncuentro))];
 
   const filteredCalificaciones = calificaciones.filter(calif => {
+    const normalizedQuery = normalizeText(searchQuery);
     const searchMatch = searchQuery === "" ||
-      calif.vendedor.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      calif.vendedor.apellido.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      calif.comprador.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      calif.comprador.apellido.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      calif.puntoEncuentro.toLowerCase().includes(searchQuery.toLowerCase());
+      normalizeText(calif.vendedor.nombre).includes(normalizedQuery) ||
+      normalizeText(calif.vendedor.apellido).includes(normalizedQuery) ||
+      normalizeText(calif.comprador.nombre).includes(normalizedQuery) ||
+      normalizeText(calif.comprador.apellido).includes(normalizedQuery) ||
+      normalizeText(calif.puntoEncuentro).includes(normalizedQuery);
 
     const ratingMatch = minRating === 0 ||
       (calif.califCompradorAVendedor && calif.califCompradorAVendedor >= minRating) ||
