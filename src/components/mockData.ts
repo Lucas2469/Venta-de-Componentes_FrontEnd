@@ -216,38 +216,83 @@ export const mockProducts: Product[] = [
 export const mockMeetingPoints: MeetingPoint[] = [
   {
     id: "1",
-    name: "Plaza San Francisco",
-    address: "Plaza San Francisco, La Paz, Bolivia",
-    coordinates: { lat: -16.4955, lng: -68.1336 },
-    zone: "centro"
+    nombre: "Plaza San Francisco",
+    direccion: "Plaza San Francisco, La Paz, Bolivia",
+    referencias: "Centro",
+    coordenadas_lat: -16.4955,
+    coordenadas_lng: -68.1336,
+    estado: "activo",
+    fecha_creacion: "2024-01-01"
   },
   {
     id: "2", 
-    name: "Centro Comercial Megacenter",
-    address: "Av. Rafael Pabón, La Paz, Bolivia",
-    coordinates: { lat: -16.5000, lng: -68.1193 },
-    zone: "sur"
+    nombre: "Centro Comercial Megacenter",
+    direccion: "Av. Rafael Pabón, La Paz, Bolivia",
+    referencias: "Zona Sur",
+    coordenadas_lat: -16.5,
+    coordenadas_lng: -68.1193,
+    estado: "activo",
+    fecha_creacion: "2024-01-02"
   },
   {
     id: "3",
-    name: "Universidad Mayor de San Andrés",
-    address: "Av. Villazón 1995, La Paz, Bolivia", 
-    coordinates: { lat: -16.5402, lng: -68.0731 },
-    zone: "centro"
+    nombre: "Universidad Mayor de San Andrés",
+    direccion: "Av. Villazón 1995, La Paz, Bolivia", 
+    referencias: "Centro",
+    coordenadas_lat: -16.5402,
+    coordenadas_lng: -68.0731,
+    estado: "activo",
+    fecha_creacion: "2024-01-03"
   },
   {
     id: "4",
-    name: "Plaza Abaroa",
-    address: "Plaza Abaroa, La Paz, Bolivia",
-    coordinates: { lat: -16.4890, lng: -68.1450 },
-    zone: "norte"
+    nombre: "Plaza Abaroa",
+    direccion: "Plaza Abaroa, La Paz, Bolivia",
+    referencias: "Zona Norte",
+    coordenadas_lat: -16.489,
+    coordenadas_lng: -68.145,
+    estado: "activo",
+    fecha_creacion: "2024-01-04"
   },
   {
     id: "5",
-    name: "Mercado Rodríguez",
-    address: "Mercado Rodríguez, La Paz, Bolivia",
-    coordinates: { lat: -16.4980, lng: -68.1380 },
-    zone: "centro"
+    nombre: "Mercado Rodríguez",
+    direccion: "Mercado Rodríguez, La Paz, Bolivia",
+    referencias: "Centro",
+    coordenadas_lat: -16.498,
+    coordenadas_lng: -68.138,
+    estado: "activo",
+    fecha_creacion: "2024-01-05"
+  },
+  {
+    id: "6",
+    nombre: "Plaza del Estudiante",
+    direccion: "Av. 6 de Agosto, La Paz, Bolivia",
+    referencias: "Zona Este",
+    coordenadas_lat: -16.5200,
+    coordenadas_lng: -68.1000,
+    estado: "activo",
+    fecha_creacion: "2024-01-06"
+  },
+  {
+    id: "7",
+    nombre: "Mall Ventura",
+    direccion: "Av. Costanera, La Paz, Bolivia",
+    referencias: "Zona Oeste",
+    coordenadas_lat: -16.4800,
+    coordenadas_lng: -68.1200,
+    estado: "inactivo",
+    fecha_creacion: "2024-01-07"
+  },
+  {
+    id: "8",
+    nombre: "Plaza España",
+    direccion: "Av. Mariscal Santa Cruz, La Paz, Bolivia",
+    referencias: "Zona Sur",
+    coordenadas_lat: -16.5100,
+    coordenadas_lng: -68.1100,
+    estado: "activo",
+    fecha_creacion: "2024-01-08"
   }
 ];
 
@@ -279,15 +324,15 @@ export const mockCreditPackages: CreditPackage[] = [
 ];
 
 export const mockCategories: Category[] = [
-  { id: "sensores", name: "Sensores", description: "Sensores de temperatura, humedad, proximidad, etc." },
-  { id: "actuadores", name: "Actuadores", description: "Motores, servos, actuadores lineales" },
-  { id: "microcontroladores", name: "Microcontroladores", description: "Arduino, ESP32, PIC, STM32" },
-  { id: "componentes-pasivos", name: "Componentes Pasivos", description: "Resistencias, condensadores, bobinas" },
-  { id: "semiconductores", name: "Semiconductores", description: "Diodos, transistores, integrados" },
-  { id: "fuentes", name: "Fuentes de Alimentación", description: "Reguladores, transformadores, baterías" },
-  { id: "conectores", name: "Conectores y Cables", description: "Cables, conectores, terminales" },
-  { id: "herramientas", name: "Herramientas", description: "Multímetros, soldadores, protoboards" },
-  { id: "modulos", name: "Módulos", description: "WiFi, Bluetooth, GPS, comunicación" }
+  { id: "sensores", nombre: "Sensores", descripcion: "Sensores de temperatura, humedad, proximidad, etc.", estado: "activo" },
+  { id: "actuadores", nombre: "Actuadores", descripcion: "Motores, servos, actuadores lineales", estado: "activo" },
+  { id: "microcontroladores", nombre: "Microcontroladores", descripcion: "Arduino, ESP32, PIC, STM32", estado: "activo" },
+  { id: "componentes-pasivos", nombre: "Componentes Pasivos", descripcion: "Resistencias, condensadores, bobinas", estado: "activo" },
+  { id: "semiconductores", nombre: "Semiconductores", descripcion: "Diodos, transistores, integrados", estado: "activo" },
+  { id: "fuentes", nombre: "Fuentes de Alimentación", descripcion: "Reguladores, transformadores, baterías", estado: "activo" },
+  { id: "conectores", nombre: "Conectores y Cables", descripcion: "Cables, conectores, terminales", estado: "activo" },
+  { id: "herramientas", nombre: "Herramientas", descripcion: "Multímetros, soldadores, protoboards", estado: "activo" },
+  { id: "modulos", nombre: "Módulos", descripcion: "WiFi, Bluetooth, GPS, comunicación", estado: "activo" }
 ];
 
 export const mockRatings: Rating[] = [

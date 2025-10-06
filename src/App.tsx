@@ -4,7 +4,6 @@ import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { LoginPage } from "./components/LoginPage";
 import { RegistrationPage } from "./components/RegistrationPage";
-import { ContactConfirmationModal } from "./components/ContactConfirmationModal";
 import { NewAdminDashboard } from "./components/NewAdminDashboard";
 import CreateAdPage from "./components/CreateAdPage";
 import { ProductCatalog } from "./components/ProductCatalog";
@@ -71,13 +70,6 @@ export default function App() {
   const location = useLocation();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showContactModal, setShowContactModal] = useState(false);
-  const [contactDetails, setContactDetails] = useState<{
-    productTitle: string;
-    sellerName: string;
-    selectedDate: Date;
-    meetingPointId: string;
-  } | null>(null);
 
   // Función para obtener datos reales del usuario desde la base de datos
   const fetchUserDataFromDB = async (userId: string) => {
@@ -176,25 +168,6 @@ export default function App() {
 
   const handleProductClick = (productId: number) => {
     navigate(`/product/${productId}`);
-  };
-
-  const handleContactSeller = (productId: string, date: Date, time: string) => {
-    if (!currentUser) {
-      navigate('/login');
-      return;
-    }
-
-    // Find product details for the modal
-    const product = mockUsers.find(p => p.id === productId);
-    if (product) {
-      setContactDetails({
-        productTitle: "iPhone 15 Pro Max 256GB", // This would come from the product
-        sellerName: "juan_tech", // This would come from the product
-        selectedDate: date,
-        meetingPointId: "1" // Use first available meeting point
-      });
-      setShowContactModal(true);
-    }
   };
 
   return (

@@ -91,7 +91,9 @@ export function LoginPage({ onNavigateToRegistration, onLoginSuccess }: LoginPag
                 <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-700">Email or Username</label>
                 <input
                   id="emailOrUsername"
+                  name="username"
                   type="text"
+                  autoComplete="username"
                   placeholder="Enter your email or username"
                   value={formData.emailOrUsername}
                   onChange={(e) => handleInputChange("emailOrUsername", e.target.value)}
@@ -150,7 +152,9 @@ export function LoginPage({ onNavigateToRegistration, onLoginSuccess }: LoginPag
               <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-700">Email or Username</label>
               <input
                 id="emailOrUsername"
+                name="username"
                 type="text"
+                autoComplete="username"
                 placeholder="Enter your email or username"
                 value={formData.emailOrUsername}
                 onChange={(e) => handleInputChange("emailOrUsername", e.target.value)}
@@ -170,7 +174,9 @@ export function LoginPage({ onNavigateToRegistration, onLoginSuccess }: LoginPag
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
               <input
                 id="password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}

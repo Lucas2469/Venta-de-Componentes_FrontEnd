@@ -225,7 +225,7 @@ const MisHorariosPage: React.FC<MisHorariosPageProps> = ({ currentUser, onNaviga
       setItems(data);
     } catch (e: any) {
       setError(e.message ?? "Error cargando horarios");
-      showToast(e.message ?? "Error cargando horarios", "error");
+      showToast("error", e.message ?? "Error cargando horarios");
     } finally {
       setLoading(false);
     }
@@ -262,7 +262,7 @@ const MisHorariosPage: React.FC<MisHorariosPageProps> = ({ currentUser, onNaviga
       // Mostrar el primer error encontrado
       const firstError = errors.general || errors.dia_semana || errors.hora_inicio || errors.hora_fin;
       if (firstError) {
-        showToast(firstError, "error");
+        showToast("error", firstError);
       }
       return;
     }
@@ -281,19 +281,19 @@ const MisHorariosPage: React.FC<MisHorariosPageProps> = ({ currentUser, onNaviga
       if (editingId) {
         await updateSchedule(editingId, payload);
         setItems((prev) => prev.map((it) => (it.id === editingId ? { ...it, ...payload } : it)));
-        showToast("Horario actualizado exitosamente", "success");
+        showToast("success", "Horario actualizado exitosamente");
       } else {
         await createSchedule(payload);
         // Recargar para obtener el ID real del backend
         await loadSchedules();
-        showToast("Horario creado exitosamente", "success");
+        showToast("success", "Horario creado exitosamente");
       }
 
       resetForm();
     } catch (e: any) {
       const errorMsg = e.message ?? "Error guardando horario";
       setError(errorMsg);
-      showToast(errorMsg, "error");
+      showToast("error", errorMsg);
     } finally {
       setSaving(false);
     }
@@ -313,14 +313,14 @@ const MisHorariosPage: React.FC<MisHorariosPageProps> = ({ currentUser, onNaviga
       setItems((prev) => prev.filter((it) => it.id !== scheduleToDelete.id));
       setShowDeleteModal(false);
       setScheduleToDelete(null);
-      showToast("Horario eliminado exitosamente", "success");
+      showToast("success", "Horario eliminado exitosamente");
 
       if (editingId === scheduleToDelete.id) {
         resetForm();
       }
     } catch (e: any) {
       const errorMsg = e.message ?? "Error eliminando horario";
-      showToast(errorMsg, "error");
+      showToast("error", errorMsg);
     } finally {
       setDeleting(false);
     }

@@ -25,7 +25,7 @@ export function ContactConfirmationModal({
   
   // Generate WhatsApp message
   const generateWhatsAppMessage = () => {
-    const message = `Hola ${sellerName}, estoy interesado en tu producto "${productTitle}". Me gustaría encontrarnos el ${selectedDate.toLocaleDateString('es-ES')} en ${meetingPoint?.name}. ¿Está disponible?`;
+    const message = `Hola ${sellerName}, estoy interesado en tu producto "${productTitle}". Me gustaría encontrarnos el ${selectedDate.toLocaleDateString('es-ES')} en ${meetingPoint?.nombre}. ¿Está disponible?`;
     return encodeURIComponent(message);
   };
 
@@ -84,8 +84,8 @@ export function ContactConfirmationModal({
               <div className="flex items-start space-x-2">
                 <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
                 <div>
-                  <div className="font-medium">{meetingPoint?.name}</div>
-                  <div className="text-gray-600">{meetingPoint?.address}</div>
+                  <div className="font-medium">{meetingPoint?.nombre}</div>
+                  <div className="text-gray-600">{meetingPoint?.direccion}</div>
                 </div>
               </div>
             </div>

@@ -47,12 +47,12 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ current
       if (response.success) {
         setAppointments(response.data);
       } else {
-        showToast(response.error || 'Error al cargar agendamientos', 'error');
+        showToast('error', response.error || 'Error al cargar agendamientos');
         setAppointments([]);
       }
     } catch (error) {
       console.error('Error al cargar agendamientos:', error);
-      showToast('Error al cargar agendamientos', 'error');
+      showToast('error', 'Error al cargar agendamientos');
       setAppointments([]);
     } finally {
       setLoading(false);

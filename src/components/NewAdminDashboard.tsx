@@ -21,6 +21,7 @@ import CreditPackagesPage from "./CreditPackagesPage";
 import AdminStatisticsPage from "./AdminStatisticsPage";
 import { MeetingPointsSection } from './Admin/sections/MeetingPointsSection';
 import { CategoriesSection } from './Admin/sections/CategoriesSection';
+import CalificacionesPage from "./CalificacionesPage";
 
 export function NewAdminDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -259,7 +260,7 @@ export function NewAdminDashboard() {
       case "categories":
         return <CategoriesSection />;
       case "ratings":
-        return <div className="text-center py-20 text-gray-500">🚧 Sección en desarrollo</div>;
+        return <CalificacionesPage />;
       default:
         return <AdminStatisticsPage />;
     }
