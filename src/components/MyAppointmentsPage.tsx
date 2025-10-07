@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Clock, MapPin, User, Phone, Package, DollarSign, Calendar, CheckCircle, AlertCircle, XCircle, Star } from 'lucide-react';
 import { appointmentApi, Appointment } from '../api/Appointment';
 import { ratingApi, CreateRatingRequest } from '../api/Rating';
@@ -18,6 +19,7 @@ interface MyAppointmentsPageProps {
 }
 
 const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = ({ currentUser }) => {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('');
@@ -280,7 +282,12 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = ({ currentUser }) 
                   <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center mb-2">
                       <User className="h-4 w-4 text-gray-600 mr-2" />
-                      <span className="font-medium text-gray-900">{appointment.vendedor_nombre}</span>
+                      <button
+                        onClick={() => navigate(`/user/${appointment.vendedor_id}`)}
+                        className="font-medium text-gray-900 hover:text-pink-600 hover:underline transition-colors"
+                      >
+                        {appointment.vendedor_nombre}
+                      </button>
                     </div>
                     {appointment.vendedor_telefono && (
                       <div className="flex items-center">

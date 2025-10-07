@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { productsApi, ProductDetail as ProductDetailType, HorarioVendedor } from '../api/productsApi';
 import { getImageUrl } from '../api/api';
 import { ScheduleMeetingModal } from './ScheduleMeetingModal';
 import { appointmentApi, CreateAppointmentRequest } from '../api/Appointment';
 import { Loader2 } from 'lucide-react';
+import { useToast } from './Toast';
 
 interface ProductDetailProps {
     productId: number;
@@ -12,6 +14,7 @@ interface ProductDetailProps {
 }
 
 export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, currentUser, onBack }) => {
+    const navigate = useNavigate();
     const [product, setProduct] = useState<ProductDetailType | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -19,9 +22,16 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, current
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [quantity, setQuantity] = useState(1);
     const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
+
+    // Toast hook para notificaciones
+    const { showToast, ToastComponent } = useToast();
+
     // Calcular ID real del usuario logueado (misma lógica que Header.tsx)
     const isAdmin = currentUser?.role === "admin";
     const comprador_id = currentUser?.id ? parseInt(currentUser.id.toString()) : (isAdmin ? 1 : 2);
+
+    // Verificar si el usuario actual es el vendedor del producto
+    const isOwnProduct = product && currentUser && parseInt(currentUser.id.toString()) === product.vendedor_id;
 
     // Debug: Verificar los IDs
     console.log("🔍 DEBUG - ProductDetail:");
@@ -29,6 +39,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, current
     console.log("currentUser.id:", currentUser?.id);
     console.log("comprador_id calculado:", comprador_id);
     console.log("isAdmin:", isAdmin);
+    console.log("product.vendedor_id:", product?.vendedor_id);
+    console.log("isOwnProduct:", isOwnProduct);
 
     useEffect(() => {
         const loadProduct = async () => {
@@ -161,9 +173,20 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, current
     const handleScheduleConfirm = async (fecha: Date, horario: HorarioVendedor, horaExacta: string, cantidad_solicitada: number, precio_total: number) => {
         if (!product) return;
 
+        // Validación crítica: No permitir agendar tu propio producto
+        if (isOwnProduct) {
+            showToast('error', 'No puedes agendar tu propio producto', 'No puedes comprarte a ti mismo');
+            setShowScheduleModal(false);
+            return;
+        }
+
         // Validar stock disponible
         if (cantidad_solicitada > product.stock) {
-            alert(`Stock insuficiente. Solo hay ${product.stock} unidad${product.stock !== 1 ? 'es' : ''} disponible${product.stock !== 1 ? 's' : ''}.`);
+            showToast(
+                'error',
+                'Stock insuficiente',
+                `Solo hay ${product.stock} unidad${product.stock !== 1 ? 'es' : ''} disponible${product.stock !== 1 ? 's' : ''}.`
+            );
             return;
         }
 
@@ -181,12 +204,20 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, current
 
             const response = await appointmentApi.createAppointment(appointmentData);
 
-            alert(`Encuentro agendado exitosamente para ${fecha.toLocaleDateString('es-ES')} de ${horario.hora_inicio} a ${horario.hora_fin}.\nCantidad: ${cantidad_solicitada} unidad${cantidad_solicitada !== 1 ? 'es' : ''}\nTotal: ${formatPrice(precio_total)}`);
+            showToast(
+                'success',
+                '¡Encuentro agendado exitosamente! 🎉',
+                `${fecha.toLocaleDateString('es-ES')} de ${horario.hora_inicio} a ${horario.hora_fin} - ${cantidad_solicitada} unidad${cantidad_solicitada !== 1 ? 'es' : ''} - Total: ${formatPrice(precio_total)}`
+            );
 
             setShowScheduleModal(false);
         } catch (error: any) {
             console.error('Error al crear agendamiento:', error);
-            alert(error.response?.data?.message || 'Error al agendar el encuentro. Por favor intenta nuevamente.');
+            showToast(
+                'error',
+                'Error al agendar',
+                error.response?.data?.message || 'Por favor intenta nuevamente.'
+            );
         } finally {
             setIsCreatingAppointment(false);
         }
@@ -386,9 +417,12 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, current
                                                 </span>
                                             </div>
                                             <div className="flex-1">
-                                                <h4 className="font-bold text-gray-900">
+                                                <button
+                                                    onClick={() => navigate(`/user/${product.vendedor_id}`)}
+                                                    className="font-bold text-gray-900 hover:text-pink-600 transition-colors text-left"
+                                                >
                                                     {product.vendedor_nombre} {product.vendedor_apellido}
-                                                </h4>
+                                                </button>
                                                 <div className="flex items-center space-x-4 text-xs">
                                                     <span className="text-gray-600">
                                                         ⭐ {parseFloat(product.vendedor_calificacion).toFixed(1)}
@@ -466,19 +500,31 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, current
 
                             {/* Botón de contactar vendedor COMPACTO pero épico */}
                             <div className="pt-4">
-                                <button
-                                    onClick={handleContactSeller}
-                                    className="group relative w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-bold py-4 px-6 rounded-xl hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 transition-all duration-300 shadow-xl hover:shadow-purple-500/25 transform hover:-translate-y-1 overflow-hidden"
-                                >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                    <div className="relative flex items-center justify-center space-x-2">
-                                        <span className="text-lg">📅</span>
-                                        <span className="text-lg">Contactar al vendedor</span>
+                                {isOwnProduct ? (
+                                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-6 text-center">
+                                        <div className="text-5xl mb-3">📦</div>
+                                        <h3 className="text-xl font-bold text-gray-900 mb-2">Este es tu producto</h3>
+                                        <p className="text-gray-600 text-sm">
+                                            No puedes agendar citas para comprar tus propios productos. Los compradores podrán contactarte para adquirirlo.
+                                        </p>
                                     </div>
-                                </button>
-                                <p className="text-center text-gray-500 mt-2 text-sm">
-                                    🤝 Agenda una cita para ver el producto y realizar la compra
-                                </p>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={handleContactSeller}
+                                            className="group relative w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-bold py-4 px-6 rounded-xl hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 transition-all duration-300 shadow-xl hover:shadow-purple-500/25 transform hover:-translate-y-1 overflow-hidden"
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                            <div className="relative flex items-center justify-center space-x-2">
+                                                <span className="text-lg">📅</span>
+                                                <span className="text-lg">Contactar al vendedor</span>
+                                            </div>
+                                        </button>
+                                        <p className="text-center text-gray-500 mt-2 text-sm">
+                                            🤝 Agenda una cita para ver el producto y realizar la compra
+                                        </p>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -542,6 +588,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, current
                     onConfirm={handleScheduleConfirm}
                 />
             )}
+
+            {/* Toast notifications */}
+            <ToastComponent />
         </div>
     );
 };

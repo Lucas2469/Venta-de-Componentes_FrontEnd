@@ -15,6 +15,12 @@ import VendorAppointmentsPage from "./components/VendorAppointmentsPage";
 import MyAppointmentsPage from "./components/MyAppointmentsPage";
 import MisHorariosPage from "./components/MisHorariosPage";
 import RatingSystemManager from "./components/RatingSystemManager";
+import { SecurityPage } from "./components/SecurityPage";
+import { HelpPage } from "./components/HelpPage";
+import { SellerGuidePage } from "./components/SellerGuidePage";
+import { MyProfilePage } from "./components/MyProfilePage";
+import { PublicProfilePage } from "./components/PublicProfilePage";
+import { MyProductsPage } from "./components/MyProductsPage";
 import { User } from "./components/types";
 import { mockUsers } from "./components/mockData";
 
@@ -43,6 +49,20 @@ const ProductDetailWrapper: React.FC<{ currentUser: User | null }> = ({ currentU
       productId={productId}
       currentUser={currentUser}
       onBack={() => navigate('/catalog')}
+    />
+  );
+};
+
+// Wrapper para PublicProfilePage que extrae el ID de la URL
+const PublicProfileWrapper: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate }) => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  return (
+    <PublicProfilePage
+      userId={id || '0'}
+      onNavigate={onNavigate}
+      onProductClick={(productId) => navigate(`/product/${productId}`)}
     />
   );
 };
@@ -86,10 +106,12 @@ export default function App() {
           email: userData.email,
           nombre: userData.nombre,
           apellido: userData.apellido,
+          telefono: userData.telefono,
           role: (userData.tipo_usuario === 'admin' ? 'admin' : 'user') as 'admin' | 'user',
           registrationDate: userData.fecha_registro ? userData.fecha_registro.split('T')[0] : '',
           rating: userData.calificacion_promedio || 0,
           totalTransactions: userData.total_intercambios_vendedor || 0,
+          total_intercambios_comprador: userData.total_intercambios_comprador || 0,
           credits: userData.creditos_disponibles || 0,
           creditos_disponibles: userData.creditos_disponibles || 0,
           isSeller: userData.creditos_disponibles > 0,
@@ -264,25 +286,32 @@ export default function App() {
 
           {/* Admin Dashboard - Temporarily accessible to all users */}
           <Route path="/admin-dashboard" element={<NewAdminDashboard />} />
+
+          {/* Mi Perfil (privado) */}
           <Route path="/profile" element={
             <ProtectedRoute currentUser={currentUser}>
-              <div className="container mx-auto px-4 py-8">
-                <div className="max-w-2xl mx-auto">
-                  <h1 className="text-3xl font-bold mb-6" style={{ color: '#9d0045' }}>
-                    Mi Perfil
-                  </h1>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-                    <h3 className="text-lg font-medium text-green-800 mb-2">
-                      Función en Desarrollo
-                    </h3>
-                    <p className="text-green-700">
-                      La página de perfil estará disponible próximamente.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <MyProfilePage
+                currentUser={currentUser!}
+                onNavigate={handleNavigate}
+                onUserUpdate={(updatedUser) => setCurrentUser(updatedUser)}
+              />
             </ProtectedRoute>
           } />
+
+          {/* Perfil Público */}
+          <Route path="/user/:id" element={<PublicProfileWrapper onNavigate={handleNavigate} />} />
+
+          {/* Mis Productos */}
+          <Route path="/my-products" element={
+            <ProtectedRoute currentUser={currentUser}>
+              <MyProductsPage
+                currentUser={currentUser!}
+                onNavigate={handleNavigate}
+                onProductClick={(id) => navigate(`/product/${id}`)}
+              />
+            </ProtectedRoute>
+          } />
+
           <Route path="/settings" element={
             <ProtectedRoute currentUser={currentUser}>
               <div className="container mx-auto px-4 py-8">
@@ -302,6 +331,11 @@ export default function App() {
               </div>
             </ProtectedRoute>
           } />
+
+          {/* Páginas informativas del Footer */}
+          <Route path="/security" element={<SecurityPage onNavigate={handleNavigate} />} />
+          <Route path="/help" element={<HelpPage onNavigate={handleNavigate} />} />
+          <Route path="/seller-guide" element={<SellerGuidePage onNavigate={handleNavigate} />} />
         </Routes>
       </main>
 

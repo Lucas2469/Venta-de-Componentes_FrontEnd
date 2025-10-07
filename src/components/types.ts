@@ -5,10 +5,12 @@ export interface User {
   email: string;
   nombre?: string;
   apellido?: string;
+  telefono?: string;
   role: 'user' | 'admin';
   registrationDate: string;
   rating: number;
   totalTransactions: number;
+  total_intercambios_comprador?: number;
   credits: number;
   creditos_disponibles?: number;
   isSeller?: boolean;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Clock, MapPin, User, Phone, Package, DollarSign, Calendar, CheckCircle, X, Star, AlertTriangle } from 'lucide-react';
 import { appointmentApi, Appointment } from '../api/Appointment';
 import { ratingApi, CreateRatingRequest } from '../api/Rating';
@@ -18,6 +19,7 @@ interface VendorAppointmentsPageProps {
 }
 
 const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ currentUser }) => {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('');
@@ -169,7 +171,6 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ current
     }
   };
 
-
   const getStatusBadge = (estado: string) => {
     const statusConfig = {
       agendado: { color: 'bg-yellow-100 text-yellow-800', label: 'Pendiente' },
@@ -296,7 +297,12 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ current
                 <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center mb-2">
                     <User className="h-4 w-4 text-gray-600 mr-2" />
-                    <span className="font-medium text-gray-900">{appointment.comprador_nombre}</span>
+                    <button
+                      onClick={() => navigate(`/user/${appointment.comprador_id}`)}
+                      className="font-medium text-gray-900 hover:text-pink-600 hover:underline transition-colors"
+                    >
+                      {appointment.comprador_nombre}
+                    </button>
                   </div>
                   {appointment.comprador_telefono && (
                     <div className="flex items-center">
