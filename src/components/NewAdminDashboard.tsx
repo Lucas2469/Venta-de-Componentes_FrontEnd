@@ -1,981 +1,367 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { useSearchParams } from "react-router-dom";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table";
-import { Badge } from "../components/ui/badge";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Loader2, Star, BarChart3, Users, Receipt, Package, ShoppingBag, Search, Filter } from "lucide-react";
-import { mockUsers, mockProducts, mockCreditPackages, mockRatings } from "./mockData";
-import { User, Product, CreditPackage, CreditPurchase, Rating } from "./types";
-import { calificationAPI } from '../api/CalificationApi';
-import { usuariosAPI } from '../api/UsuariosApi';
-import { MainContent } from './Admin/MainContent';
+  Users,
+  MapPin,
+  BarChart3,
+  Package,
+  ShoppingBag,
+  Star,
+  Settings,
+  Receipt,
+  ChevronLeft,
+  ChevronRight,
+  Crown
+} from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { UsersList } from './UsersList';
+import { AdsManagement } from './AdsManagement';
+import ComprobantesPage from "./ComprobantesPage";
+import CreditPackagesPage from "./CreditPackagesPage";
+import AdminStatisticsPage from "./AdminStatisticsPage";
+import { MeetingPointsSection } from './Admin/sections/MeetingPointsSection';
+import { CategoriesSection } from './Admin/sections/CategoriesSection';
+import CalificacionesPage from "./CalificacionesPage";
 
 export function NewAdminDashboard() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState("statistics");
-  const [users, setUsers] = useState(mockUsers.map(user => ({ ...user, isActive: true })));
-  const [products, setProducts] = useState(mockProducts.map(product => ({ ...product, status: 'active' as 'active' | 'inactive' | 'sold' | 'pending' | 'rejected' })));
-  const [creditPackages, setCreditPackages] = useState(mockCreditPackages);
-  const [califications, setCalifications] = useState<any[]>([]);
-  const [usuarios, setUsuarios] = useState<any[]>([]);
-  const [isLoadingUsuarios, setIsLoadingUsuarios] = useState(false);
-  
-  const [rejectionReason, setRejectionReason] = useState("");
-  const [showRejectionModal, setShowRejectionModal] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState("");
-  const [selectedPurchaseId, setSelectedPurchaseId] = useState("");
-  const [showUserEditModal, setShowUserEditModal] = useState(false);
-  const [showAdDisableModal, setShowAdDisableModal] = useState(false);
-  const [showPurchaseRejectModal, setShowPurchaseRejectModal] = useState(false);
-  const [disableReason, setDisableReason] = useState("");
-  const [purchaseRejectionReason, setPurchaseRejectionReason] = useState("");
-  const [ratings] = useState(mockRatings);
-  const [selectedZone, setSelectedZone] = useState<string>("todas");
-  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
-  const [isCalificationsLoading, setIsCalificationsLoading] = useState(false);
-  const [showCalificationPage, setShowCalificationPage] = useState(false);
-  
-  // Filtros para calificaciones
-  const [calificationFilters, setCalificationFilters] = useState({
-    search: "",
-    minRating: 0,
-    maxRating: 5,
-    meetingPoint: "all",
-    userSearch: ""
-  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Mock credit purchases data with more samples
-  const [creditPurchases, setCreditPurchases] = useState<CreditPurchase[]>([
-    {
-      id: "1",
-      userId: "1",
-      packageId: "1",
-      amount: 50,
-      proofImageUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
-      status: "pending",
-      createdAt: "2024-12-18"
-    },
-    {
-      id: "2", 
-      userId: "4",
-      packageId: "2",
-      amount: 100,
-      proofImageUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
-      status: "approved",
-      createdAt: "2024-12-17"
-    },
-    {
-      id: "3",
-      userId: "2",
-      packageId: "1",
-      amount: 50,
-      proofImageUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
-      status: "rejected",
-      createdAt: "2024-12-16"
-    },
-    {
-      id: "4",
-      userId: "3",
-      packageId: "3",
-      amount: 200,
-      proofImageUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
-      status: "pending",
-      createdAt: "2024-12-15"
-    }
-  ]);
-
-  // Cargar calificaciones y usuarios al montar el componente
+  // Leer parámetro de sección de la URL al cargar
   useEffect(() => {
-    console.log("🔄 Iniciando carga de calificaciones...");
-    loadCalifications();
-    loadUsuarios();
-  }, []);
-
-  const loadCalifications = async () => {
-    try {
-      setIsCalificationsLoading(true);
-      const response = await fetch('http://localhost:5000/api/calificaciones');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const calificationsData = await response.json();
-      console.log("Calificaciones cargadas:", calificationsData.length, "elementos");
-      setCalifications(calificationsData);
-    } catch (error) {
-      console.error("Error al cargar calificaciones:", error);
-      // Fallback a datos mock si falla la API
-      const mockData = [
-        {
-          vendedor: { id: 1, nombre: "Juan", apellido: "Pérez" },
-          comprador: { id: 2, nombre: "María", apellido: "González" },
-          califCompradorAVendedor: 5,
-          califVendedorAComprador: 4,
-          fechaCita: "2024-12-20",
-          horaCita: "10:30:00",
-          puntoEncuentro: "Plaza 14 de Septiembress",
-          direccionPunto: "IC Norte, E-0817, Avenida América, Queru Queru Central",
-          referenciasPunto: "Centro",
-          comentarioComprador: "Excelente vendedor",
-          comentarioVendedor: "Compradora responsable"
-        },
-        {
-          vendedor: { id: 3, nombre: "Carlos", apellido: "López" },
-          comprador: { id: 4, nombre: "Ana", apellido: "Martínez" },
-          califCompradorAVendedor: 4,
-          califVendedorAComprador: 5,
-          fechaCita: "2024-12-19",
-          horaCita: "14:00:00",
-          puntoEncuentro: "IC NORTE",
-          direccionPunto: "IC Norte, E-0817, Avenida América, Queru Queru Central",
-          referenciasPunto: "Zona Este",
-          comentarioComprador: "Buen producto",
-          comentarioVendedor: "Compradora seria"
-        }
-      ];
-      setCalifications(mockData);
-    } finally {
-      setIsCalificationsLoading(false);
+    const section = searchParams.get('section');
+    const validSections = ["statistics", "users", "payment-proofs", "meeting-points", "credit-packages", "ads-management", "categories", "ratings"];
+    if (section && validSections.includes(section)) {
+      setActiveSection(section);
     }
+  }, [searchParams]);
+
+  // Función para cambiar sección y actualizar URL
+  const handleSectionChange = (sectionId: string) => {
+    setActiveSection(sectionId);
+    setSearchParams({ section: sectionId });
   };
 
-  const loadUsuarios = async () => {
-    try {
-      setIsLoadingUsuarios(true);
-      const usuariosData = await usuariosAPI.getAll();
-      setUsuarios(usuariosData);
-    } catch (error) {
-      console.error("Error al cargar usuarios:", error);
-      // Fallback a datos mock si falla la API
-      const mockUsuarios = [
-        { id: 1, nombre: "Juan", apellido: "Pérez", email: "juan@email.com" },
-        { id: 2, nombre: "María", apellido: "González", email: "maria@email.com" },
-        { id: 3, nombre: "Carlos", apellido: "López", email: "carlos@email.com" },
-        { id: 4, nombre: "Ana", apellido: "Martínez", email: "ana@email.com" },
-        { id: 5, nombre: "Luis", apellido: "García", email: "luis@email.com" },
-        { id: 6, nombre: "Sofia", apellido: "Rodríguez", email: "sofia@email.com" }
-      ];
-      setUsuarios(mockUsuarios);
-    } finally {
-      setIsLoadingUsuarios(false);
-    }
+  // Estadísticas básicas (datos simulados simples)
+  const statistics = {
+    totalUsers: 15,
+    activeUsers: 12,
+    totalSellers: 8,
+    totalBuyers: 7,
+    activeProducts: 24,
+    weeklyAds: 6,
+    totalCategories: 5,
+    totalMeetingPoints: 8
   };
-
-  // Resto de las funciones existentes...
-  const handleRejectProduct = (productId: string) => {
-    setSelectedProductId(productId);
-    setShowRejectionModal(true);
-  };
-
-  const confirmRejectProduct = () => {
-    setProducts(prev => prev.map(p => 
-      p.id === selectedProductId ? { 
-        ...p, 
-        status: 'rejected' as const,
-        rejectionReason: rejectionReason
-      } : p
-    ));
-    setShowRejectionModal(false);
-    setRejectionReason("");
-    setSelectedProductId("");
-  };
-
-  const handleApproveProduct = (productId: string) => {
-    setProducts(prev => prev.map(p => 
-      p.id === productId ? { ...p, status: 'active' as const } : p
-    ));
-  };
-
-  // Nuevas funciones para manejo de usuarios
-  const handleToggleUserStatus = (userId: string) => {
-    setSelectedUserId(userId);
-    setShowUserEditModal(true);
-  };
-
-  const confirmToggleUserStatus = () => {
-    setUsers(prev => prev.map(u => 
-      u.id === selectedUserId ? { ...u, isActive: !u.isActive } : u
-    ));
-    setShowUserEditModal(false);
-    setSelectedUserId("");
-  };
-
-  const handleDisableAd = (productId: string) => {
-      setSelectedProductId(productId);
-      setShowAdDisableModal(true);
-  };
-
-  const confirmDisableAd = () => {
-    setProducts(prev => prev.map(p => 
-      p.id === selectedProductId ? { 
-        ...p, 
-        status: 'inactive' as const,
-        disableReason: disableReason
-      } : p
-    ));
-    setShowAdDisableModal(false);
-    setDisableReason("");
-    setSelectedProductId("");
-  };
-
-  const handleRejectPurchase = (purchaseId: string) => {
-    setSelectedPurchaseId(purchaseId);
-    setShowPurchaseRejectModal(true);
-  };
-
-  const confirmRejectPurchase = () => {
-    setCreditPurchases(prev => prev.map(p => 
-      p.id === selectedPurchaseId ? { 
-        ...p, 
-        status: 'rejected' as const,
-        rejectionReason: purchaseRejectionReason
-      } : p
-    ));
-    setShowPurchaseRejectModal(false);
-    setPurchaseRejectionReason("");
-    setSelectedPurchaseId("");
-  };
-
-  const handleApprovePurchase = (purchaseId: string) => {
-    setCreditPurchases(prev => prev.map(p => 
-      p.id === purchaseId ? { ...p, status: 'approved' as const } : p
-    ));
-  };
-
-  // Calcular estadísticas
-  const totalUsers = users.length;
-  const activeUsers = users.filter(u => u.isActive).length;
-  const totalProducts = products.length;
-  const activeProducts = products.filter(p => p.status === 'active').length;
-  const pendingProducts = products.filter(p => p.status === 'pending').length;
-  const totalPurchases = creditPurchases.length;
-  const pendingPurchases = creditPurchases.filter(p => p.status === 'pending').length;
-  const approvedPurchases = creditPurchases.filter(p => p.status === 'approved').length;
-  const totalRevenue = creditPurchases
-    .filter(p => p.status === 'approved')
-    .reduce((sum, p) => sum + p.amount, 0);
-
-  // Calcular estadísticas de calificaciones
-  const averageRating = califications.length > 0 
-    ? (califications.reduce((acc, calif) => {
-        const compradorCalif = calif.califCompradorAVendedor || 0;
-        const vendedorCalif = calif.califVendedorAComprador || 0;
-        return acc + compradorCalif + vendedorCalif;
-      }, 0) / (califications.length * 2)).toFixed(1)
-    : '0.0';
 
   const menuItems = [
     { id: "statistics", label: "Estadísticas", icon: BarChart3 },
     { id: "users", label: "Gestión Usuarios", icon: Users },
     { id: "payment-proofs", label: "Comprobantes", icon: Receipt },
+    { id: "meeting-points", label: "Puntos de Encuentro", icon: MapPin },
     { id: "credit-packages", label: "Paquetes Créditos", icon: Package },
     { id: "ads-management", label: "Gestión Anuncios", icon: ShoppingBag },
-    { id: "califications", label: "Calificaciones", icon: Star }
+    { id: "categories", label: "Categorías", icon: Settings },
+    { id: "ratings", label: "Calificaciones", icon: Star }
   ];
 
-  const renderStatistics = () => (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-            <div className="text-2xl font-bold">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground">
-              {activeUsers} activos
-            </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Productos</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-            <div className="text-2xl font-bold">{totalProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              {activeProducts} activos, {pendingProducts} pendientes
-            </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Compras de Créditos</CardTitle>
-            <Receipt className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-            <div className="text-2xl font-bold">{totalPurchases}</div>
-            <p className="text-xs text-muted-foreground">
-              {pendingPurchases} pendientes, {approvedPurchases} aprobadas
-            </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-            <div className="text-2xl font-bold">${totalRevenue}</div>
-            <p className="text-xs text-muted-foreground">
-              De compras aprobadas
-            </p>
-            </CardContent>
-          </Card>
+  const renderStatistics = () => {
+    // Datos simples para gráficos
+    const paymentStatusData = [
+      { name: 'Pendientes', value: 3, color: '#fbbf24' },
+      { name: 'Aprobadas', value: 7, color: '#10b981' },
+      { name: 'Rechazadas', value: 2, color: '#ef4444' }
+    ];
+
+    const userRegistrationData = [
+      { month: 'Oct', users: 12 },
+      { month: 'Nov', users: 18 },
+      { month: 'Dic', users: 24 }
+    ];
+
+    return (
+      <div className="space-y-8">
+        {/* Título de la sección */}
+        <div className="text-center">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+            📊 Panel de Estadísticas
+          </h2>
+          <p className="text-gray-600">Resumen completo del sistema ElectroMarket</p>
         </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-            <CardTitle>Calificaciones Promedio</CardTitle>
-            </CardHeader>
-            <CardContent>
-            <div className="text-3xl font-bold text-center">{averageRating}/5</div>
-            <p className="text-center text-sm text-muted-foreground mt-2">
-              Basado en {califications.length} calificaciones
-            </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-            <CardTitle>Calificaciones Recientes</CardTitle>
-            </CardHeader>
-            <CardContent>
-            <div className="text-3xl font-bold text-center">{califications.length}</div>
-            <p className="text-center text-sm text-muted-foreground mt-2">
-              Calificaciones registradas
-            </p>
-            </CardContent>
-          </Card>
+        {/* Cards de estadísticas principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full filter blur-xl"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{statistics.totalUsers}</span>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-1">Usuarios Totales</h3>
+              <p className="text-xs text-gray-500">Usuarios registrados</p>
+            </div>
+          </div>
+
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full filter blur-xl"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{statistics.activeUsers}</span>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-1">Usuarios Activos</h3>
+              <p className="text-xs text-gray-500">Usuarios no admin</p>
+            </div>
+          </div>
+
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-orange-400/10 to-red-400/10 rounded-full filter blur-xl"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <ShoppingBag className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{statistics.activeProducts}</span>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-1">Productos Activos</h3>
+              <p className="text-xs text-gray-500">Anuncios publicados</p>
+            </div>
+          </div>
+
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full filter blur-xl"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                  <BarChart3 className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{statistics.weeklyAds}</span>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-1">Anuncios Semanales</h3>
+              <p className="text-xs text-gray-500">Últimos 7 días</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Gráficos */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
+            <div className="flex items-center mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center mr-3">
+                <Receipt className="h-5 w-5 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Solicitudes de Pago</h3>
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={paymentStatusData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    dataKey="value"
+                    label={({ name, value }) => `${name}: ${value}`}
+                  >
+                    {paymentStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
+            <div className="flex items-center mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mr-3">
+                <BarChart3 className="h-5 w-5 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Registros por Mes</h3>
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={userRegistrationData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="users" fill="#9d0045" name="Nuevos Usuarios" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Resumen de distribución */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Distribución de Usuarios</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl">
+                <span className="font-medium text-gray-700">Vendedores</span>
+                <span className="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-bold">{statistics.totalSellers}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                <span className="font-medium text-gray-700">Compradores</span>
+                <span className="px-3 py-1 bg-blue-500 text-white rounded-full text-sm font-bold">{statistics.totalBuyers}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
+                <span className="font-medium text-gray-700">Administradores</span>
+                <span className="px-3 py-1 bg-purple-500 text-white rounded-full text-sm font-bold">1</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Resumen del Sistema</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                <span className="font-medium text-gray-700">Categorías</span>
+                <span className="px-3 py-1 bg-green-500 text-white rounded-full text-sm font-bold">{statistics.totalCategories}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl">
+                <span className="font-medium text-gray-700">Puntos de Encuentro</span>
+                <span className="px-3 py-1 bg-red-500 text-white rounded-full text-sm font-bold">{statistics.totalMeetingPoints}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl">
+                <span className="font-medium text-gray-700">Paquetes de Créditos</span>
+                <span className="px-3 py-1 bg-indigo-500 text-white rounded-full text-sm font-bold">3</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
-
-  const renderUsers = () => (
-    <div className="space-y-6">
-    <Card>
-      <CardHeader>
-          <CardTitle>Gestión de Usuarios ({users.length})</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Usuario</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Teléfono</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.username}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>N/A</TableCell>
-                  <TableCell>
-                    <Badge variant={user.isActive ? "default" : "secondary"}>
-                      {user.isActive ? "Activo" : "Inactivo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                        <Button 
-                          variant="outline" 
-                      onClick={() => handleToggleUserStatus(user.id)}
-                        >
-                      {user.isActive ? "Desactivar" : "Activar"}
-                        </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-    </div>
-  );
-
-  const renderCreditPurchases = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Comprobantes de Pago ({creditPurchases.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                <TableHead>Usuario</TableHead>
-                <TableHead>Paquete</TableHead>
-                <TableHead>Monto</TableHead>
-                <TableHead>Comprobante</TableHead>
-                  <TableHead>Estado</TableHead>
-                <TableHead>Fecha</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-              {creditPurchases.map((purchase) => {
-                const user = users.find(u => u.id === purchase.userId);
-                const packageInfo = creditPackages.find(p => p.id === purchase.packageId);
-                return (
-                  <TableRow key={purchase.id}>
-                    <TableCell className="font-medium">{user?.username || 'N/A'}</TableCell>
-                    <TableCell>{packageInfo?.name || 'N/A'}</TableCell>
-                    <TableCell>${purchase.amount}</TableCell>
-                    <TableCell>
-                      <img 
-                        src={purchase.proofImageUrl} 
-                        alt="Comprobante" 
-                        className="w-16 h-16 object-cover rounded"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={
-                        purchase.status === 'approved' ? 'default' : 
-                        purchase.status === 'rejected' ? 'destructive' : 
-                        'secondary'
-                      }>
-                        {purchase.status === 'approved' ? 'Aprobado' : 
-                         purchase.status === 'rejected' ? 'Rechazado' : 
-                         'Pendiente'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{purchase.createdAt}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        {purchase.status === 'pending' && (
-                          <>
-                        <Button 
-                          variant="outline" 
-                              onClick={() => handleApprovePurchase(purchase.id)}
-                            >
-                              Aprobar
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                              onClick={() => handleRejectPurchase(purchase.id)}
-                        >
-                              Rechazar
-                        </Button>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              </TableBody>
-            </Table>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  const renderCreditPackages = () => (
-    <div className="space-y-6">
-    <Card>
-        <CardHeader>
-          <CardTitle>Paquetes de Créditos ({creditPackages.length})</CardTitle>
-      </CardHeader>
-      <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {creditPackages.map((pkg) => (
-              <Card key={pkg.id}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{pkg.name}</CardTitle>
-                  <div className="text-2xl font-bold text-primary">${pkg.price}</div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">Paquete de {pkg.credits} créditos</p>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm">Créditos:</span>
-                      <span className="font-medium">{pkg.credits}</span>
-                  </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">Bonificación:</span>
-                      <span className="font-medium">{pkg.bonus}%</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-      </CardContent>
-    </Card>
-    </div>
-  );
-
-  const renderAdsManagement = () => (
-    <div className="space-y-6">
-    <Card>
-      <CardHeader>
-          <CardTitle>Gestión de Anuncios ({products.length})</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Título</TableHead>
-              <TableHead>Vendedor</TableHead>
-              <TableHead>Precio</TableHead>
-              <TableHead>Estado</TableHead>
-                <TableHead>Fecha</TableHead>
-              <TableHead>Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-              {products.map((product) => {
-                const seller = users.find(u => u.id === product.sellerId);
-                return (
-              <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.title}</TableCell>
-                    <TableCell>{seller?.username || 'N/A'}</TableCell>
-                    <TableCell>${product.price}</TableCell>
-                <TableCell>
-                  <Badge variant={
-                    product.status === 'active' ? 'default' :
-                        product.status === 'rejected' ? 'destructive' : 
-                        'secondary'
-                  }>
-                    {product.status === 'active' ? 'Activo' :
-                         product.status === 'rejected' ? 'Rechazado' : 
-                         product.status === 'pending' ? 'Pendiente' : 
-                         product.status === 'sold' ? 'Vendido' : 'Inactivo'}
-                  </Badge>
-                </TableCell>
-                    <TableCell>{product.createdAt}</TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                        {product.status === 'pending' && (
-                          <>
-                    <Button 
-                              variant="outline"
-                              onClick={() => handleApproveProduct(product.id)}
-                            >
-                              Aprobar
-                    </Button>
-                      <Button 
-                              variant="outline"
-                              onClick={() => handleRejectProduct(product.id)}
-                      >
-                              Rechazar
-                      </Button>
-                          </>
-                        )}
-                        {product.status === 'active' && (
-                        <Button 
-                          variant="outline" 
-                            onClick={() => handleDisableAd(product.id)}
-                          >
-                            Desactivar
-                        </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              </TableBody>
-            </Table>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-4 w-4 ${i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-      />
-    ));
   };
 
-  // Función para filtrar calificaciones
-  const getFilteredCalifications = () => {
-    return califications.filter(calif => {
-      const searchMatch = calificationFilters.search === "" || 
-        calif.vendedor?.nombre?.toLowerCase().includes(calificationFilters.search.toLowerCase()) ||
-        calif.comprador?.nombre?.toLowerCase().includes(calificationFilters.search.toLowerCase()) ||
-        calif.puntoEncuentro?.toLowerCase().includes(calificationFilters.search.toLowerCase());
-      
-      const ratingMatch = ((calif.califCompradorAVendedor || 0) >= calificationFilters.minRating && 
-                          (calif.califCompradorAVendedor || 0) <= calificationFilters.maxRating) ||
-                         ((calif.califVendedorAComprador || 0) >= calificationFilters.minRating && 
-                          (calif.califVendedorAComprador || 0) <= calificationFilters.maxRating);
-      
-      const meetingPointMatch = calificationFilters.meetingPoint === "all" || 
-        calif.puntoEncuentro === calificationFilters.meetingPoint;
-
-      const userMatch = calificationFilters.userSearch === "" || 
-        calif.vendedor?.nombre?.toLowerCase().includes(calificationFilters.userSearch.toLowerCase()) ||
-        calif.vendedor?.apellido?.toLowerCase().includes(calificationFilters.userSearch.toLowerCase()) ||
-        calif.comprador?.nombre?.toLowerCase().includes(calificationFilters.userSearch.toLowerCase()) ||
-        calif.comprador?.apellido?.toLowerCase().includes(calificationFilters.userSearch.toLowerCase());
-
-      return searchMatch && ratingMatch && meetingPointMatch && userMatch;
-    });
-  };
-
-  const filteredCalifications = getFilteredCalifications();
-  const uniqueMeetingPoints = [...new Set(califications.map(calif => calif.puntoEncuentro))];
-
-  const renderCalifications = () => {
-    return (
-    <div className="space-y-6">
-      {/* Filtros */}
-      <Card className="border-2 border-blue-200 bg-blue-50">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-blue-800">
-            <Filter className="h-5 w-5" />
-            <span>🔍 Filtros de Búsqueda</span>
-          </CardTitle>
-          <p className="text-sm text-blue-600">Busca calificaciones específicas por usuario, calificación o punto de encuentro</p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div>
-              <Label htmlFor="search">Buscar</Label>
-              <Input
-                id="search"
-                placeholder="Vendedor, comprador o punto de encuentro..."
-                value={calificationFilters.search}
-                onChange={(e) => setCalificationFilters(prev => ({ ...prev, search: e.target.value }))}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="minRating">Calificación Mínima</Label>
-              <Select
-                value={calificationFilters.minRating.toString()}
-                onValueChange={(value) => setCalificationFilters(prev => ({ ...prev, minRating: parseInt(value) }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">Todas</SelectItem>
-                  <SelectItem value="1">1+ Estrellas</SelectItem>
-                  <SelectItem value="2">2+ Estrellas</SelectItem>
-                  <SelectItem value="3">3+ Estrellas</SelectItem>
-                  <SelectItem value="4">4+ Estrellas</SelectItem>
-                  <SelectItem value="5">5 Estrellas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="maxRating">Calificación Máxima</Label>
-              <Select
-                value={calificationFilters.maxRating.toString()}
-                onValueChange={(value) => setCalificationFilters(prev => ({ ...prev, maxRating: parseInt(value) }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">Todas</SelectItem>
-                  <SelectItem value="4">Hasta 4 Estrellas</SelectItem>
-                  <SelectItem value="3">Hasta 3 Estrellas</SelectItem>
-                  <SelectItem value="2">Hasta 2 Estrellas</SelectItem>
-                  <SelectItem value="1">Hasta 1 Estrella</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="meetingPoint">Punto de Encuentro</Label>
-              <Select
-                value={calificationFilters.meetingPoint}
-                onValueChange={(value) => setCalificationFilters(prev => ({ ...prev, meetingPoint: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  {uniqueMeetingPoints.map(point => (
-                    <SelectItem key={point} value={point}>{point}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="userSearch" className="font-semibold text-blue-700">👤 Buscar Usuario</Label>
-              <Input
-                id="userSearch"
-                placeholder="Nombre o apellido del usuario..."
-                value={calificationFilters.userSearch}
-                onChange={(e) => setCalificationFilters(prev => ({ ...prev, userSearch: e.target.value }))}
-                className="border-blue-300 focus:border-blue-500 focus:ring-blue-200"
-              />
-              <p className="text-xs text-blue-600 mt-1">Busca en vendedor y comprador</p>
-            </div>
-          </div>
-          
-          {/* Botones de acción */}
-          <div className="flex justify-between items-center mt-4 pt-4 border-t border-blue-200">
-            <div className="text-sm text-blue-600">
-              {filteredCalifications.length} de {califications.length} calificaciones mostradas
-            </div>
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => setCalificationFilters({
-                  search: "",
-                  minRating: 0,
-                  maxRating: 5,
-                  meetingPoint: "all",
-                  userSearch: ""
-                })}
-                className="text-blue-600 border-blue-300 hover:bg-blue-50"
-              >
-                Limpiar Filtros
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-          <CardHeader>
-            <CardTitle>Calificaciones ({filteredCalifications.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-            {isCalificationsLoading && califications.length === 0 ? (
-              <div className="flex justify-center items-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-            </div>
-            ) : filteredCalifications.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Star className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p>No hay calificaciones que coincidan con los filtros</p>
-            </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredCalifications.map((calif, index) => (
-                  <Card key={index} className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                        <h4 className="font-semibold text-sm text-gray-600 mb-2">Vendedor</h4>
-                        <p className="text-lg">{calif.vendedor?.nombre} {calif.vendedor?.apellido}</p>
-                        <div className="flex items-center mt-1">
-                          <span className="text-sm text-gray-500 mr-2">Calificación:</span>
-                          <div className="flex">
-                            {renderStars(calif.califCompradorAVendedor || 0)}
-            </div>
-            </div>
-                        <p className="text-sm text-gray-600 mt-1">"{calif.comentarioComprador}"</p>
-          </div>
-                      <div>
-                        <h4 className="font-semibold text-sm text-gray-600 mb-2">Comprador</h4>
-                        <p className="text-lg">{calif.comprador?.nombre} {calif.comprador?.apellido}</p>
-                        <div className="flex items-center mt-1">
-                          <span className="text-sm text-gray-500 mr-2">Calificación:</span>
-                          <div className="flex">
-                            {renderStars(calif.califVendedorAComprador || 0)}
-            </div>
-          </div>
-                        <p className="text-sm text-gray-600 mt-1">"{calif.comentarioVendedor}"</p>
-                      </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t">
-                      <div className="space-y-2 text-sm text-gray-500">
-                        <div className="flex justify-between items-center">
-                          <span>📅 {calif.fechaCita} a las {calif.horaCita}</span>
-                          <span>📍 {calif.puntoEncuentro}</span>
-                  </div>
-                        <div className="text-xs">
-                          <p><strong>Dirección:</strong> {calif.direccionPunto}</p>
-                          <p><strong>Referencias:</strong> {calif.referenciasPunto}</p>
-            </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-            </div>
-            )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-  };
-
-  const renderCurrentSection = () => {
+  const renderContent = () => {
     switch (activeSection) {
       case "statistics":
-        return renderStatistics();
+        return <AdminStatisticsPage />;
       case "users":
-        return renderUsers();
+        return <UsersList searchQuery="" onUserClick={(userId) => console.log('Usuario seleccionado:', userId)} />;
       case "payment-proofs":
-        return renderCreditPurchases();
+        return <ComprobantesPage />;
+      case "meeting-points":
+        return <MeetingPointsSection />;
       case "credit-packages":
-        return renderCreditPackages();
+        return <CreditPackagesPage />;
       case "ads-management":
-        return renderAdsManagement();
-      case "califications":
-        return renderCalifications();
+        return <AdsManagement />;
+      case "categories":
+        return <CategoriesSection />;
+      case "ratings":
+        return <CalificacionesPage />;
       default:
-        return renderStatistics();
+        return <AdminStatisticsPage />;
     }
   };
 
-  // Si se debe mostrar la página de calificaciones separada
-  if (showCalificationPage) {
-    return (
-      <MainContent 
-        currentSection="califications"
-        onBack={() => setShowCalificationPage(false)} 
-      />
-    );
-  }
+  const getCurrentIcon = () => {
+    const currentItem = menuItems.find(item => item.id === activeSection);
+    return currentItem ? currentItem.icon : BarChart3;
+  };
+
+  const CurrentIcon = getCurrentIcon();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg">
-          <div className="p-6">
-            <h1 className="text-2xl font-bold" style={{ color: '#9d0045' }}>
-              Admin Dashboard
-          </h1>
-        </div>
-        <nav className="mt-6">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              return (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                  className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-100 ${
-                    activeSection === item.id ? 'bg-gray-100 border-r-2 border-red-600' : ''
-                  }`}
-                >
-                  <Icon className="h-5 w-5 mr-3" />
-                  {item.label}
-              </button>
-              );
-            })}
-        </nav>
-      </div>
+      <div className={`${sidebarCollapsed ? 'w-20' : 'w-72'} bg-white/95 backdrop-blur-sm shadow-2xl border-r border-white/20 transition-all duration-300 ease-in-out`}>
 
-      {/* Main Content */}
-        <div className="flex-1 p-8">
-          {renderCurrentSection()}
-        </div>
-          </div>
-          
-      {/* Modals */}
-      <div>
-        {/* Rejection Modal */}
-        {showRejectionModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg w-96">
-              <h3 className="text-lg font-semibold mb-4">Rechazar Producto</h3>
-              <textarea
-                className="w-full p-3 border rounded mb-4"
-                placeholder="Motivo del rechazo..."
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-              />
-              <div className="flex space-x-3">
-                <Button onClick={confirmRejectProduct} disabled={!rejectionReason.trim()}>
-                  Confirmar Rechazo
-                </Button>
-                <Button variant="outline" onClick={() => setShowRejectionModal(false)}>
-                  Cancelar
-                </Button>
-        </div>
-      </div>
-          </div>
-        )}
-
-      {/* User Edit Modal */}
-        {showUserEditModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg w-96">
-              <h3 className="text-lg font-semibold mb-4">Cambiar Estado de Usuario</h3>
-              <p className="mb-4">
-                ¿Estás seguro de que quieres cambiar el estado de este usuario?
-              </p>
-            <div className="flex space-x-3">
-                <Button onClick={confirmToggleUserStatus}>
-                Confirmar
-              </Button>
-                <Button variant="outline" onClick={() => setShowUserEditModal(false)}>
-                  Cancelar
-              </Button>
-            </div>
-          </div>
-          </div>
-        )}
-
-      {/* Ad Disable Modal */}
-        {showAdDisableModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg w-96">
-              <h3 className="text-lg font-semibold mb-4">Desactivar Anuncio</h3>
-              <textarea
-                className="w-full p-3 border rounded mb-4"
-                placeholder="Motivo de la desactivación..."
-                value={disableReason}
-                onChange={(e) => setDisableReason(e.target.value)}
-              />
-            <div className="flex space-x-3">
-                <Button onClick={confirmDisableAd} disabled={!disableReason.trim()}>
-                  Confirmar Desactivación
-                </Button>
-                <Button variant="outline" onClick={() => setShowAdDisableModal(false)}>
-                Cancelar
-              </Button>
-            </div>
-          </div>
-          </div>
-        )}
-
-        {/* Purchase Reject Modal */}
-        {showPurchaseRejectModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg w-96">
-              <h3 className="text-lg font-semibold mb-4">Rechazar Compra</h3>
-              <textarea
-                className="w-full p-3 border rounded mb-4"
-                placeholder="Motivo del rechazo..."
-                value={purchaseRejectionReason}
-                onChange={(e) => setPurchaseRejectionReason(e.target.value)}
-              />
-            <div className="flex space-x-3">
-                <Button onClick={confirmRejectPurchase} disabled={!purchaseRejectionReason.trim()}>
-                  Confirmar Rechazo
-                </Button>
-                <Button variant="outline" onClick={() => setShowPurchaseRejectModal(false)}>
-                Cancelar
-              </Button>
-            </div>
-          </div>
+        {/* Header del sidebar */}
+        <div className="p-6 border-b border-gray-200/50">
+          <div className="flex items-center justify-between">
+            {!sidebarCollapsed && (
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  ELECTROMARKET
+                </h1>
+                <p className="text-sm text-gray-600 mt-1">Panel Administrativo</p>
               </div>
-        )}
+            )}
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="p-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+            >
+              {sidebarCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Navegación */}
+        <nav className="p-4 space-y-2">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => handleSectionChange(item.id)}
+              className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition-all duration-200 transform hover:scale-105 ${
+                activeSection === item.id
+                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg'
+                  : 'text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 hover:text-purple-700'
+              }`}
+              title={sidebarCollapsed ? item.label : ''}
+            >
+              <item.icon className={`h-5 w-5 ${sidebarCollapsed ? 'mx-auto' : 'mr-3'}`} />
+              {!sidebarCollapsed && (
+                <span className="text-sm font-medium">{item.label}</span>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        {/* Footer del sidebar */}
+        {!sidebarCollapsed && (
+          <div className="absolute bottom-6 left-6 right-6">
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-200/50">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                  <Crown className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Admin Sistema</p>
+                  <p className="text-xs text-gray-600">Acceso completo</p>
+                </div>
+              </div>
+              <div className="text-xs text-gray-500 text-center">
+                v2.0.0 • ElectroMarket
+              </div>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Contenido principal */}
+      <div className="flex-1 overflow-auto">
+        <div className="p-8">
+          <div className="mb-8">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <CurrentIcon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">
+                  {menuItems.find(item => item.id === activeSection)?.label || 'Panel Administrativo'}
+                </h2>
+                <p className="text-gray-600 mt-1">
+                  Gestiona y supervisa todas las operaciones del sistema
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {renderContent()}
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,65 +1,62 @@
 import { User, Product, MeetingPoint, CreditPackage, Category, Rating } from "./types";
 // cambios
+// USUARIOS MOCK MAPEADOS A LA BASE DE DATOS REAL
 export const mockUsers: User[] = [
   {
+    // ADMIN REAL DE LA BD (ID: 1)
     id: "1",
-    username: "juan_tech",
-    email: "juan@electromarket.com",
-    role: "user",
-    registrationDate: "2024-01-15",
-    rating: 4.8,
-    totalTransactions: 23,
-    credits: 15,
-    isSeller: true,
-    isBuyer: true
-  },
-  {
-    id: "2", 
-    username: "maria_buyer",
-    email: "maria@electromarket.com",
-    role: "user",
-    registrationDate: "2024-02-10",
-    rating: 4.9,
-    totalTransactions: 12,
-    credits: 0,
-    isSeller: false,
-    isBuyer: true
-  },
-  {
-    id: "3",
     username: "Admin",
-    email: "admin@electromarket.com", 
+    email: "admin@electromarket.bo",
     role: "admin",
-    registrationDate: "2023-12-01",
-    rating: 5.0,
+    registrationDate: "2025-09-21",
+    rating: 0.0,
     totalTransactions: 0,
     credits: 0,
+    creditos_disponibles: 0,
     isSeller: false,
     isBuyer: false
   },
   {
-    id: "4",
-    username: "tech_seller",
-    email: "tech@electromarket.com",
-    role: "user", 
-    registrationDate: "2024-03-05",
-    rating: 4.6,
-    totalTransactions: 8,
-    credits: 22,
-    isSeller: true,
-    isBuyer: false
-  },
-  {
-    id: "5",
-    username: "ana_gamer",
-    email: "ana@electromarket.com",
+    // JUAN CARLOS PÉREZ MAMANI (ID: 2) - VENDEDOR CON 50 CRÉDITOS
+    id: "2",
+    username: "juan_tech",
+    email: "juan.perez@email.com",
     role: "user",
-    registrationDate: "2024-01-20",
-    rating: 4.7,
-    totalTransactions: 5,
-    credits: 0,
-    isSeller: false,
+    registrationDate: "2025-09-21",
+    rating: 0.0,
+    totalTransactions: 0,
+    credits: 50,
+    creditos_disponibles: 50,
+    isSeller: true,
     isBuyer: true
+  },
+  {
+    // MARÍA ELENA LÓPEZ VARGAS (ID: 3) - COMPRADOR CON 10 CRÉDITOS (ACTUALIZADO)
+    id: "3",
+    username: "maria_buyer",
+    email: "maria.lopez@email.com",
+    role: "user",
+    registrationDate: "2025-09-21",
+    rating: 5.0,
+    totalTransactions: 0,
+    credits: 10,
+    creditos_disponibles: 10,
+    isSeller: true,  // ← Ahora puede vender porque tiene créditos
+    isBuyer: true
+  },
+  {
+    // CARLOS ALBERTO QUISPE CONDORI (ID: 4) - VENDEDOR CON 53 CRÉDITOS
+    id: "4",
+    username: "carlos_seller",
+    email: "carlos.quispe@email.com",
+    role: "user",
+    registrationDate: "2025-09-21",
+    rating: 5.0,
+    totalTransactions: 0,
+    credits: 53,
+    creditos_disponibles: 53,
+    isSeller: true,
+    isBuyer: true  // ← Corregido: también puede comprar
   }
 ];
 
@@ -305,14 +302,14 @@ export const mockCreditPackages: CreditPackage[] = [
     name: "Paquete Básico",
     credits: 5,
     price: 50,
-    qrCodeUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+    qrCodeUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png"
   },
   {
     id: "2",
     name: "Paquete Estándar",
     credits: 10,
     price: 90,
-    qrCodeUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
+    qrCodeUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
     popular: true,
     bonus: 2
   },
@@ -321,7 +318,7 @@ export const mockCreditPackages: CreditPackage[] = [
     name: "Paquete Premium",
     credits: 25,
     price: 200,
-    qrCodeUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
+    qrCodeUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
     bonus: 5
   }
 ];

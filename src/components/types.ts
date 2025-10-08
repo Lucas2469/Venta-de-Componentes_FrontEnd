@@ -1,12 +1,22 @@
+// src/components/types.ts
 export interface User {
-  id: string;
-  username: string;
+  id: number;
   email: string;
-  role: 'user' | 'admin';
-  registrationDate: string;
-  rating: number;
-  totalTransactions: number;
-  credits: number;
+  nombre: string;
+  apellido: string;
+  telefono?: string;
+  tipo_usuario: 'admin' | 'vendedor' | 'comprador';
+  creditos_disponibles: number;
+  fecha_registro: string;
+  estado: 'activo' | 'inactivo';
+  // Propiedades opcionales para compatibilidad
+  username?: string;
+  role?: 'user' | 'admin';
+  registrationDate?: string;
+  rating?: number;
+  totalTransactions?: number;
+  total_intercambios_comprador?: number;
+  credits?: number;
   isSeller?: boolean;
   isBuyer?: boolean;
   isActive?: boolean;
@@ -46,6 +56,7 @@ export interface MeetingPoint {
   estado: 'activo' | 'inactivo';
   fecha_creacion?: string;
 }
+
 
 export interface CreditPackage {
   id: string;

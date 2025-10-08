@@ -1,7 +1,6 @@
+
 import React from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Button } from "./ui/button";
-import { CheckCircle, MessageCircle, Calendar, MapPin, ExternalLink } from "lucide-react";
+import { CheckCircle, MessageCircle, Calendar, MapPin, ExternalLink, X } from "lucide-react";
 import { mockMeetingPoints } from "./mockData";
 
 interface ContactConfirmationModalProps {
@@ -32,20 +31,41 @@ export function ContactConfirmationModal({
 
   const whatsappUrl = `https://wa.me/?text=${generateWhatsAppMessage()}`;
 
+  if (!isOpen) return null;
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <div className="flex items-center space-x-2 mb-2">
-            <CheckCircle className="h-6 w-6 text-green-500" />
-            <DialogTitle>¡Contacto Confirmado!</DialogTitle>
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-200 scale-100">
+        {/* Header */}
+        <div className="p-6 pb-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-6 w-6 text-green-500" />
+              <h2 className="text-xl font-bold text-gray-900">¡Contacto Confirmado!</h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="h-5 w-5 text-gray-400" />
+            </button>
           </div>
-          <DialogDescription>
+          <p className="text-gray-600 text-sm">
             Tu solicitud de encuentro ha sido preparada. Ahora puedes contactar directamente al vendedor.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-4">
+          </p>
+        </div>
+
+        {/* Content */}
+        <div className="px-6 space-y-4">
           {/* Meeting Details */}
           <div className="bg-gray-50 rounded-lg p-4 space-y-3">
             <h4 className="font-medium text-gray-900">Detalles del encuentro:</h4>
@@ -94,31 +114,29 @@ export function ContactConfirmationModal({
 
           {/* Action Buttons */}
           <div className="flex flex-col space-y-3">
-            <Button 
-              className="w-full"
-              style={{ backgroundColor: '#25D366', color: '#ffffff' }}
+            <button
+              className="w-full flex items-center justify-center px-4 py-3 bg-[#25D366] text-white rounded-xl font-medium hover:bg-[#20b358] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105 shadow-lg"
               onClick={() => window.open(whatsappUrl, '_blank')}
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Contactar por WhatsApp
               <ExternalLink className="h-4 w-4 ml-2" />
-            </Button>
-            
-            <Button 
-              variant="outline" 
+            </button>
+
+            <button
               onClick={onClose}
-              className="w-full"
+              className="w-full px-4 py-3 border border-gray-300 text-gray-700 bg-white rounded-xl font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
             >
               Cerrar
-            </Button>
+            </button>
           </div>
 
           {/* Contact Info */}
-          <div className="text-center text-xs text-gray-500">
+          <div className="text-center text-xs text-gray-500 pb-6">
             Al contactar al vendedor, te comprometes a cumplir con nuestros términos de uso y políticas de seguridad.
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
