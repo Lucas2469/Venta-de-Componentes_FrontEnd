@@ -224,8 +224,11 @@ class AuthService {
   // Logout
   public async logout(): Promise<void> {
     try {
-      if (this.tokens?.accessToken) {
-        await axios.post(`${API_BASE_URL}/auth/logout`, {}, {
+      if (this.tokens?.accessToken && this.tokens?.refreshToken) {
+        // Enviar refresh token para invalidarlo en el servidor
+        await axios.post(`${API_BASE_URL}/auth/logout`, {
+          refreshToken: this.tokens.refreshToken
+        }, {
           headers: { Authorization: `Bearer ${this.tokens.accessToken}` }
         });
       }
