@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Package, Plus, ArrowLeft } from "lucide-react";
 import { User } from "./types";
+import { useAuthContext } from "../contexts/AuthContext";
 
 interface MyProductsPageProps {
-  currentUser: User;
   onNavigate: (page: string) => void;
   onProductClick: (productId: number) => void;
 }
@@ -21,18 +21,21 @@ interface Product {
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-export function MyProductsPage({ currentUser, onNavigate, onProductClick }: MyProductsPageProps) {
+export function MyProductsPage({ onNavigate, onProductClick }: MyProductsPageProps) {
+  const { user: currentUser } = useAuthContext();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchMyProducts();
-  }, [currentUser.id]);
+    if (currentUser?.id) {
+      fetchMyProducts();
+    }
+  }, [currentUser?.id]);
 
   const fetchMyProducts = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/api/productos/vendedor/${currentUser.id}`);
+      const response = await fetch(`${API_BASE}/api/productos/vendedor/${currentUser?.id}`);
       if (response.ok) {
         const data = await response.json();
         setProducts(data.data || data);

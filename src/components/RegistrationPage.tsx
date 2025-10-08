@@ -1,12 +1,16 @@
 import React from "react";
 import { useState } from "react";
 import { AlertCircle, User } from "lucide-react";
+import { useAuthContext } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface RegistrationPageProps {
   onNavigateToLogin: () => void;
 }
 
 export function RegistrationPage({ onNavigateToLogin }: RegistrationPageProps) {
+  const { register, isLoading, error, clearError } = useAuthContext();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -68,12 +72,25 @@ export function RegistrationPage({ onNavigateToLogin }: RegistrationPageProps) {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
+    clearError();
     
-    // Show success message or redirect
-    alert("Registration successful! Please check your email to verify your account.");
+    try {
+      await register({
+        nombre: formData.firstName,
+        apellido: formData.lastName,
+        email: formData.email,
+        telefono: formData.phone,
+        password: formData.password,
+        tipo_usuario: 'comprador'
+      });
+      
+      // Redirigir al catálogo después del registro exitoso
+      navigate('/catalog');
+    } catch (error) {
+      console.error('Registration error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {

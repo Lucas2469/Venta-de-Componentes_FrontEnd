@@ -1,13 +1,16 @@
 import React from "react";
 import { useState } from "react";
 import { AlertCircle, LogIn, Mail } from "lucide-react";
+import { useAuthContext } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface LoginPageProps {
   onNavigateToRegistration: () => void;
-  onLoginSuccess: (credentials?: { username: string; password: string }) => void;
 }
 
-export function LoginPage({ onNavigateToRegistration, onLoginSuccess }: LoginPageProps) {
+export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
+  const { login, isLoading, error, clearError } = useAuthContext();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     emailOrUsername: "",
     password: ""
@@ -36,15 +39,21 @@ export function LoginPage({ onNavigateToRegistration, onLoginSuccess }: LoginPag
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
+    clearError();
     
-    // Pass credentials to parent component
-    onLoginSuccess({
-      username: formData.emailOrUsername,
-      password: formData.password
-    });
+    try {
+      await login({
+        email: formData.emailOrUsername,
+        password: formData.password
+      });
+      
+      // Redirigir según el tipo de usuario
+      navigate('/catalog');
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
