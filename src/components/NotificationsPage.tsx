@@ -25,14 +25,16 @@ import {
   deleteNotification,
   NotificationFilters
 } from '../api/notifications';
+import { useAuthContext } from '../contexts/AuthContext';
 
 interface NotificationsPageProps {
-  userId: number;
   expandNotificationId?: number; // Para auto-expandir una notificación específica
 }
 
-export function NotificationsPage({ userId, expandNotificationId }: NotificationsPageProps) {
+export function NotificationsPage({ expandNotificationId }: NotificationsPageProps) {
+  const { user } = useAuthContext();
   const navigate = useNavigate();
+  const userId = user?.id || 0;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);

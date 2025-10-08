@@ -1,18 +1,22 @@
 // src/components/types.ts
 export interface User {
-  id: string;
-  username: string;
+  id: number;
   email: string;
-  nombre?: string;
-  apellido?: string;
+  nombre: string;
+  apellido: string;
   telefono?: string;
-  role: 'user' | 'admin';
-  registrationDate: string;
-  rating: number;
-  totalTransactions: number;
+  tipo_usuario: 'admin' | 'vendedor' | 'comprador';
+  creditos_disponibles: number;
+  fecha_registro: string;
+  estado: 'activo' | 'inactivo';
+  // Propiedades opcionales para compatibilidad
+  username?: string;
+  role?: 'user' | 'admin';
+  registrationDate?: string;
+  rating?: number;
+  totalTransactions?: number;
   total_intercambios_comprador?: number;
-  credits: number;
-  creditos_disponibles?: number;
+  credits?: number;
   isSeller?: boolean;
   isBuyer?: boolean;
   isActive?: boolean;

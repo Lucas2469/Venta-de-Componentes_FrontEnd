@@ -3,6 +3,7 @@ import { createSchedule, deleteSchedule, fetchSchedules, updateSchedule } from "
 import { Pencil, Trash2, Plus, Clock, Calendar, MapPin, User, ArrowLeft, Save, X } from "lucide-react";
 import { ConfirmationModal } from "./reusables/ConfirmationModal";
 import { showToast } from "./Toast";
+import { useAuthContext } from "../contexts/AuthContext";
 
 // =================== TIPOS ===================
 export interface ScheduleItem {
@@ -14,11 +15,6 @@ export interface ScheduleItem {
 }
 
 interface MisHorariosPageProps {
-  currentUser: {
-    id: number | string;
-    username?: string;
-    isSeller?: boolean;
-  };
   onNavigate: (page: string) => void;
 }
 
@@ -175,7 +171,8 @@ function validateFormRealTime(
 }
 
 // =================== COMPONENTE ===================
-const MisHorariosPage: React.FC<MisHorariosPageProps> = ({ currentUser, onNavigate }) => {
+const MisHorariosPage: React.FC<MisHorariosPageProps> = ({ onNavigate }) => {
+  const { user: currentUser } = useAuthContext();
   const [items, setItems] = useState<ScheduleItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -203,7 +200,7 @@ const MisHorariosPage: React.FC<MisHorariosPageProps> = ({ currentUser, onNaviga
   const [scheduleToDelete, setScheduleToDelete] = useState<ScheduleItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const vendedorId = parseInt(currentUser.id.toString());
+  const vendedorId = currentUser ? parseInt(currentUser.id.toString()) : 0;
 
   // =================== EFECTOS ===================
   useEffect(() => {
@@ -363,7 +360,7 @@ const MisHorariosPage: React.FC<MisHorariosPageProps> = ({ currentUser, onNaviga
 
             <div className="flex items-center space-x-3">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{currentUser.username}</p>
+                 <p className="text-sm font-medium text-gray-900">{currentUser?.nombre} {currentUser?.apellido}</p>
                 <p className="text-xs text-gray-500">Vendedor</p>
               </div>
               <div className="bg-pink-100 p-2 rounded-full">

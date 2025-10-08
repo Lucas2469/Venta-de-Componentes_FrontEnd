@@ -7,18 +7,13 @@ import { getRatingsWithAppointmentDetails } from '../api/ratings';
 import { showToast } from './Toast';
 import RatingModal from './RatingModal';
 import RatingDisplay, { RatingSummary } from './RatingDisplay';
+import { useAuthContext } from '../contexts/AuthContext';
 
 interface VendorAppointmentsPageProps {
-  currentUser: {
-    id: string | number;
-    nombre?: string;
-    name?: string;
-    tipo_usuario?: string;
-    role?: string;
-  };
 }
 
-const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = ({ currentUser }) => {
+const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = () => {
+  const { user: currentUser } = useAuthContext();
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);

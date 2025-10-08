@@ -3,16 +3,17 @@ import RatingModal from './RatingModal';
 import { getPendingRatings, createRating, checkPendingRatingsAlert, PendingRating } from '../api/ratings';
 import { showToast } from './Toast';
 import { Bell } from 'lucide-react';
+import { useAuthContext } from '../contexts/AuthContext';
 
 interface RatingSystemManagerProps {
-  currentUserId: number;
   isActive: boolean; // Para pausar/activar el sistema
 }
 
 const RatingSystemManager: React.FC<RatingSystemManagerProps> = ({
-  currentUserId,
   isActive = true
 }) => {
+  const { user } = useAuthContext();
+  const currentUserId = user?.id || 0;
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [currentRating, setCurrentRating] = useState<PendingRating | null>(null);
   const [pendingRatings, setPendingRatings] = useState<PendingRating[]>([]);
