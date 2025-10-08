@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Package, Plus, ArrowLeft } from "lucide-react";
+import { Package, Plus, ArrowLeft, Trash2 } from "lucide-react";
 import { User } from "./types";
+import { productsApi } from "../api/productsApi";
+import { ConfirmationModal } from "./reusables/ConfirmationModal";
+import { useToast } from "./Toast";
 
 interface MyProductsPageProps {
   currentUser: User;
@@ -24,6 +27,10 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 export function MyProductsPage({ currentUser, onNavigate, onProductClick }: MyProductsPageProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const { showToast, ToastComponent } = useToast();
 
   useEffect(() => {
     fetchMyProducts();
@@ -47,8 +54,51 @@ export function MyProductsPage({ currentUser, onNavigate, onProductClick }: MyPr
   const activeProducts = products.filter(p => p.estado === 'activo' && p.stock > 0);
   const inactiveProducts = products.filter(p => p.estado !== 'activo' || p.stock === 0);
 
+  const handleDeleteClick = (product: Product, e: React.MouseEvent) => {
+    e.stopPropagation(); // Evitar que se active el onClick del card
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!productToDelete) return;
+
+    setDeleting(true);
+    try {
+      await productsApi.deleteProduct(productToDelete.id);
+      showToast('success', 'Producto eliminado', 'El producto ha sido eliminado correctamente');
+      setShowDeleteModal(false);
+      setProductToDelete(null);
+      // Recargar productos
+      fetchMyProducts();
+    } catch (error: any) {
+      console.error('Error al eliminar producto:', error);
+      showToast('error', 'Error al eliminar', error.message || 'No se pudo eliminar el producto');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setProductToDelete(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-teal-50">
+      <ToastComponent />
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleCancelDelete}
+        onConfirm={handleDeleteConfirm}
+        title="Eliminar Producto"
+        message={`¿Estás seguro de que deseas eliminar "${productToDelete?.nombre}"? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        type="danger"
+        loading={deleting}
+      />
+
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
@@ -121,27 +171,40 @@ export function MyProductsPage({ currentUser, onNavigate, onProductClick }: MyPr
                 </h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {activeProducts.map((product) => (
-                    <button
+                    <div
                       key={product.id}
-                      onClick={() => onProductClick(product.id)}
-                      className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-pink-300 hover:shadow-xl transition-all text-left"
+                      className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-pink-300 hover:shadow-xl transition-all relative group"
                     >
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
-                          Activo
-                        </span>
-                        <span className="text-sm text-gray-500">{product.categoria_nombre}</span>
-                      </div>
-                      <h3 className="font-bold text-gray-900 text-lg mb-2">{product.nombre}</h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{product.descripcion}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-2xl font-bold text-pink-600">Bs. {product.precio}</span>
-                        <span className="text-sm text-gray-600">Stock: {product.stock}</span>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-3">
-                        Publicado: {new Date(product.fecha_publicacion).toLocaleDateString('es-ES')}
-                      </p>
-                    </button>
+                      <button
+                        onClick={() => onProductClick(product.id)}
+                        className="w-full text-left"
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
+                            Activo
+                          </span>
+                          <span className="text-sm text-gray-500">{product.categoria_nombre}</span>
+                        </div>
+                        <h3 className="font-bold text-gray-900 text-lg mb-2">{product.nombre}</h3>
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{product.descripcion}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-2xl font-bold text-pink-600">Bs. {product.precio}</span>
+                          <span className="text-sm text-gray-600">Stock: {product.stock}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-3">
+                          Publicado: {new Date(product.fecha_publicacion).toLocaleDateString('es-ES')}
+                        </p>
+                      </button>
+
+                      {/* Botón eliminar - aparece en hover */}
+                      <button
+                        onClick={(e) => handleDeleteClick(product, e)}
+                        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg shadow-lg"
+                        title="Eliminar producto"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
