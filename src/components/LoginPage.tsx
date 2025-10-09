@@ -1,16 +1,18 @@
 import React from "react";
-import { useState } from "react";
-import { AlertCircle, LogIn, Mail } from "lucide-react";
+import { useState, useEffect } from "react";
+import { AlertCircle, LogIn, Mail, Eye, EyeOff } from "lucide-react";
 import { useAuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "./Toast";
 
 interface LoginPageProps {
   onNavigateToRegistration: () => void;
 }
 
 export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
-  const { login, isLoading, error, clearError } = useAuthContext();
+  const { login, isLoading, error, clearError, isAuthenticated } = useAuthContext();
   const navigate = useNavigate();
+  const { showToast, ToastComponent } = useToast();
   const [formData, setFormData] = useState({
     emailOrUsername: "",
     password: ""
@@ -18,6 +20,21 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Redirigir cuando el login sea exitoso y el usuario esté autenticado
+  useEffect(() => {
+    if (loginSuccess && isAuthenticated && !isLoading) {
+      // Redirigir según el tipo de usuario CON REFRESH para garantizar que funcione
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.tipo_usuario === 'admin') {
+        window.location.href = '/admin-dashboard';
+      } else {
+        window.location.href = '/catalog';
+      }
+    }
+  }, [loginSuccess, isAuthenticated, isLoading]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -39,18 +56,21 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    clearError();
-    
+    setLoginSuccess(false);
+
     try {
       await login({
         email: formData.emailOrUsername,
         password: formData.password
       });
-      
-      // Redirigir según el tipo de usuario
-      navigate('/catalog');
-    } catch (error) {
+
+      // El login() hook ahora maneja el delay internamente
+      // Solo marcamos como exitoso para que el useEffect navegue
+      setLoginSuccess(true);
+    } catch (error: any) {
       console.error('Login error:', error);
+      alert('Email o contraseña incorrectos');
+      setLoginSuccess(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -67,14 +87,14 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsSubmitting(false);
-    
-    alert("Password reset link has been sent to your email!");
+
+    showToast('success', 'Enlace enviado', 'Se ha enviado un enlace para restablecer tu contraseña a tu correo electrónico');
     setShowForgotPassword(false);
+    setFormData(prev => ({ ...prev, emailOrUsername: "" }));
   };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
@@ -82,7 +102,9 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
 
   if (showForgotPassword) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+      <>
+        <ToastComponent />
+        <div className="min-h-screen flex items-center justify-center p-4 bg-white">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
           <div className="text-center p-6" style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
             <div className="flex items-center justify-center mb-2">
@@ -139,11 +161,14 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+    <>
+      <ToastComponent />
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
         <div className="text-center p-6" style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
           <div className="flex items-center justify-center mb-2">
@@ -180,19 +205,28 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={(e) => handleInputChange("password", e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
-                  errors.password ? "border-red-500 bg-red-50" : "border-gray-300"
-                }`}
-              />
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  placeholder="Ingresa tu contraseña"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
+                    errors.password ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
               {errors.password && (
                 <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
                   <AlertCircle className="h-4 w-4 text-red-600" />
@@ -238,5 +272,6 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -34,24 +34,32 @@ export const useAuth = (): AuthState & AuthActions => {
         const isAuthenticated = authService.isAuthenticated();
 
         if (isAuthenticated && user) {
-          // Verificar si el token sigue siendo válido
-          const isValid = await authService.verifyToken();
-          if (isValid) {
-            setState({
-              user,
-              isAuthenticated: true,
-              isLoading: false,
-              error: null
-            });
-          } else {
-            // Token inválido, limpiar autenticación
-            await authService.logout();
-            setState({
-              user: null,
-              isAuthenticated: false,
-              isLoading: false,
-              error: null
-            });
+          // Primero actualizar el estado con el usuario del localStorage
+          // Esto evita el "Acceso denegado" durante la verificación del token
+          setState({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null
+          });
+
+          // Luego verificar si el token sigue siendo válido (en background)
+          try {
+            const isValid = await authService.verifyToken();
+            if (!isValid) {
+              // Token inválido, limpiar autenticación
+              await authService.logout();
+              setState({
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+                error: null
+              });
+            }
+          } catch (verifyError) {
+            // Si falla la verificación, mantener el usuario por ahora
+            // El interceptor de axios manejará la expiración del token
+            console.warn('Token verification failed, but keeping user logged in', verifyError);
           }
         } else {
           setState({
@@ -78,15 +86,25 @@ export const useAuth = (): AuthState & AuthActions => {
   // Login
   const login = useCallback(async (credentials: LoginCredentials) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
-    
+
     try {
       const authResponse = await authService.login(credentials);
+
+      // Actualizar usuario primero pero mantener isLoading: true
       setState({
         user: authResponse.user,
         isAuthenticated: true,
-        isLoading: false,
+        isLoading: true, // Mantener loading para evitar "Acceso denegado" prematuramente
         error: null
       });
+
+      // Esperar a que el contexto se propague antes de cambiar isLoading a false
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      setState(prev => ({
+        ...prev,
+        isLoading: false
+      }));
     } catch (error: any) {
       setState(prev => ({
         ...prev,

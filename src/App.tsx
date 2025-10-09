@@ -123,7 +123,7 @@ function AppContent() {
 
           {/* Rutas protegidas */}
           <Route path="/create-ad" element={
-            <AuthProtectedRoute requiredRoles={['vendedor', 'admin']}>
+            <AuthProtectedRoute>
               <CreateAdPage onBack={() => navigate('/catalog')} />
             </AuthProtectedRoute>
           } />
@@ -204,10 +204,8 @@ function AppContent() {
 
       <Footer onNavigate={handleNavigate} />
 
-      {/* Sistema de calificaciones automático */}
-      <AuthProtectedRoute>
-        <RatingSystemManager isActive={true} />
-      </AuthProtectedRoute>
+      {/* Sistema de calificaciones automático - solo se ejecuta si hay usuario autenticado */}
+      <RatingSystemManager isActive={true} />
     </div>
   );
 }

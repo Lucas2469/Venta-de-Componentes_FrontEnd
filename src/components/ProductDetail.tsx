@@ -168,6 +168,15 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack 
     };
 
     const handleContactSeller = () => {
+        // Verificar si el usuario está autenticado
+        if (!isAuthenticated || !currentUser) {
+            showToast('warning', 'Inicia sesión', 'Debes iniciar sesión para contactar al vendedor');
+            // Guardar la URL actual para redirigir después del login
+            sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+            navigate('/login');
+            return;
+        }
+
         setShowScheduleModal(true);
     };
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   User as UserIcon,
   Mail,
@@ -123,21 +124,14 @@ export function MyProfilePage({ onNavigate }: MyProfilePageProps) {
   const handleSaveProfile = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/api/users/${currentUser?.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre: formData.nombre,
-          apellido: formData.apellido,
-          email: formData.email,
-          telefono: formData.telefono
-        }),
+      const response = await axios.put(`${API_BASE}/api/users/${currentUser?.id}`, {
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        email: formData.email,
+        telefono: formData.telefono
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.data.success) {
         showToast('success', 'Perfil actualizado', 'Tus datos se guardaron correctamente');
 
         // Actualizar usuario en el estado global
@@ -340,8 +334,8 @@ export function MyProfilePage({ onNavigate }: MyProfilePageProps) {
                     <span>Miembro desde</span>
                   </label>
                   <p className="text-gray-900 font-medium">
-                    {currentUser?.fecha_registro
-                      ? new Date(currentUser.fecha_registro).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
+                    {currentUser?.fecha_registro || currentUser?.registrationDate
+                      ? new Date(currentUser.fecha_registro || currentUser.registrationDate || '').toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
                       : 'No disponible'
                     }
                   </p>

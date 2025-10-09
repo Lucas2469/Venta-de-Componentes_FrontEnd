@@ -8,6 +8,7 @@ import {
   getCreditosDisponibles,
 } from "../api/AdProduct";
 import { Upload, X, FileText, Image as ImageIcon, DollarSign, ChevronDown } from "lucide-react";
+import { useAuthContext } from "../contexts/AuthContext";
 
 type Categoria = { id: number; nombre: string };
 type Punto = { id: number; nombre: string };
@@ -20,6 +21,10 @@ interface CreateAdPageProps {
 export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuthContext();
+
+  // Usar user del contexto si currentUser no está disponible
+  const activeUser = currentUser || user;
 
   // datos dinámicos
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -50,21 +55,18 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
     let mounted = true;
     (async () => {
       try {
-        const vendedorId = currentUser?.id ? parseInt(currentUser.id.toString()) : 2;
-        const [cats, pts, creds] = await Promise.all([
+        const [cats, pts] = await Promise.all([
           getCategorias(),           // [{id, nombre}]
           getPuntosEncuentro(),      // [{id, nombre}]
-          getCreditosDisponibles(vendedorId), // { creditos_disponibles: number }
         ]);
 
         if (!mounted) return;
         setCategorias(Array.isArray(cats) ? cats : []);
         setPuntos(Array.isArray(pts) ? pts : []);
 
-        const parsedCredits = Number(
-          (creds && (creds.creditos_disponibles ?? creds.creditos ?? creds[0]?.creditos_disponibles)) ?? 0
-        );
-        setCreditos(Number.isFinite(parsedCredits) ? parsedCredits : 0);
+        // Usar créditos directamente del usuario autenticado
+        const userCredits = activeUser?.creditos_disponibles || activeUser?.credits || 0;
+        setCreditos(userCredits);
       } catch (e) {
         console.error("[CreateAdPage] load error:", e);
         if (mounted) setCreditos(0);
@@ -75,7 +77,7 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
     return () => {
       mounted = false;
     };
-  }, [currentUser?.id]);
+  }, [activeUser?.id, activeUser?.creditos_disponibles]);
 
   // Redirigir a compra de créditos si no alcanza (evitar bucle si ya estás ahí)
   useEffect(() => {
@@ -83,11 +85,13 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
     if (location.pathname === "/buy-credits") return;
     if (redirectedRef.current) return;
 
+    console.log('🔍 Verificando créditos:', creditos);
     if ((creditos ?? 0) < 1) {
+      console.log('⚠️ Sin créditos, redirigiendo a compra...');
       redirectedRef.current = true;
       navigate("/buy-credits");
     }
-  }, [loading, creditos, location.pathname, navigate]);
+  }, [creditos, loading, location.pathname, navigate]);
 
   const handleInput = (field: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -148,7 +152,7 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
 
     try {
       setSubmitting(true);
-      const vendedorId = currentUser?.id ? parseInt(currentUser.id.toString()) : 2;
+      const vendedorId = activeUser?.id ? parseInt(activeUser.id.toString()) : 2;
       const res = await createAdProduct(
         {
           vendedorId: vendedorId,

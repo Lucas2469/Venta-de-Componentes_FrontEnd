@@ -3,6 +3,7 @@ import { Search, User as UserIcon, LogOut, Settings, Package, CreditCard, BarCha
 import { useAuthContext } from "../contexts/AuthContext";
 import { NotificationPanel } from "./NotificationPanel";
 import { fetchUnreadNotificationsCount } from "../api/notifications";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   onNavigate: (page: string) => void;
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps) {
   const { user: currentUser, logout, isAuthenticated } = useAuthContext();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -243,9 +245,10 @@ export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps)
                             <div className="border-t border-gray-200 my-2"></div>
 
                             <button
-                              onClick={() => {
-                                logout();
+                              onClick={async () => {
+                                await logout();
                                 setIsMenuOpen(false);
+                                navigate('/login');
                               }}
                               className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
                             >
