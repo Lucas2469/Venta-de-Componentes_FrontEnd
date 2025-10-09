@@ -21,11 +21,10 @@ import {
 } from "lucide-react";
 import { User } from "./types";
 import { useToast } from "./Toast";
+import { useAuthContext } from "../contexts/AuthContext";
 
 interface MyProfilePageProps {
-  currentUser: User;
   onNavigate: (page: string) => void;
-  onUserUpdate: (updatedUser: User) => void;
 }
 
 interface CreditHistory {
@@ -40,7 +39,8 @@ interface CreditHistory {
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfilePageProps) {
+export function MyProfilePage({ onNavigate }: MyProfilePageProps) {
+  const { user: currentUser, updateUser } = useAuthContext();
   const { showToast, ToastComponent } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -50,10 +50,10 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
   const [totalRatingsReceived, setTotalRatingsReceived] = useState(0);
 
   const [formData, setFormData] = useState({
-    nombre: currentUser.nombre || '',
-    apellido: currentUser.apellido || '',
-    email: currentUser.email || '',
-    telefono: currentUser.telefono || ''
+    nombre: currentUser?.nombre || '',
+    apellido: currentUser?.apellido || '',
+    email: currentUser?.email || '',
+    telefono: currentUser?.telefono || ''
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -68,8 +68,8 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
     confirm: false
   });
 
-  const isAdmin = currentUser.role === 'admin';
-  const isSeller = !isAdmin && (currentUser.creditos_disponibles || currentUser.credits || 0) > 0;
+  const isAdmin = currentUser?.tipo_usuario === 'admin';
+  const isSeller = !isAdmin && (currentUser?.creditos_disponibles || 0) > 0;
 
   // Cargar historial de créditos y calificaciones
   useEffect(() => {
@@ -77,12 +77,12 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
       fetchCreditHistory();
     }
     fetchTotalRatings();
-  }, [currentUser.id]);
+  }, [currentUser?.id]);
 
   const fetchCreditHistory = async () => {
     setLoadingHistory(true);
     try {
-      const response = await fetch(`${API_BASE}/api/historial-creditos/${currentUser.id}`);
+      const response = await fetch(`${API_BASE}/api/historial-creditos/${currentUser?.id}`);
       if (response.ok) {
         const data = await response.json();
         setCreditHistory(data.data || []);
@@ -96,7 +96,7 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
 
   const fetchTotalRatings = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/calificaciones/usuario/${currentUser.id}`);
+      const response = await fetch(`${API_BASE}/api/calificaciones/usuario/${currentUser?.id}`);
       if (response.ok) {
         const data = await response.json();
         setTotalRatingsReceived((data.data || []).length);
@@ -123,7 +123,7 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
   const handleSaveProfile = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/api/users/${currentUser.id}`, {
+      const response = await fetch(`${API_BASE}/api/users/${currentUser?.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
         showToast('success', 'Perfil actualizado', 'Tus datos se guardaron correctamente');
 
         // Actualizar usuario en el estado global
-        onUserUpdate({
+        updateUser({
           ...currentUser,
           nombre: formData.nombre,
           apellido: formData.apellido,
@@ -174,7 +174,7 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/api/users/${currentUser.id}/change-password`, {
+      const response = await fetch(`${API_BASE}/api/users/${currentUser?.id}/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -203,10 +203,10 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
 
   const handleCancelEdit = () => {
     setFormData({
-      nombre: currentUser.nombre || '',
-      apellido: currentUser.apellido || '',
-      email: currentUser.email || '',
-      telefono: currentUser.telefono || ''
+      nombre: currentUser?.nombre || '',
+      apellido: currentUser?.apellido || '',
+      email: currentUser?.email || '',
+      telefono: currentUser?.telefono || ''
     });
     setIsEditing(false);
   };
@@ -279,7 +279,7 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className="text-gray-900 font-medium">{currentUser.nombre}</p>
+                    <p className="text-gray-900 font-medium">{currentUser?.nombre}</p>
                   )}
                 </div>
 
@@ -294,7 +294,7 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className="text-gray-900 font-medium">{currentUser.apellido}</p>
+                    <p className="text-gray-900 font-medium">{currentUser?.apellido}</p>
                   )}
                 </div>
 
@@ -312,7 +312,7 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className="text-gray-900 font-medium">{currentUser.email}</p>
+                    <p className="text-gray-900 font-medium">{currentUser?.email}</p>
                   )}
                 </div>
 
@@ -330,7 +330,7 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className="text-gray-900 font-medium">{currentUser.telefono || 'No registrado'}</p>
+                    <p className="text-gray-900 font-medium">{currentUser?.telefono || 'No registrado'}</p>
                   )}
                 </div>
 
@@ -340,8 +340,8 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
                     <span>Miembro desde</span>
                   </label>
                   <p className="text-gray-900 font-medium">
-                    {currentUser.registrationDate
-                      ? new Date(currentUser.registrationDate).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
+                    {currentUser?.fecha_registro
+                      ? new Date(currentUser.fecha_registro).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
                       : 'No disponible'
                     }
                   </p>
@@ -503,7 +503,7 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
                   <h3 className="text-lg font-bold">Créditos Disponibles</h3>
                   <CreditCard className="h-6 w-6" />
                 </div>
-                <p className="text-5xl font-bold mb-4">{currentUser.creditos_disponibles || currentUser.credits || 0}</p>
+                <p className="text-5xl font-bold mb-4">{currentUser?.creditos_disponibles || 0}</p>
                 <button
                   onClick={() => onNavigate('buy-credits')}
                   className="w-full bg-white text-pink-600 px-4 py-2 rounded-lg hover:bg-pink-50 transition-colors font-medium"
@@ -521,20 +521,20 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
               </div>
               <div className="text-center">
                 <p className="text-5xl font-bold text-gray-900 mb-2">
-                  {currentUser.rating ? Number(currentUser.rating).toFixed(1) : '0.0'}
+                  {currentUser?.rating ? Number(currentUser?.rating).toFixed(1) : '0.0'}
                 </p>
                 <div className="flex justify-center space-x-1 mb-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                       key={star}
                       className={`h-5 w-5 ${
-                        star <= Number(currentUser.rating || 0) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
+                        star <= Number(currentUser?.rating || 0) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
                       }`}
                     />
                   ))}
                 </div>
                 <p className="text-sm text-gray-600">
-                  Basado en {currentUser.totalTransactions || 0} transacciones
+                  Basado en {currentUser?.totalTransactions || 0} transacciones
                 </p>
               </div>
             </div>
@@ -552,7 +552,7 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
                       <Package className="h-5 w-5 text-pink-600" />
                       <span className="text-gray-700">Total ventas</span>
                     </div>
-                    <span className="font-bold text-gray-900">{currentUser.totalTransactions || 0}</span>
+                    <span className="font-bold text-gray-900">{currentUser?.totalTransactions || 0}</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between py-2 border-b border-gray-100">
@@ -560,7 +560,7 @@ export function MyProfilePage({ currentUser, onNavigate, onUserUpdate }: MyProfi
                     <ShoppingCart className="h-5 w-5 text-purple-600" />
                     <span className="text-gray-700">Total compras</span>
                   </div>
-                  <span className="font-bold text-gray-900">{currentUser.total_intercambios_comprador || 0}</span>
+                  <span className="font-bold text-gray-900">{currentUser?.total_intercambios_comprador || 0}</span>
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center space-x-2">

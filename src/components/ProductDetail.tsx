@@ -6,14 +6,15 @@ import { ScheduleMeetingModal } from './ScheduleMeetingModal';
 import { appointmentApi, CreateAppointmentRequest } from '../api/Appointment';
 import { Loader2 } from 'lucide-react';
 import { useToast } from './Toast';
+import { useAuthContext } from '../contexts/AuthContext';
 
 interface ProductDetailProps {
     productId: number;
-    currentUser: { id: string | number; role?: string } | null;
     onBack: () => void;
 }
 
-export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, currentUser, onBack }) => {
+export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack }) => {
+    const { user: currentUser, isAuthenticated } = useAuthContext();
     const navigate = useNavigate();
     const [product, setProduct] = useState<ProductDetailType | null>(null);
     const [loading, setLoading] = useState(true);
@@ -26,9 +27,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, current
     // Toast hook para notificaciones
     const { showToast, ToastComponent } = useToast();
 
-    // Calcular ID real del usuario logueado (misma lógica que Header.tsx)
-    const isAdmin = currentUser?.role === "admin";
-    const comprador_id = currentUser?.id ? parseInt(currentUser.id.toString()) : (isAdmin ? 1 : 2);
+    // Calcular ID real del usuario logueado
+    const isAdmin = currentUser?.tipo_usuario === "admin";
+    const comprador_id = currentUser?.id || 0;
 
     // Verificar si el usuario actual es el vendedor del producto
     const isOwnProduct = product && currentUser && parseInt(currentUser.id.toString()) === product.vendedor_id;

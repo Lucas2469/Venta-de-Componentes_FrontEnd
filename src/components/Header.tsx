@@ -1,28 +1,26 @@
 import { useState, useEffect } from "react";
 import { Search, User as UserIcon, LogOut, Settings, Package, CreditCard, BarChart3, Menu, Bell, Grid, Calendar, Clock } from "lucide-react";
-import { User } from "./types";
+import { useAuthContext } from "../contexts/AuthContext";
 import { NotificationPanel } from "./NotificationPanel";
 import { fetchUnreadNotificationsCount } from "../api/notifications";
 
 interface HeaderProps {
-  currentUser: User | null;
-  onLogin: () => void;
-  onLogout: () => void;
   onNavigate: (page: string) => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
 }
 
-export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery, onSearchChange }: HeaderProps) {
+export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps) {
+  const { user: currentUser, logout, isAuthenticated } = useAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const isAdmin = currentUser?.role === "admin";
-  const userCredits = currentUser?.creditos_disponibles || currentUser?.credits || 0;
+  const isAdmin = currentUser?.tipo_usuario === "admin";
+  const userCredits = currentUser?.creditos_disponibles || 0;
 
   // Usar el ID real del usuario logueado
-  const userId = currentUser?.id ? parseInt(currentUser.id.toString()) : (isAdmin ? 1 : 2);
+  const userId = currentUser?.id || 0;
 
   // Lógica dinámica para determinar capacidades del usuario basada en créditos
   const canSell = !isAdmin && userCredits > 0; // Puede vender si tiene créditos
@@ -30,13 +28,13 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
 
   // Cargar contador de notificaciones no leídas
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && isAuthenticated) {
       loadUnreadCount();
       // Actualizar cada 30 segundos
       const interval = setInterval(loadUnreadCount, 30000);
       return () => clearInterval(interval);
     }
-  }, [currentUser]);
+  }, [currentUser, isAuthenticated]);
 
   async function loadUnreadCount() {
     try {
@@ -118,7 +116,7 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
                         <UserIcon className="h-4 w-4 text-white" />
                       </div>
                       <div className="text-white">
-                        <p className="text-sm font-medium">{currentUser.username}</p>
+                        <p className="text-sm font-medium">{currentUser.nombre} {currentUser.apellido}</p>
                         {!isAdmin && (
                           <p className="text-xs text-pink-200">{userCredits} créditos</p>
                         )}
@@ -246,7 +244,7 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
 
                             <button
                               onClick={() => {
-                                onLogout();
+                                logout();
                                 setIsMenuOpen(false);
                               }}
                               className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
@@ -263,7 +261,7 @@ export function Header({ currentUser, onLogin, onLogout, onNavigate, searchQuery
               ) : (
                 <div className="flex space-x-3">
                   <button
-                    onClick={onLogin}
+                    onClick={() => onNavigate('login')}
                     className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-105"
                   >
                     Iniciar Sesión

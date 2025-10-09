@@ -4,9 +4,9 @@ import { User } from "./types";
 import { productsApi } from "../api/productsApi";
 import { ConfirmationModal } from "./reusables/ConfirmationModal";
 import { useToast } from "./Toast";
+import { useAuthContext } from "../contexts/AuthContext";
 
 interface MyProductsPageProps {
-  currentUser: User;
   onNavigate: (page: string) => void;
   onProductClick: (productId: number) => void;
 }
@@ -24,7 +24,8 @@ interface Product {
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-export function MyProductsPage({ currentUser, onNavigate, onProductClick }: MyProductsPageProps) {
+export function MyProductsPage({ onNavigate, onProductClick }: MyProductsPageProps) {
+  const { user: currentUser } = useAuthContext();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -33,13 +34,15 @@ export function MyProductsPage({ currentUser, onNavigate, onProductClick }: MyPr
   const { showToast, ToastComponent } = useToast();
 
   useEffect(() => {
-    fetchMyProducts();
-  }, [currentUser.id]);
+    if (currentUser?.id) {
+      fetchMyProducts();
+    }
+  }, [currentUser?.id]);
 
   const fetchMyProducts = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/api/productos/vendedor/${currentUser.id}`);
+      const response = await fetch(`${API_BASE}/api/productos/vendedor/${currentUser?.id}`);
       if (response.ok) {
         const data = await response.json();
         setProducts(data.data || data);
