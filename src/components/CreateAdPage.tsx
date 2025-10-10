@@ -9,6 +9,7 @@ import {
 } from "../api/AdProduct";
 import { Upload, X, FileText, Image as ImageIcon, DollarSign, ChevronDown } from "lucide-react";
 import { useAuthContext } from "../contexts/AuthContext";
+import { useToast } from "./Toast";
 
 type Categoria = { id: number; nombre: string };
 type Punto = { id: number; nombre: string };
@@ -21,7 +22,8 @@ interface CreateAdPageProps {
 export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuthContext();
+  const { user, refreshProfile } = useAuthContext();
+  const { showToast, ToastComponent } = useToast();
 
   // Usar user del contexto si currentUser no está disponible
   const activeUser = currentUser || user;
@@ -166,13 +168,22 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
         imageFiles
       );
 
-      alert(res.message || "Producto creado con éxito.");
-      // Vuelve al catálogo (si pasó onBack lo usamos, sino navegamos)
-      if (onBack) onBack();
-      else navigate("/catalog");
+      // Actualizar créditos del usuario en el contexto
+      await refreshProfile();
+
+      // Mostrar toast de éxito
+      showToast('success', '¡Producto creado!', res.message || 'Tu producto se ha publicado exitosamente.');
+
+      // Esperar un poco para que el usuario vea el toast antes de navegar
+      setTimeout(() => {
+        if (onBack) onBack();
+        else navigate("/catalog");
+      }, 1500);
     } catch (err: any) {
       console.error(err);
-      setErrors((p) => ({ ...p, submit: err?.message || "Error al crear el anuncio" }));
+      const errorMessage = err?.message || "Error al crear el anuncio";
+      setErrors((p) => ({ ...p, submit: errorMessage }));
+      showToast('error', 'Error', errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -432,6 +443,9 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
           </div>
         </form>
       </div>
+
+      {/* Toast Component */}
+      <ToastComponent />
     </div>
   );
 }

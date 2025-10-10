@@ -4,6 +4,8 @@ import { Eye, Edit, Trash2, Plus, X, Check, Upload, Package } from "lucide-react
 import {
   listPacks, createPack, updatePack, deletePack, buildAssetUrl, type CreditPack,
 } from "../api/packsApi";
+import { useToast } from "./Toast";
+import { ConfirmationModal } from "./reusables/ConfirmationModal";
 
 const MAX_IMG_MB = 5;
 const ALLOWED_MIME = ["image/png", "image/jpeg", "image/webp"];
@@ -40,6 +42,14 @@ export default function CreditPackagesPage() {
     descripcion: "",
   });
   const fileEditRef = useRef<HTMLInputElement>(null);
+
+  // Estados para modal de eliminación
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [packToDelete, setPackToDelete] = useState<CreditPack | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Hook de toast
+  const { showToast, ToastComponent } = useToast();
 
   useEffect(() => {
     listPacks().then(setCreditPackages).catch(console.error);
@@ -85,7 +95,10 @@ export default function CreditPackagesPage() {
   const handleCreditPackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const err = validateNew();
-    if (err) return alert(err);
+    if (err) {
+      showToast('warning', 'Validación', err);
+      return;
+    }
 
     try {
       setIsSavingNew(true);
@@ -98,9 +111,10 @@ export default function CreditPackagesPage() {
       });
       setNewCreditPack({ nombre: "", cantidad_creditos: "", precio: "", qr: null, descripcion: "" });
       setCreditPackages(await listPacks());
+      showToast('success', '¡Paquete creado!', 'El paquete de créditos se creó exitosamente');
     } catch (error: any) {
       console.error("Error al crear paquete", error);
-      alert(error?.response?.data?.error || "Error al crear paquete");
+      showToast('error', 'Error al crear', error?.response?.data?.error || 'No se pudo crear el paquete');
     } finally {
       setIsSavingNew(false);
     }
@@ -112,7 +126,7 @@ export default function CreditPackagesPage() {
       const file = files?.[0] || null;
       const fileErr = validateFile(file);
       if (file && fileErr) {
-        alert(fileErr);
+        showToast('warning', 'Archivo inválido', fileErr);
         return;
       }
       setNewCreditPack(prev => ({ ...prev, qr: file }));
@@ -140,7 +154,7 @@ export default function CreditPackagesPage() {
       const file = files?.[0] || null;
       const fileErr = validateFile(file);
       if (file && fileErr) {
-        alert(fileErr);
+        showToast('warning', 'Archivo inválido', fileErr);
         return;
       }
       setEditPack((p: any) => ({ ...p, qr: file }));
@@ -151,7 +165,10 @@ export default function CreditPackagesPage() {
 
   const saveEdit = async () => {
     const err = validateEdit();
-    if (err) return alert(err);
+    if (err) {
+      showToast('warning', 'Validación', err);
+      return;
+    }
     try {
       setSavingEdit(true);
       await updatePack({
@@ -164,22 +181,35 @@ export default function CreditPackagesPage() {
       });
       setCreditPackages(await listPacks());
       setEditOpen(false);
+      showToast('success', '¡Paquete actualizado!', 'Los cambios se guardaron exitosamente');
     } catch (error: any) {
       console.error("Error al actualizar paquete", error);
-      alert(error?.response?.data?.error || "Error al actualizar paquete");
+      showToast('error', 'Error al actualizar', error?.response?.data?.error || 'No se pudo actualizar el paquete');
     } finally {
       setSavingEdit(false);
     }
   };
 
-  const handleDeletePack = async (id: number) => {
-    if (!confirm("¿Eliminar paquete?")) return;
+  const handleDeletePack = (pack: CreditPack) => {
+    setPackToDelete(pack);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeletePack = async () => {
+    if (!packToDelete) return;
+
     try {
-      await deletePack(id);
+      setIsDeleting(true);
+      await deletePack(packToDelete.id);
       setCreditPackages(await listPacks());
+      setShowDeleteModal(false);
+      setPackToDelete(null);
+      showToast('success', 'Paquete eliminado', 'El paquete se eliminó exitosamente');
     } catch (error: any) {
       console.error("Error al eliminar paquete", error);
-      alert(error?.response?.data?.error || "Error al eliminar paquete");
+      showToast('error', 'Error al eliminar', error?.response?.data?.error || 'No se pudo eliminar el paquete');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -260,9 +290,25 @@ export default function CreditPackagesPage() {
                 required
               />
               {newCreditPack.qr && (
-                <p className="text-sm text-green-600 mt-1">
-                  Archivo seleccionado: {newCreditPack.qr.name}
-                </p>
+                <div className="mt-3 space-y-2">
+                  <p className="text-sm text-green-600 flex items-center">
+                    <Check className="h-4 w-4 mr-1" />
+                    Archivo seleccionado: {newCreditPack.qr.name}
+                  </p>
+                  <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <img
+                      src={URL.createObjectURL(newCreditPack.qr)}
+                      alt="Vista previa del QR"
+                      className="h-32 w-32 object-contain rounded-lg border border-gray-300 bg-white"
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-700">Vista previa del código QR</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Verifica que el código QR sea correcto antes de crear el paquete
+                      </p>
+                    </div>
+                  </div>
+                </div>
               )}
               <p className="text-xs text-gray-600 mt-1">
                 Formatos permitidos: PNG, JPG/JPEG, WEBP. Tamaño máx: {MAX_IMG_MB}MB.
@@ -368,7 +414,7 @@ export default function CreditPackagesPage() {
                           </button>
                           <button
                             className="inline-flex items-center px-3 py-1 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                            onClick={() => handleDeletePack(pack.id)}
+                            onClick={() => handleDeletePack(pack)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -540,6 +586,25 @@ export default function CreditPackagesPage() {
           </div>
         </div>
       )}
+
+      {/* Modal de confirmación de eliminación */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setPackToDelete(null);
+        }}
+        onConfirm={confirmDeletePack}
+        title="Eliminar Paquete de Créditos"
+        message={`¿Estás seguro de que deseas eliminar el paquete "${packToDelete?.nombre}"? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+        loading={isDeleting}
+      />
+
+      {/* Toast de notificaciones */}
+      <ToastComponent />
     </div>
   );
 }

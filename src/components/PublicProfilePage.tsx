@@ -82,13 +82,17 @@ export function PublicProfilePage({ userId, onNavigate, onProductClick }: Public
 
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/users/${userId}`);
+      const response = await fetch(`${API_BASE}/api/users/public/${userId}`);
       if (response.ok) {
         const data = await response.json();
         setProfile(data.data || data);
+      } else {
+        console.error('Error al cargar perfil, status:', response.status);
+        setProfile(null);
       }
     } catch (error) {
       console.error('Error al cargar perfil:', error);
+      setProfile(null);
     } finally {
       setLoading(false);
     }

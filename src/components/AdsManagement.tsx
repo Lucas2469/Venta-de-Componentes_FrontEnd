@@ -50,7 +50,9 @@ export const AdsManagement: React.FC = () => {
       });
 
       if (response.success) {
-        setProducts(response.data);
+        // Filtrar productos agotados - el admin no debería gestionarlos
+        const productosGestionables = response.data.filter((p: ProductSummary) => p.estado !== 'agotado');
+        setProducts(productosGestionables);
       } else {
         setError('Error al cargar los productos');
       }
@@ -142,7 +144,7 @@ export const AdsManagement: React.FC = () => {
         usuario_id: productToToggle.vendedor_id, // ID del vendedor del producto
         titulo,
         mensaje,
-        tipo_notificacion: 'producto' as const
+        tipo: 'producto' as const
       };
 
       const notificationResponse = await notificationsApi.createNotification(notificationData);

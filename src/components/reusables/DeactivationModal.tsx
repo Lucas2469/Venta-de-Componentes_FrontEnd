@@ -22,14 +22,14 @@ export const DeactivationModal: React.FC<DeactivationModalProps> = ({
   const [mensaje, setMensaje] = useState('');
   const [errors, setErrors] = useState<{titulo?: string; mensaje?: string}>({});
 
-  // Limpiar formulario cuando se abre el modal
+  // Limpiar formulario cuando se abre el modal y prellenar título con nombre del producto
   React.useEffect(() => {
     if (isOpen) {
-      setTitulo('');
+      setTitulo(`Desactivación de Producto: ${productName}`); // Pre-llenado automático con nombre del producto
       setMensaje('');
       setErrors({});
     }
-  }, [isOpen]);
+  }, [isOpen, productName]);
 
   const validateForm = (): boolean => {
     const newErrors: {titulo?: string; mensaje?: string} = {};
@@ -101,29 +101,6 @@ export const DeactivationModal: React.FC<DeactivationModalProps> = ({
               <strong>⚠️ Importante:</strong> Al desactivar este producto, se enviará una notificación
               al vendedor explicando el motivo. El producto dejará de aparecer en el catálogo público.
             </p>
-          </div>
-
-          {/* Título */}
-          <div>
-            <label htmlFor="titulo" className="block text-sm font-semibold text-gray-700 mb-2">
-              Título de la notificación *
-            </label>
-            <input
-              type="text"
-              id="titulo"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              disabled={isLoading}
-              placeholder="Ej: Producto desactivado por violación de políticas"
-              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all ${
-                errors.titulo ? 'border-red-300 bg-red-50' : 'border-gray-300'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-              maxLength={100}
-            />
-            {errors.titulo && (
-              <p className="text-red-600 text-sm mt-1">{errors.titulo}</p>
-            )}
-            <p className="text-gray-500 text-xs mt-1">{titulo.length}/100 caracteres</p>
           </div>
 
           {/* Mensaje */}

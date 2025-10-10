@@ -76,8 +76,8 @@ export function MyProfilePage({ onNavigate }: MyProfilePageProps) {
   useEffect(() => {
     if (!isAdmin) {
       fetchCreditHistory();
+      fetchTotalRatings();
     }
-    fetchTotalRatings();
   }, [currentUser?.id]);
 
   const fetchCreditHistory = async () => {
@@ -507,103 +507,109 @@ export function MyProfilePage({ onNavigate }: MyProfilePageProps) {
               </div>
             )}
 
-            {/* Calificación */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Calificación Promedio</h3>
-                <Star className="h-6 w-6 text-yellow-500" />
-              </div>
-              <div className="text-center">
-                <p className="text-5xl font-bold text-gray-900 mb-2">
-                  {currentUser?.rating ? Number(currentUser?.rating).toFixed(1) : '0.0'}
-                </p>
-                <div className="flex justify-center space-x-1 mb-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`h-5 w-5 ${
-                        star <= Number(currentUser?.rating || 0) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
+            {/* Calificación (solo no-admin) */}
+            {!isAdmin && (
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-gray-900">Calificación Promedio</h3>
+                  <Star className="h-6 w-6 text-yellow-500" />
                 </div>
-                <p className="text-sm text-gray-600">
-                  Basado en {currentUser?.totalTransactions || 0} transacciones
-                </p>
+                <div className="text-center">
+                  <p className="text-5xl font-bold text-gray-900 mb-2">
+                    {currentUser?.rating ? Number(currentUser?.rating).toFixed(1) : '0.0'}
+                  </p>
+                  <div className="flex justify-center space-x-1 mb-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-5 w-5 ${
+                          star <= Number(currentUser?.rating || 0) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Basado en {currentUser?.totalTransactions || 0} transacciones
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Estadísticas */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                <TrendingUp className="h-5 w-5 text-teal-600" />
-                <span>Estadísticas</span>
-              </h3>
-              <div className="space-y-4">
-                {isSeller && (
+            {/* Estadísticas (solo no-admin) */}
+            {!isAdmin && (
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
+                  <TrendingUp className="h-5 w-5 text-teal-600" />
+                  <span>Estadísticas</span>
+                </h3>
+                <div className="space-y-4">
+                  {isSeller && (
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <div className="flex items-center space-x-2">
+                        <Package className="h-5 w-5 text-pink-600" />
+                        <span className="text-gray-700">Total ventas</span>
+                      </div>
+                      <span className="font-bold text-gray-900">{currentUser?.totalTransactions || 0}</span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
                     <div className="flex items-center space-x-2">
-                      <Package className="h-5 w-5 text-pink-600" />
-                      <span className="text-gray-700">Total ventas</span>
+                      <ShoppingCart className="h-5 w-5 text-purple-600" />
+                      <span className="text-gray-700">Total compras</span>
                     </div>
-                    <span className="font-bold text-gray-900">{currentUser?.totalTransactions || 0}</span>
+                    <span className="font-bold text-gray-900">{currentUser?.total_intercambios_comprador || 0}</span>
                   </div>
-                )}
-                <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                  <div className="flex items-center space-x-2">
-                    <ShoppingCart className="h-5 w-5 text-purple-600" />
-                    <span className="text-gray-700">Total compras</span>
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center space-x-2">
+                      <Award className="h-5 w-5 text-yellow-600" />
+                      <span className="text-gray-700">Calificaciones recibidas</span>
+                    </div>
+                    <span className="font-bold text-gray-900">{totalRatingsReceived}</span>
                   </div>
-                  <span className="font-bold text-gray-900">{currentUser?.total_intercambios_comprador || 0}</span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center space-x-2">
-                    <Award className="h-5 w-5 text-yellow-600" />
-                    <span className="text-gray-700">Calificaciones recibidas</span>
-                  </div>
-                  <span className="font-bold text-gray-900">{totalRatingsReceived}</span>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Accesos rápidos */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Accesos Rápidos</h3>
-              <div className="space-y-2">
-                {isSeller && (
-                  <>
-                    <button
-                      onClick={() => onNavigate('my-products')}
-                      className="w-full text-left px-4 py-3 rounded-lg hover:bg-pink-50 transition-colors flex items-center justify-between group"
-                    >
-                      <span className="text-gray-700 group-hover:text-pink-600">Mis Productos</span>
-                      <Package className="h-5 w-5 text-gray-400 group-hover:text-pink-600" />
-                    </button>
-                    <button
-                      onClick={() => onNavigate('vendor-appointments')}
-                      className="w-full text-left px-4 py-3 rounded-lg hover:bg-purple-50 transition-colors flex items-center justify-between group"
-                    >
-                      <span className="text-gray-700 group-hover:text-purple-600">Mis Citas (Vendedor)</span>
-                      <Calendar className="h-5 w-5 text-gray-400 group-hover:text-purple-600" />
-                    </button>
-                    <button
-                      onClick={() => onNavigate('mis-horarios')}
-                      className="w-full text-left px-4 py-3 rounded-lg hover:bg-teal-50 transition-colors flex items-center justify-between group"
-                    >
-                      <span className="text-gray-700 group-hover:text-teal-600">Mis Horarios</span>
-                      <Clock className="h-5 w-5 text-gray-400 group-hover:text-teal-600" />
-                    </button>
-                  </>
-                )}
-                <button
-                  onClick={() => onNavigate('my-appointments')}
-                  className="w-full text-left px-4 py-3 rounded-lg hover:bg-orange-50 transition-colors flex items-center justify-between group"
-                >
-                  <span className="text-gray-700 group-hover:text-orange-600">Mis Citas (Comprador)</span>
-                  <ShoppingCart className="h-5 w-5 text-gray-400 group-hover:text-orange-600" />
-                </button>
+            {/* Accesos rápidos (solo no-admin) */}
+            {!isAdmin && (
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Accesos Rápidos</h3>
+                <div className="space-y-2">
+                  {isSeller && (
+                    <>
+                      <button
+                        onClick={() => onNavigate('my-products')}
+                        className="w-full text-left px-4 py-3 rounded-lg hover:bg-pink-50 transition-colors flex items-center justify-between group"
+                      >
+                        <span className="text-gray-700 group-hover:text-pink-600">Mis Productos</span>
+                        <Package className="h-5 w-5 text-gray-400 group-hover:text-pink-600" />
+                      </button>
+                      <button
+                        onClick={() => onNavigate('vendor-appointments')}
+                        className="w-full text-left px-4 py-3 rounded-lg hover:bg-purple-50 transition-colors flex items-center justify-between group"
+                      >
+                        <span className="text-gray-700 group-hover:text-purple-600">Mis Citas (Vendedor)</span>
+                        <Calendar className="h-5 w-5 text-gray-400 group-hover:text-purple-600" />
+                      </button>
+                      <button
+                        onClick={() => onNavigate('mis-horarios')}
+                        className="w-full text-left px-4 py-3 rounded-lg hover:bg-teal-50 transition-colors flex items-center justify-between group"
+                      >
+                        <span className="text-gray-700 group-hover:text-teal-600">Mis Horarios</span>
+                        <Clock className="h-5 w-5 text-gray-400 group-hover:text-teal-600" />
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => onNavigate('my-appointments')}
+                    className="w-full text-left px-4 py-3 rounded-lg hover:bg-orange-50 transition-colors flex items-center justify-between group"
+                  >
+                    <span className="text-gray-700 group-hover:text-orange-600">Mis Citas (Comprador)</span>
+                    <ShoppingCart className="h-5 w-5 text-gray-400 group-hover:text-orange-600" />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

@@ -484,13 +484,13 @@ export const UsersList: React.FC<UsersListProps> = ({
 
                                             {/* Créditos */}
                                             <td className="px-6 py-5 whitespace-nowrap">
-                                                {user.tipo_usuario === 'vendedor' ? (
+                                                {user.tipo_usuario !== 'admin' ? (
                                                     <div className="flex items-center">
                                                         <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center mr-2">
                                                             <span className="text-white text-sm font-bold">💳</span>
                                                         </div>
                                                         <span className="text-lg font-bold text-green-600">
-                                                            {user.creditos_disponibles}
+                                                            {user.creditos_disponibles || 0}
                                                         </span>
                                                     </div>
                                                 ) : (

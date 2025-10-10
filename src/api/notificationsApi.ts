@@ -1,4 +1,19 @@
 import { API_CONFIG, getApiUrl } from './api';
+import { authService } from './authApi';
+
+// Helper para agregar headers de autenticación
+const getAuthHeaders = (): HeadersInit => {
+    const token = authService.getAccessToken();
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+    };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return headers;
+};
 
 // Tipos para la API de notificaciones
 export interface NotificationData {
@@ -21,7 +36,10 @@ export interface CreateNotificationRequest {
     usuario_id: number;
     titulo: string;
     mensaje: string;
-    tipo_notificacion?: 'producto' | 'creditos' | 'agendamiento' | 'calificacion';
+    tipo?: 'producto' | 'creditos' | 'agendamiento' | 'calificacion' | 'sistema';
+    datos?: any;
+    enlace?: string;
+    prioridad?: 'baja' | 'normal' | 'alta' | 'urgente';
 }
 
 export interface NotificationResponse {
@@ -56,9 +74,7 @@ class NotificationsApi {
         try {
             const response = await fetch(this.baseUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(notificationData)
             });
 
@@ -94,7 +110,9 @@ class NotificationsApi {
         const url = `${this.baseUrl}/user/${userId}?${queryParams.toString()}`;
 
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: getAuthHeaders()
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -110,9 +128,7 @@ class NotificationsApi {
         try {
             const response = await fetch(`${this.baseUrl}/${notificationId}/read`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ usuario_id: userId })
             });
 
@@ -130,7 +146,9 @@ class NotificationsApi {
     // Contar notificaciones no vistas
     async getUnreadCount(userId: number): Promise<UnreadCountResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/user/${userId}/unread-count`);
+            const response = await fetch(`${this.baseUrl}/user/${userId}/unread-count`, {
+                headers: getAuthHeaders()
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -146,9 +164,7 @@ class NotificationsApi {
         try {
             const response = await fetch(`${this.baseUrl}/${notificationId}`, {
                 method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ usuario_id: userId })
             });
 

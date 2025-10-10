@@ -23,7 +23,6 @@ import { MyProfilePage } from "./components/MyProfilePage";
 import { PublicProfilePage } from "./components/PublicProfilePage";
 import { MyProductsPage } from "./components/MyProductsPage";
 import { User } from "./components/types";
-import { mockUsers } from "./components/mockData";
 
 // Wrapper para ProductDetail que extrae el ID de la URL
 const ProductDetailWrapper: React.FC = () => {
@@ -123,7 +122,7 @@ function AppContent() {
 
           {/* Rutas protegidas */}
           <Route path="/create-ad" element={
-            <AuthProtectedRoute>
+            <AuthProtectedRoute requiredRoles={['comprador', 'vendedor']}>
               <CreateAdPage onBack={() => navigate('/catalog')} />
             </AuthProtectedRoute>
           } />

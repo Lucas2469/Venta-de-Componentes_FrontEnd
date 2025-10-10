@@ -177,6 +177,12 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack 
             return;
         }
 
+        // Bloquear a administradores de hacer transacciones
+        if (isAdmin) {
+            showToast('info', 'Administrador no realiza transacciones', 'Como administrador, no puedes agendar citas ni realizar compras. Esta función está disponible solo para compradores y vendedores.');
+            return;
+        }
+
         setShowScheduleModal(true);
     };
 

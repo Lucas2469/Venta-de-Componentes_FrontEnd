@@ -1,4 +1,19 @@
 import { API_CONFIG, getApiUrl } from './api';
+import { authService } from './authApi';
+
+// Helper para agregar headers de autenticación
+const getAuthHeaders = (): HeadersInit => {
+    const token = authService.getAccessToken();
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+    };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return headers;
+};
 
 // Tipos para la API de usuarios
 export interface UserFilters {
@@ -91,7 +106,7 @@ class UsersApi {
     // Obtener todos los usuarios
     async getAllUsers(filters: UserFilters = {}): Promise<PaginatedUsersResponse> {
         const queryParams = new URLSearchParams();
-        
+
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
                 queryParams.append(key, value.toString());
@@ -99,9 +114,11 @@ class UsersApi {
         });
 
         const url = `${this.baseUrl}?${queryParams.toString()}`;
-        
+
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: getAuthHeaders()
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -115,7 +132,9 @@ class UsersApi {
     // Obtener usuario por ID
     async getUserById(id: number): Promise<SingleUserResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/${id}`);
+            const response = await fetch(`${this.baseUrl}/${id}`, {
+                headers: getAuthHeaders()
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -129,7 +148,7 @@ class UsersApi {
     // Buscar usuarios
     async searchUsers(query: string, filters: UserFilters = {}): Promise<PaginatedUsersResponse> {
         const searchParams = new URLSearchParams({ q: query });
-        
+
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
                 searchParams.append(key, value.toString());
@@ -137,7 +156,9 @@ class UsersApi {
         });
 
         try {
-            const response = await fetch(`${this.baseUrl}/search?${searchParams.toString()}`);
+            const response = await fetch(`${this.baseUrl}/search?${searchParams.toString()}`, {
+                headers: getAuthHeaders()
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -151,7 +172,7 @@ class UsersApi {
     // Obtener usuarios por tipo
     async getUsersByType(tipo: string, filters: UserFilters = {}): Promise<PaginatedUsersResponse> {
         const queryParams = new URLSearchParams();
-        
+
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
                 queryParams.append(key, value.toString());
@@ -159,9 +180,11 @@ class UsersApi {
         });
 
         const url = `${this.baseUrl}/type/${tipo}?${queryParams.toString()}`;
-        
+
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: getAuthHeaders()
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -219,9 +242,7 @@ class UsersApi {
         try {
             const response = await fetch(`${this.baseUrl}/${userId}/status`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ estado: newStatus })
             });
 
