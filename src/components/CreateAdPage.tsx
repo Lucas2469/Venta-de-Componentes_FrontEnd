@@ -97,7 +97,19 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
 
   const handleInput = (field: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
+
+    // ✅ Validación en tiempo real para stock
+    if (field === 'stock') {
+      const stockValue = Number(value);
+      if (stockValue > 0 && (creditos ?? 0) < stockValue) {
+        setErrors((prev) => ({
+          ...prev,
+          stock: `Stock excede tus créditos disponibles (tienes ${creditos || 0})`
+        }));
+      } else if (errors[field]) {
+        setErrors((prev) => ({ ...prev, [field]: "" }));
+      }
+    } else if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
@@ -140,13 +152,20 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
       if (!form.descripcion.trim()) errs.descripcion = "La descripción es requerida";
       if (!form.precio || Number(form.precio) <= 0) errs.precio = "El precio debe ser mayor a 0";
       if (!form.stock || Number(form.stock) <= 0) errs.stock = "La cantidad debe ser mayor a 0";
+
+      // ✅ Validación crítica: stock no debe exceder créditos disponibles
+      const stockValue = Number(form.stock);
+      if (stockValue > 0 && (creditos ?? 0) < stockValue) {
+        errs.stock = `Stock excede tus créditos disponibles (tienes ${creditos || 0})`;
+      }
+
       if (!form.categoriaId) errs.categoriaId = "Selecciona una categoría";
       if (!form.puntoEncuentroId) errs.puntoEncuentroId = "Selecciona un punto de encuentro";
       if (imageFiles.length === 0) errs.images = "Debes subir al menos una imagen";
       setErrors(errs);
       return Object.keys(errs).length === 0;
     };
-  }, [form, imageFiles.length]);
+  }, [form, imageFiles.length, creditos]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,13 +228,32 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
         </div>
 
         {/* Aviso de créditos + política */}
-        <div className="mb-4 flex items-center gap-3">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-            Créditos: {creditos}
-          </span>
-          <span className="text-sm text-red-600">
-            ⚠️ Una vez publicado, no podrás editar este producto. Solo podrás eliminarlo.
-          </span>
+        <div className="mb-6 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-blue-700 font-medium mb-1">Tus créditos disponibles</p>
+              <p className="text-3xl font-bold text-blue-900">{creditos || 0}</p>
+              <p className="text-xs text-blue-600 mt-1">
+                💡 Cada unidad de stock consume 1 crédito
+              </p>
+            </div>
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => navigate("/buy-credits")}
+                className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Comprar más créditos
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+          <p className="text-sm text-yellow-800 flex items-center">
+            <span className="mr-2">⚠️</span>
+            <strong>Importante:</strong> Una vez publicado, no podrás editar este producto (solo eliminarlo).
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -288,21 +326,46 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
                 </div>
 
                 <div>
-
                   <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-1">
                     Stock *
+                    <span className="ml-2 text-xs text-gray-500">
+                      (= créditos a usar)
+                    </span>
                   </label>
                   <input
                     id="stock"
                     type="number"
                     placeholder="1"
+                    min="1"
+                    max={creditos || undefined}
                     value={form.stock}
                     onChange={(e) => handleInput("stock", e.target.value)}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9d0045] focus:border-transparent ${
-                      errors.stock ? "border-red-500" : "border-gray-300"
+                      errors.stock
+                        ? "border-red-500 bg-red-50"
+                        : form.stock && Number(form.stock) > 0 && Number(form.stock) <= (creditos || 0)
+                        ? "border-green-500 bg-green-50"
+                        : "border-gray-300"
                     }`}
                   />
-                  {errors.stock && <p className="text-red-500 text-sm mt-1">{errors.stock}</p>}
+                  {errors.stock && (
+                    <p className="text-red-600 text-sm mt-1 flex items-center">
+                      <span className="mr-1">⚠️</span>
+                      {errors.stock}
+                    </p>
+                  )}
+                  {!errors.stock && form.stock && Number(form.stock) > 0 && (
+                    <p className="text-green-600 text-sm mt-1 flex items-center">
+                      <span className="mr-1">✓</span>
+                      Se descontarán {form.stock} crédito{Number(form.stock) !== 1 ? 's' : ''}
+                      (te quedarán {(creditos || 0) - Number(form.stock)})
+                    </p>
+                  )}
+                  {!form.stock && (
+                    <p className="text-gray-500 text-xs mt-1">
+                      Tienes {creditos || 0} crédito{(creditos || 0) !== 1 ? 's' : ''} disponible{(creditos || 0) !== 1 ? 's' : ''}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -410,16 +473,62 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
           </div>
 
           {/* Info de costos */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg shadow-sm">
-            <div className="px-6 py-4 border-b border-yellow-200">
-              <h3 className="flex items-center space-x-2 text-lg font-semibold text-yellow-800">
+          <div className={`border rounded-lg shadow-sm ${
+            form.stock && Number(form.stock) > (creditos || 0)
+              ? "bg-red-50 border-red-300"
+              : "bg-blue-50 border-blue-200"
+          }`}>
+            <div className={`px-6 py-4 border-b ${
+              form.stock && Number(form.stock) > (creditos || 0)
+                ? "border-red-300"
+                : "border-blue-200"
+            }`}>
+              <h3 className={`flex items-center space-x-2 text-lg font-semibold ${
+                form.stock && Number(form.stock) > (creditos || 0)
+                  ? "text-red-800"
+                  : "text-blue-800"
+              }`}>
                 <DollarSign className="h-5 w-5" />
-                <span>Información de Costos</span>
+                <span>Resumen de Publicación</span>
               </h3>
             </div>
-            <div className="p-6 text-sm text-yellow-700">
-              <p>• Al publicar se descuentan créditos iguales al <strong>stock</strong> (p. ej. stock 5 ⇒ 5 créditos).</p>
-              <p>• El anuncio queda activo; no es editable. Puedes eliminarlo.</p>
+            <div className={`p-6 space-y-2 text-sm ${
+              form.stock && Number(form.stock) > (creditos || 0)
+                ? "text-red-700"
+                : "text-blue-700"
+            }`}>
+              <div className="flex justify-between items-center font-medium">
+                <span>Créditos disponibles:</span>
+                <span className="text-lg">{creditos || 0}</span>
+              </div>
+              {form.stock && Number(form.stock) > 0 && (
+                <>
+                  <div className="flex justify-between items-center">
+                    <span>Stock a publicar:</span>
+                    <span className="text-lg">-{form.stock}</span>
+                  </div>
+                  <div className="border-t border-current opacity-30 my-2"></div>
+                  <div className="flex justify-between items-center font-bold text-base">
+                    <span>Te quedarán:</span>
+                    <span className={`text-xl ${
+                      (creditos || 0) - Number(form.stock) < 0
+                        ? "text-red-600"
+                        : "text-green-600"
+                    }`}>
+                      {(creditos || 0) - Number(form.stock)} crédito{((creditos || 0) - Number(form.stock)) !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                </>
+              )}
+              <div className={`mt-4 pt-4 border-t ${
+                form.stock && Number(form.stock) > (creditos || 0)
+                  ? "border-red-300"
+                  : "border-blue-300"
+              }`}>
+                <p className="text-xs">
+                  <strong>Importante:</strong> Stock = Créditos a descontar. Una vez publicado, no podrás editar este anuncio (solo eliminarlo).
+                </p>
+              </div>
               {errors.submit && <p className="text-red-600 mt-2">{errors.submit}</p>}
             </div>
           </div>
@@ -435,7 +544,7 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
             </button>
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || (form.stock && Number(form.stock) > (creditos || 0))}
               className="flex-1 px-4 py-2 bg-[#9d0045] text-white rounded-md hover:bg-[#8b003d] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {submitting ? "Creando..." : "Crear Anuncio"}

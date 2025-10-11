@@ -219,6 +219,67 @@ export const useAuth = (): AuthState & AuthActions => {
     setState(prev => ({ ...prev, error: null }));
   }, []);
 
+  // 🔄 SINCRONIZACIÓN AUTOMÁTICA DE CRÉDITOS
+  // Verifica créditos cada 30 segundos y actualiza automáticamente
+  useEffect(() => {
+    // Solo sincronizar si hay un usuario autenticado
+    if (!state.isAuthenticated || !state.user) {
+      return;
+    }
+
+    const syncCredits = async () => {
+      try {
+        console.log('🔄 Sincronizando créditos y tipo_usuario automáticamente...');
+        const updatedUser = await authService.getProfile();
+
+        // Usar setState con función para obtener el estado más reciente
+        setState(prev => {
+          // ✅ Actualizar si cambiaron créditos O tipo_usuario
+          if (prev.user && (
+            updatedUser.creditos_disponibles !== prev.user.creditos_disponibles ||
+            updatedUser.tipo_usuario !== prev.user.tipo_usuario
+          )) {
+            console.log(`💰 Créditos: ${prev.user.creditos_disponibles} → ${updatedUser.creditos_disponibles}`);
+            console.log(`👤 Tipo usuario: ${prev.user.tipo_usuario} → ${updatedUser.tipo_usuario}`);
+
+            // También actualizar en localStorage
+            authService.updateUser({
+              creditos_disponibles: updatedUser.creditos_disponibles,
+              tipo_usuario: updatedUser.tipo_usuario
+            });
+
+            return {
+              ...prev,
+              user: {
+                ...prev.user,
+                creditos_disponibles: updatedUser.creditos_disponibles,
+                tipo_usuario: updatedUser.tipo_usuario
+              }
+            };
+          } else {
+            console.log('✅ Sin cambios - Créditos:', updatedUser.creditos_disponibles, 'Tipo:', updatedUser.tipo_usuario);
+            return prev; // No cambiar estado si no hay cambios
+          }
+        });
+      } catch (error) {
+        console.error('❌ Error sincronizando:', error);
+        // No mostrar error al usuario, es una sincronización en background
+      }
+    };
+
+    // Ejecutar inmediatamente al montar (después de 1 segundo)
+    const immediateTimer = setTimeout(syncCredits, 1000);
+
+    // Configurar intervalo de 30 segundos
+    const interval = setInterval(syncCredits, 30000); // 30 segundos
+
+    // Limpiar timers al desmontar
+    return () => {
+      clearTimeout(immediateTimer);
+      clearInterval(interval);
+    };
+  }, [state.isAuthenticated, state.user?.id]); // Solo depender de autenticación y userId
+
   return {
     ...state,
     login,

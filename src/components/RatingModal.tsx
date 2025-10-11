@@ -12,6 +12,8 @@ interface RatingModalProps {
   };
   ratingType: 'comprador_a_vendedor' | 'vendedor_a_comprador';
   productName: string;
+  fechaCita: string;
+  horaCita: string;
 }
 
 export const RatingModal: React.FC<RatingModalProps> = ({
@@ -20,7 +22,9 @@ export const RatingModal: React.FC<RatingModalProps> = ({
   onSubmit,
   targetUser,
   ratingType,
-  productName
+  productName,
+  fechaCita,
+  horaCita
 }) => {
   const [rating, setRating] = useState<number>(0);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
@@ -45,16 +49,22 @@ export const RatingModal: React.FC<RatingModalProps> = ({
       return;
     }
 
+    if (isSubmitting) {
+      console.log('⏸️ Ya se está enviando una calificación, ignorando clic adicional');
+      return; // Prevenir doble envío
+    }
+
     setIsSubmitting(true);
     try {
+      console.log('📤 Enviando calificación desde modal:', { rating, comment });
       await onSubmit(rating, comment);
-      // Reset form
+      // Reset form SOLO SI fue exitoso
       setRating(0);
       setComment('');
-      onClose();
-      showToast('success', 'Calificación enviada', 'Gracias por tu calificación');
+      // NO llamar a showToast aquí, ya se hace en RatingSystemManager
     } catch (error) {
-      showToast('error', 'Error', 'No se pudo enviar la calificación');
+      console.error('❌ Error en handleSubmit del modal:', error);
+      // NO mostrar toast aquí, ya se maneja en RatingSystemManager
     } finally {
       setIsSubmitting(false);
     }
@@ -89,12 +99,25 @@ export const RatingModal: React.FC<RatingModalProps> = ({
               <X className="h-6 w-6" />
             </button>
           </div>
-          <p className="text-sm text-gray-600 mt-2">
-            Producto: <span className="font-medium">{productName}</span>
-          </p>
-          <p className="text-sm text-gray-600">
-            {ratingType === 'comprador_a_vendedor' ? 'Vendedor' : 'Comprador'}: <span className="font-medium">{targetUser.nombre}</span>
-          </p>
+          <div className="mt-3 space-y-1">
+            <p className="text-sm text-gray-600">
+              <span className="font-medium text-gray-700">Producto:</span> {productName}
+            </p>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium text-gray-700">{ratingType === 'comprador_a_vendedor' ? 'Vendedor' : 'Comprador'}:</span> {targetUser.nombre}
+            </p>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium text-gray-700">Fecha del encuentro:</span> {new Date(fechaCita).toLocaleDateString('es-BO', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </p>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium text-gray-700">Hora:</span> {horaCita}
+            </p>
+          </div>
         </div>
 
         {/* Body */}

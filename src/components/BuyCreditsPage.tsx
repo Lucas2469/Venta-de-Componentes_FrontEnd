@@ -9,60 +9,27 @@ import {
   RefreshCw
 } from "lucide-react";
 import { SuccessModal } from "./reusables/SuccessModal";
+import { useAuthContext } from "../contexts/AuthContext";
 
 const API_BASE = "http://localhost:5000";
 
 interface BuyCreditsPageProps {
   onBack: () => void;
-  currentUser?: any;
-  onCreditsUpdated?: (newCredits: number) => void;
 }
 
-export function BuyCreditsPage({ onBack, currentUser, onCreditsUpdated }: BuyCreditsPageProps) {
+export function BuyCreditsPage({ onBack }: BuyCreditsPageProps) {
+  const { user: currentUser, refreshProfile } = useAuthContext();
   const [selectedPackage, setSelectedPackage] = useState<string>("");
   const [proofImage, setProofImage] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [creditPackages, setCreditPackages] = useState<any[]>([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Función para verificar créditos actualizados desde el backend
-  const checkUpdatedCredits = async () => {
-    if (!currentUser?.id) return;
-
-    try {
-      console.log('🔍 Verificando créditos para usuario ID:', currentUser.id);
-      const response = await fetch(`${API_BASE}/api/users/${currentUser.id}`);
-
-      if (response.ok) {
-        const responseData = await response.json();
-        console.log('📊 Respuesta del backend:', responseData);
-
-        // El backend devuelve { success: true, data: { usuario... } }
-        const userData = responseData.data || responseData;
-        console.log('👤 Datos del usuario extraídos:', userData);
-        const newCredits = userData.creditos_disponibles || 0;
-
-        // Solo actualizar si los créditos han cambiado
-        const currentCredits = currentUser?.creditos_disponibles || currentUser?.credits || 0;
-        console.log('💰 Créditos actuales:', currentCredits, '| Nuevos créditos:', newCredits);
-
-        if (newCredits !== currentCredits && onCreditsUpdated) {
-          console.log('✅ Actualizando créditos del usuario');
-          onCreditsUpdated(newCredits);
-        }
-      } else {
-        console.log('❌ Error en respuesta:', response.status, response.statusText);
-      }
-    } catch (error) {
-      console.error('Error verificando créditos:', error);
-    }
+  // Función para actualizar créditos manualmente
+  const handleRefreshCredits = async () => {
+    console.log('🔄 Actualizando créditos manualmente...');
+    await refreshProfile();
   };
-
-  // Verificar créditos cada 5 segundos (solo cuando está en esta página)
-  useEffect(() => {
-    const interval = setInterval(checkUpdatedCredits, 5000);
-    return () => clearInterval(interval);
-  }, [currentUser?.id]);
 
   // Obtener los paquetes de créditos desde el backend
   useEffect(() => {
@@ -178,9 +145,9 @@ export function BuyCreditsPage({ onBack, currentUser, onCreditsUpdated }: BuyCre
               </div>
               <button
                 type="button"
-                onClick={checkUpdatedCredits}
+                onClick={handleRefreshCredits}
                 className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors flex items-center gap-1"
-                title="Verificar créditos actualizados"
+                title="Actualizar créditos ahora"
               >
                 <RefreshCw className="h-3 w-3" />
                 Actualizar

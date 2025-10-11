@@ -24,8 +24,8 @@ export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps)
   // Usar el ID real del usuario logueado
   const userId = currentUser?.id || 0;
 
-  // Lógica dinámica para determinar capacidades del usuario basada en créditos
-  const canSell = !isAdmin && userCredits > 0; // Puede vender si tiene créditos
+  // ✅ Lógica simplificada: tipo_usuario se actualiza automáticamente en BD
+  const isVendor = currentUser?.tipo_usuario === "vendedor"; // Es vendedor (tiene créditos > 0)
   const canBuy = !isAdmin; // Cualquier usuario no-admin puede comprar
 
   // Cargar contador de notificaciones no leídas
@@ -150,8 +150,8 @@ export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps)
                               Mi Perfil
                             </button>
 
-                            {/* Mis horarios - Solo para usuarios que pueden vender (tienen créditos) */}
-                            {canSell && (
+                            {/* Mis horarios - Solo para vendedores reales */}
+                            {isVendor && (
                               <button
                                 onClick={() => {
                                   onNavigate("mis-horarios");
@@ -164,8 +164,8 @@ export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps)
                               </button>
                             )}
 
-                            {/* Agendamientos del vendedor - Solo para usuarios que pueden vender */}
-                            {canSell && (
+                            {/* Mis Agendamientos (como vendedor) - Solo para vendedores */}
+                            {isVendor && (
                               <button
                                 onClick={() => {
                                   onNavigate("vendor-appointments");
@@ -192,6 +192,7 @@ export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps)
                               </button>
                             )}
 
+                            {/* Crear Anuncio - Para todos los no-admin (redirige a BuyCredits si sin créditos) */}
                             {!isAdmin && (
                               <>
                                 <button

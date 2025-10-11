@@ -29,22 +29,33 @@ const RatingSystemManager: React.FC<RatingSystemManagerProps> = ({
     if (!isActive || !currentUserId) return;
 
     try {
+      console.log('🔄 Cargando calificaciones pendientes para usuario:', currentUserId);
       const ratings = await getPendingRatings(currentUserId);
+      console.log(`📊 Calificaciones pendientes encontradas: ${ratings.length}`);
       setPendingRatings(ratings);
 
-      // Si hay calificaciones pendientes, mostrar la primera automáticamente
-      if (ratings.length > 0 && !showRatingModal) {
+      // Si hay calificaciones pendientes, mostrar la primera automáticamente SOLO si no hay modal abierto
+      if (ratings.length > 0 && !showRatingModal && !currentRating) {
         const firstPending = ratings[0];
+        console.log('📝 Primera calificación pendiente:', {
+          agendamiento_id: firstPending.agendamiento_id,
+          producto: firstPending.producto_nombre,
+          minutes_since_meeting: firstPending.minutes_since_meeting
+        });
+
         // Solo mostrar si han pasado más de 0 minutos (para pruebas - originalmente 20 min)
         if (firstPending.minutes_since_meeting >= 0) {
+          console.log('✅ Mostrando modal de calificación automáticamente');
           setCurrentRating(firstPending);
           setShowRatingModal(true);
         }
+      } else if (showRatingModal) {
+        console.log('⏸️ Ya hay un modal abierto, no se muestra otro');
       }
     } catch (error) {
-      console.error('Error loading pending ratings:', error);
+      console.error('❌ Error loading pending ratings:', error);
     }
-  }, [currentUserId, isActive, showRatingModal]);
+  }, [currentUserId, isActive, showRatingModal, currentRating]);
 
   // Verificar alertas de calificaciones pendientes
   const checkAlerts = useCallback(async () => {
@@ -100,40 +111,71 @@ const RatingSystemManager: React.FC<RatingSystemManagerProps> = ({
         comentario: comment || null,
       };
 
+      console.log('📤 Enviando calificación:', ratingData);
       await createRating(ratingData);
+      console.log('✅ Calificación enviada exitosamente');
+
+      // Eliminar el agendamiento actual de la lista de pendientes INMEDIATAMENTE
+      const currentAgendamientoId = currentRating.agendamiento_id;
+      setPendingRatings(prevPendings =>
+        prevPendings.filter(r => r.agendamiento_id !== currentAgendamientoId)
+      );
 
       showToast('success', 'Calificación enviada', 'Gracias por tu calificación');
 
-      // Recargar calificaciones pendientes
+      // Cerrar el modal actual
+      setShowRatingModal(false);
+      setCurrentRating(null);
+
+      // Recargar calificaciones pendientes después de un delay
       setTimeout(() => {
         loadPendingRatings();
         checkAlerts();
       }, 1000);
 
     } catch (error: any) {
-      console.error('Error submitting rating:', error);
-      const message = error.response?.data?.message || 'Error al enviar la calificación';
-      showToast('error', 'Error', message);
+      console.error('❌ Error submitting rating:', error);
+      console.error('📋 Error details:', error.response?.data);
+
+      // Obtener mensaje específico del backend
+      const backendMessage = error.response?.data?.message || 'Error al enviar la calificación';
+
+      // Si ya calificó, mostrar mensaje específico
+      if (backendMessage.includes('Ya has calificado')) {
+        showToast('warning', 'Ya calificado', 'Ya has enviado tu calificación para este encuentro');
+
+        // Eliminar de la lista de pendientes si ya calificó
+        const currentAgendamientoId = currentRating.agendamiento_id;
+        setPendingRatings(prevPendings =>
+          prevPendings.filter(r => r.agendamiento_id !== currentAgendamientoId)
+        );
+
+        // Cerrar el modal
+        setShowRatingModal(false);
+        setCurrentRating(null);
+
+        // Recargar pendientes para actualizar la lista
+        setTimeout(() => {
+          loadPendingRatings();
+          checkAlerts();
+        }, 500);
+      } else {
+        showToast('error', 'Error', backendMessage);
+      }
+
       throw error;
     }
   };
 
   // Manejar cierre del modal
   const handleCloseModal = () => {
+    console.log('🚪 Cerrando modal de calificación (cancelado por usuario)');
     setShowRatingModal(false);
     setCurrentRating(null);
 
-    // Si hay más calificaciones pendientes, mostrar la siguiente después de un delay
-    setTimeout(() => {
-      const remainingRatings = pendingRatings.filter(r => r.agendamiento_id !== currentRating?.agendamiento_id);
-      if (remainingRatings.length > 0) {
-        const nextRating = remainingRatings[0];
-        if (nextRating.minutes_since_meeting >= 20) {
-          setCurrentRating(nextRating);
-          setShowRatingModal(true);
-        }
-      }
-    }, 5000); // Esperar 5 segundos antes de mostrar la siguiente
+    // NOTA: Ya NO mostramos automáticamente el siguiente modal
+    // El usuario puede hacer refresh o esperar el próximo intervalo (2 min)
+    // Esto evita abrumar al usuario con múltiples modales
   };
 
   // Función para abrir manualmente la calificación de un agendamiento específico
@@ -204,6 +246,8 @@ const RatingSystemManager: React.FC<RatingSystemManagerProps> = ({
           }}
           ratingType={currentRating.can_rate_buyer ? 'vendedor_a_comprador' : 'comprador_a_vendedor'}
           productName={currentRating.producto_nombre}
+          fechaCita={currentRating.fecha_cita}
+          horaCita={currentRating.hora_cita}
         />
       )}
     </>
