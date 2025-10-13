@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { AlertCircle, LogIn, Mail, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, LogIn, Eye, EyeOff } from "lucide-react";
 import { useAuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./Toast";
@@ -19,7 +19,6 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -76,94 +75,12 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
     }
   };
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.emailOrUsername.trim()) {
-      setErrors({ emailOrUsername: "Please enter your email or username" });
-      return;
-    }
-
-    setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
-
-    showToast('success', 'Enlace enviado', 'Se ha enviado un enlace para restablecer tu contraseña a tu correo electrónico');
-    setShowForgotPassword(false);
-    setFormData(prev => ({ ...prev, emailOrUsername: "" }));
-  };
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
   };
-
-  if (showForgotPassword) {
-    return (
-      <>
-        <ToastComponent />
-        <div className="min-h-screen flex items-center justify-center p-4 bg-white">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-          <div className="text-center p-6" style={{ backgroundColor: '#9d0045', color: '#ffffff' }}>
-            <div className="flex items-center justify-center mb-2">
-              <Mail className="h-8 w-8 mr-2" />
-              <h1 className="text-2xl font-bold">Reset Password</h1>
-            </div>
-            <p className="text-white/80">
-              Enter your email or username to receive a reset link
-            </p>
-          </div>
-
-          <div className="p-6">
-            <form onSubmit={handleForgotPassword} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-700">Email or Username</label>
-                <input
-                  id="emailOrUsername"
-                  name="username"
-                  type="text"
-                  autoComplete="username"
-                  placeholder="Enter your email or username"
-                  value={formData.emailOrUsername}
-                  onChange={(e) => handleInputChange("emailOrUsername", e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
-                    errors.emailOrUsername ? "border-red-500 bg-red-50" : "border-gray-300"
-                  }`}
-                />
-                {errors.emailOrUsername && (
-                  <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-                    <AlertCircle className="h-4 w-4 text-red-600" />
-                    <p className="text-sm text-red-600">{errors.emailOrUsername}</p>
-                  </div>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                style={{ backgroundColor: '#9d0045', color: '#ffffff' }}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Sending..." : "Send Reset Link"}
-              </button>
-
-              <button
-                type="button"
-                className="w-full py-3 px-4 rounded-lg font-medium transition-colors hover:bg-gray-100"
-                onClick={() => setShowForgotPassword(false)}
-                style={{ color: '#00adb5' }}
-              >
-                Back to Login
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-      </>
-    );
-  }
 
   return (
     <>
@@ -238,11 +155,11 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={() => setShowForgotPassword(true)}
+                onClick={() => navigate('/forgot-password')}
                 className="text-sm hover:underline transition-colors"
                 style={{ color: '#00adb5' }}
               >
-                Forgot password?
+                ¿Olvidaste tu contraseña?
               </button>
             </div>
 

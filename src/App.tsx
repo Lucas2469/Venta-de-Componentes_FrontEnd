@@ -5,6 +5,8 @@ import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { LoginPage } from "./components/LoginPage";
 import { RegistrationPage } from "./components/RegistrationPage";
+import { ForgotPasswordPage } from "./components/ForgotPasswordPage";
+import { ResetPasswordPage } from "./components/ResetPasswordPage";
 import { NewAdminDashboard } from "./components/NewAdminDashboard";
 import CreateAdPage from "./components/CreateAdPage";
 import { ProductCatalog } from "./components/ProductCatalog";
@@ -103,6 +105,12 @@ function AppContent() {
             <RegistrationPage
               onNavigateToLogin={() => navigate('/login')}
             />
+          } />
+          <Route path="/forgot-password" element={
+            <ForgotPasswordPage onNavigate={handleNavigate} />
+          } />
+          <Route path="/reset-password" element={
+            <ResetPasswordPage onNavigate={handleNavigate} />
           } />
 
           {/* Admin Dashboard - Solo para admins */}

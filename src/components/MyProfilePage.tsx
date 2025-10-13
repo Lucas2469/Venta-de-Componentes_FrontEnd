@@ -516,20 +516,20 @@ export function MyProfilePage({ onNavigate }: MyProfilePageProps) {
                 </div>
                 <div className="text-center">
                   <p className="text-5xl font-bold text-gray-900 mb-2">
-                    {currentUser?.rating ? Number(currentUser?.rating).toFixed(1) : '0.0'}
+                    {currentUser?.calificacion_promedio ? Number(currentUser?.calificacion_promedio).toFixed(1) : '0.0'}
                   </p>
                   <div className="flex justify-center space-x-1 mb-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
                         className={`h-5 w-5 ${
-                          star <= Number(currentUser?.rating || 0) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
+                          star <= Number(currentUser?.calificacion_promedio || 0) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
                         }`}
                       />
                     ))}
                   </div>
                   <p className="text-sm text-gray-600">
-                    Basado en {currentUser?.totalTransactions || 0} transacciones
+                    Basado en {totalRatingsReceived} transacciones
                   </p>
                 </div>
               </div>
@@ -549,7 +549,7 @@ export function MyProfilePage({ onNavigate }: MyProfilePageProps) {
                         <Package className="h-5 w-5 text-pink-600" />
                         <span className="text-gray-700">Total ventas</span>
                       </div>
-                      <span className="font-bold text-gray-900">{currentUser?.totalTransactions || 0}</span>
+                      <span className="font-bold text-gray-900">{currentUser?.total_intercambios_vendedor || 0}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
