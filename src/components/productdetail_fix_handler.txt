@@ -1,0 +1,40 @@
+    const handleScheduleConfirm = async (fecha: Date, horario: HorarioVendedor, cantidad_solicitada: number) => {
+        setIsCreatingAppointment(true);
+
+        try {
+            if (!product) throw new Error('Producto no cargado');
+
+            if (cantidad_solicitada <= 0) {
+                throw new Error('La cantidad debe ser mayor a 0');
+            }
+            if (cantidad_solicitada > product.stock) {
+                throw new Error(`La cantidad solicitada (${cantidad_solicitada}) excede el stock disponible (${product.stock})`);
+            }
+
+            const appointmentData: CreateAppointmentRequest = {
+                producto_id: productId,
+                comprador_id,
+                fecha_cita: fecha.toISOString().split('T')[0],
+                hora_cita: horario.hora_inicio,
+                cantidad_solicitada,
+            };
+
+            console.log('Datos enviados al backend:', appointmentData);
+
+            const response = await appointmentApi.createAppointment(appointmentData);
+
+            if (response.success) {
+                console.log('Agendamiento creado:', response.data);
+                alert(`Encuentro agendado con éxito para ${fecha.toLocaleDateString('es-ES')} a las ${horario.hora_inicio} para ${cantidad_solicitada} unidad(es)`);
+            } else {
+                console.error('Error al agendar:', response.error);
+                alert(`Error al agendar: ${response.error}`);
+            }
+        } catch (error) {
+            console.error('Error inesperado:', error);
+            alert(error instanceof Error ? error.message : 'Ocurrió un error inesperado al agendar la cita');
+        } finally {
+            setIsCreatingAppointment(false);
+            setShowScheduleModal(false);
+        }
+    };
