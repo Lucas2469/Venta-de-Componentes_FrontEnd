@@ -14,7 +14,7 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
   const navigate = useNavigate();
   const { showToast, ToastComponent } = useToast();
   const [formData, setFormData] = useState({
-    emailOrUsername: "",
+    email: "",
     password: ""
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -38,12 +38,12 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.emailOrUsername.trim()) {
-      newErrors.emailOrUsername = "Email or username is required";
+    if (!formData.email.trim()) {
+      newErrors.email = "El correo es requerido";
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = "La contraseña es requerida";
     }
 
     setErrors(newErrors);
@@ -59,7 +59,7 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
 
     try {
       await login({
-        email: formData.emailOrUsername,
+        email: formData.email,
         password: formData.password
       });
 
@@ -100,23 +100,23 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
         <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-700">Email or Username</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo electrónico</label>
               <input
-                id="emailOrUsername"
-                name="username"
-                type="text"
-                autoComplete="username"
-                placeholder="Enter your email or username"
-                value={formData.emailOrUsername}
-                onChange={(e) => handleInputChange("emailOrUsername", e.target.value)}
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="tu@correo.com"
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
-                  errors.emailOrUsername ? "border-red-500 bg-red-50" : "border-gray-300"
+                  errors.email ? "border-red-500 bg-red-50" : "border-gray-300"
                 }`}
               />
-              {errors.emailOrUsername && (
+              {errors.email && (
                 <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
                   <AlertCircle className="h-4 w-4 text-red-600" />
-                  <p className="text-sm text-red-600">{errors.emailOrUsername}</p>
+                  <p className="text-sm text-red-600">{errors.email}</p>
                 </div>
               )}
             </div>

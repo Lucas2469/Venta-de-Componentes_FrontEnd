@@ -576,7 +576,7 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
             </button>
             <button
               type="submit"
-              disabled={submitting || (form.stock && Number(form.stock) > (creditos || 0))}
+              disabled={submitting || (!!form.stock && Number(form.stock) > (creditos || 0))}
               className="flex-1 px-4 py-2 bg-[#9d0045] text-white rounded-md hover:bg-[#8b003d] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {submitting ? "Creando..." : "Crear Anuncio"}
