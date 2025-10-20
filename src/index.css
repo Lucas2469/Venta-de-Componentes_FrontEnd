@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* Importar animaciones personalizadas */
+@import "./styles/animations.css";
