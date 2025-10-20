@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import { AlertCircle, User, ChevronDown, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, User, Eye, EyeOff } from "lucide-react";
 import { useAuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -8,28 +8,12 @@ interface RegistrationPageProps {
   onNavigateToLogin: () => void;
 }
 
-// Códigos de país para Latinoamérica
-const countryCodes = [
-  { code: "+591", country: "Bolivia", flag: "🇧🇴" },
-  { code: "+54", country: "Argentina", flag: "🇦🇷" },
-  { code: "+55", country: "Brasil", flag: "🇧🇷" },
-  { code: "+56", country: "Chile", flag: "🇨🇱" },
-  { code: "+57", country: "Colombia", flag: "🇨🇴" },
-  { code: "+593", country: "Ecuador", flag: "🇪🇨" },
-  { code: "+595", country: "Paraguay", flag: "🇵🇾" },
-  { code: "+51", country: "Perú", flag: "🇵🇪" },
-  { code: "+598", country: "Uruguay", flag: "🇺🇾" },
-  { code: "+58", country: "Venezuela", flag: "🇻🇪" },
-  { code: "+52", country: "México", flag: "🇲🇽" },
-];
-
 export function RegistrationPage({ onNavigateToLogin }: RegistrationPageProps) {
   const { register, isLoading, error, clearError } = useAuthContext();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    countryCode: "+591",
     phone: "",
     email: "",
     password: "",
@@ -37,7 +21,6 @@ export function RegistrationPage({ onNavigateToLogin }: RegistrationPageProps) {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showCountryCodeDropdown, setShowCountryCodeDropdown] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -58,8 +41,8 @@ export function RegistrationPage({ onNavigateToLogin }: RegistrationPageProps) {
 
     if (!formData.phone.trim()) {
       newErrors.phone = "El número de celular es requerido";
-    } else if (!/^[0-9]{7,10}$/.test(formData.phone)) {
-      newErrors.phone = "El número debe tener entre 7 y 10 dígitos";
+    } else if (!/^[0-9]{8}$/.test(formData.phone)) {
+      newErrors.phone = "El número debe tener exactamente 8 dígitos";
     }
 
     if (!formData.email.trim()) {
@@ -98,7 +81,7 @@ export function RegistrationPage({ onNavigateToLogin }: RegistrationPageProps) {
         nombre: formData.firstName,
         apellido: formData.lastName,
         email: formData.email,
-        telefono: `${formData.countryCode}${formData.phone}`,
+        telefono: formData.phone,
         password: formData.password,
         tipo_usuario: 'comprador'
       });
@@ -206,61 +189,23 @@ export function RegistrationPage({ onNavigateToLogin }: RegistrationPageProps) {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Celular</label>
-              <div className="flex gap-2">
-                {/* Country Code Selector */}
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setShowCountryCodeDropdown(!showCountryCodeDropdown)}
-                    className={`flex items-center gap-2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
-                      errors.phone ? "border-red-500 bg-red-50" : "border-gray-300"
-                    } hover:bg-gray-50`}
-                  >
-                    <span className="text-lg">{countryCodes.find(c => c.code === formData.countryCode)?.flag}</span>
-                    <span className="text-sm font-medium">{formData.countryCode}</span>
-                    <ChevronDown className="h-4 w-4 text-gray-500" />
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  {showCountryCodeDropdown && (
-                    <div className="absolute z-10 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {countryCodes.map((country) => (
-                        <button
-                          key={country.code}
-                          type="button"
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, countryCode: country.code }));
-                            setShowCountryCodeDropdown(false);
-                          }}
-                          className={`w-full flex items-center gap-3 px-4 py-2 hover:bg-pink-50 transition-colors text-left ${
-                            formData.countryCode === country.code ? 'bg-pink-100' : ''
-                          }`}
-                        >
-                          <span className="text-xl">{country.flag}</span>
-                          <span className="text-sm flex-1">{country.country}</span>
-                          <span className="text-sm font-medium text-gray-600">{country.code}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Phone Number Input */}
-                <input
-                  id="phone"
-                  type="tel"
-                  placeholder="71234567"
-                  value={formData.phone}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, ''); // Solo dígitos
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Celular (Bolivia)</label>
+              <input
+                id="phone"
+                type="tel"
+                placeholder="71234567 (8 dígitos)"
+                value={formData.phone}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, ''); // Solo dígitos
+                  if (value.length <= 8) { // Limitar a 8 dígitos
                     handleInputChange("phone", value);
-                  }}
-                  className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
-                    errors.phone ? "border-red-500 bg-red-50" : "border-gray-300"
-                  }`}
-                />
-              </div>
+                  }
+                }}
+                maxLength={8}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all ${
+                  errors.phone ? "border-red-500 bg-red-50" : "border-gray-300"
+                }`}
+              />
               {errors.phone && (
                 <div className="flex items-center space-x-2 p-2 bg-red-50 border border-red-200 rounded-lg">
                   <AlertCircle className="h-4 w-4 text-red-600" />
