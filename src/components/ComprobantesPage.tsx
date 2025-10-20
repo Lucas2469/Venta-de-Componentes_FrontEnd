@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FileImage, Check, X } from "lucide-react";
+import { FileImage, Check, X, Download   } from "lucide-react";
 
 import {
   getTransacciones,
@@ -173,6 +173,30 @@ export default function ComprobantesPage() {
     setTo("");
     setPackIdFlt("all");
   };
+  //Boton descarga
+  const handleDownloadProof = async () => {
+    if (!proofSrc) return;
+    try {
+      // Intento "fino": descargar como Blob (funciona si el servidor permite CORS)
+      const res = await fetch(proofSrc, { mode: "cors" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const filename =
+        proofSrc.split("/").pop()?.split("?")[0] || "comprobante.jpg";
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      // Fallback: abrir en otra pestaña (por si no hay CORS/descarga directa)
+      window.open(proofSrc, "_blank", "noopener,noreferrer");
+    }
+  };
+
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -361,7 +385,18 @@ export default function ComprobantesPage() {
                 <p className="text-sm text-gray-600">Sin imagen</p>
               )}
             </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              {proofSrc && (
+                <button
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  onClick={handleDownloadProof}
+                  title="Descargar comprobante"
+                >
+                  <Download className="h-4 w-4" />
+                  Descargar
+                </button>
+              )}
               <button
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 onClick={() => setProofOpen(false)}
