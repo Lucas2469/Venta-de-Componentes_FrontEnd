@@ -150,13 +150,30 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
       const errs: Record<string, string> = {};
       if (!form.nombre.trim()) errs.nombre = "El título es requerido";
       if (!form.descripcion.trim()) errs.descripcion = "La descripción es requerida";
-      if (!form.precio || Number(form.precio) <= 0) errs.precio = "El precio debe ser mayor a 0";
-      if (!form.stock || Number(form.stock) <= 0) errs.stock = "La cantidad debe ser mayor a 0";
-
-      // ✅ Validación crítica: stock no debe exceder créditos disponibles
-      const stockValue = Number(form.stock);
-      if (stockValue > 0 && (creditos ?? 0) < stockValue) {
-        errs.stock = `Stock excede tus créditos disponibles (tienes ${creditos || 0})`;
+      // ✅ Validación mejorada para precio
+      if (!form.precio) {
+        errs.precio = "El precio es requerido";
+      } else {
+        const precioValue = Number(form.precio);
+        if (precioValue <= 0) {
+          errs.precio = "El precio debe ser mayor a 0";
+        }
+      }
+      
+      // ✅ Validación mejorada para stock
+      if (!form.stock) {
+        errs.stock = "La cantidad es requerida";
+      } else {
+        const stockValue = Number(form.stock);
+        
+        // Validar que sea un número entero positivo
+        if (!Number.isInteger(stockValue)) {
+          errs.stock = "La cantidad debe ser un número entero (sin decimales)";
+        } else if (stockValue <= 0) {
+          errs.stock = "La cantidad debe ser mayor a 0";
+        } else if ((creditos ?? 0) < stockValue) {
+          errs.stock = `Stock excede tus créditos disponibles (tienes ${creditos || 0})`;
+        }
       }
 
       if (!form.categoriaId) errs.categoriaId = "Selecciona una categoría";
@@ -315,8 +332,16 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
                     id="precio"
                     type="number"
                     placeholder="25"
+                    min="0"
+                    step="0.01"
                     value={form.precio}
-                    onChange={(e) => handleInput("precio", e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Permitir números positivos con hasta 2 decimales
+                      if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                        handleInput("precio", value);
+                      }
+                    }}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9d0045] focus:border-transparent ${
                       errors.precio ? "border-red-500" : "border-gray-300"
                     }`}
@@ -337,9 +362,16 @@ export default function CreateAdPage({ onBack, currentUser }: CreateAdPageProps)
                     type="number"
                     placeholder="1"
                     min="1"
+                    step="1"
                     max={creditos || undefined}
                     value={form.stock}
-                    onChange={(e) => handleInput("stock", e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Solo permitir números enteros positivos
+                      if (value === '' || /^\d+$/.test(value)) {
+                        handleInput("stock", value);
+                      }
+                    }}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#9d0045] focus:border-transparent ${
                       errors.stock
                         ? "border-red-500 bg-red-50"
