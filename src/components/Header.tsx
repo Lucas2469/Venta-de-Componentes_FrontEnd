@@ -263,30 +263,62 @@ export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps)
                   </div>
               </>
               ) : (
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => onNavigate('login')}
-                    className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-105"
-                  >
-                    Iniciar Sesión
-                  </button>
-                  <button
-                    onClick={() => onNavigate("register")}
-                    className="px-4 py-2 rounded-lg bg-white hover:bg-white/90 text-pink-700 font-medium transition-all duration-200 hover:scale-105"
-                  >
-                    <span className="hidden md:inline">Registrarse</span>
-                    <span className="md:hidden">Registro</span>
-                  </button>
-                </div>
-              )}
+                <>
+                  {/* Desktop: Botones lado a lado */}
+                  <div className="hidden sm:flex space-x-3">
+                    <button
+                      onClick={() => onNavigate('login')}
+                      className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-105"
+                    >
+                      Iniciar Sesión
+                    </button>
+                    <button
+                      onClick={() => onNavigate("register")}
+                      className="px-4 py-2 rounded-lg bg-white hover:bg-white/90 text-pink-700 font-medium transition-all duration-200 hover:scale-105"
+                    >
+                      Registrarse
+                    </button>
+                  </div>
 
-              {/* Mobile menu button */}
-              <button
-                className="md:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-105"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                <Menu className="h-5 w-5" />
-              </button>
+                  {/* Mobile: Hamburger menu */}
+                  <div className="sm:hidden relative">
+                    <button
+                      onClick={() => setIsMenuOpen(!isMenuOpen)}
+                      className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-105"
+                    >
+                      <Menu className="h-5 w-5" />
+                    </button>
+
+                    {/* Mobile dropdown menu */}
+                    {isMenuOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200">
+                        <div className="p-2">
+                          <button
+                            onClick={() => {
+                              onNavigate('login');
+                              setIsMenuOpen(false);
+                            }}
+                            className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
+                          >
+                            <UserIcon className="h-4 w-4 mr-3" />
+                            Iniciar Sesión
+                          </button>
+                          <button
+                            onClick={() => {
+                              onNavigate("register");
+                              setIsMenuOpen(false);
+                            }}
+                            className="flex items-center w-full px-3 py-2 text-sm text-pink-600 font-medium hover:bg-pink-50 rounded-md transition-colors"
+                          >
+                            <UserIcon className="h-4 w-4 mr-3" />
+                            Registrarse
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
