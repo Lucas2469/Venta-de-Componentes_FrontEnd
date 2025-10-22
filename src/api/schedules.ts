@@ -1,5 +1,7 @@
 // src/api/schedules.ts
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { getApiBaseUrl } from '../config/api';
+
+const API_URL = getApiBaseUrl();
 
 export async function fetchSchedules(vendedorId: number) {
   const res = await fetch(`${API_URL}/schedules/${vendedorId}`);

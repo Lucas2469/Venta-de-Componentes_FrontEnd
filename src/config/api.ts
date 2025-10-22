@@ -1,9 +1,19 @@
 // Configuración de la API
+const getBaseUrl = (): string => {
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  return apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`;
+};
+
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  BASE_URL: getBaseUrl(),
   TIMEOUT: 10000, // 10 segundos
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000, // 1 segundo
+};
+
+// Función helper para obtener URLs de API
+export const getApiBaseUrl = (): string => {
+  return getBaseUrl();
 };
 
 // Configuración de autenticación

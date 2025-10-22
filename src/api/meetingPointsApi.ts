@@ -1,7 +1,8 @@
 // api/meetingPointsApi.ts
 import axios from "axios";
+import { getApiBaseUrl } from "../config/api";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = getApiBaseUrl();
 
 export const meetingPointsAPI = {
   // Obtener todos los puntos de encuentro

@@ -18,8 +18,9 @@ export interface CreateAdProductResponse {
   creditos_restantes?: number;
 }
 
-const BASE_URL =
-  (import.meta as any)?.env?.VITE_API_BASE_URL || "http://localhost:5000/api";
+import { getApiBaseUrl } from '../config/api';
+
+const BASE_URL = getApiBaseUrl();
 
 export async function createAdProduct(
   payload: CreateAdProductPayload,

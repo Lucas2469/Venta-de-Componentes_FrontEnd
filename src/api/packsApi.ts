@@ -13,8 +13,7 @@ export interface CreditPack {
 }
 
 /** Base de la API (usa env si existe, si no localhost) */
-const API_BASE =
-  (import.meta as any)?.env?.VITE_API_BASE ?? "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export const PACKS_API = `${API_BASE}/api/packs`;
 

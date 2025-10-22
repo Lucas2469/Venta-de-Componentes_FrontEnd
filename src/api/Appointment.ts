@@ -54,7 +54,9 @@ export interface Appointment {
 export interface ConfirmAppointmentRequest {
   actorUserId: number;
 }
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { getApiBaseUrl } from '../config/api';
+
+const API_URL = getApiBaseUrl();
 class AppointmentApi {
   private baseUrl: string;
 

@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { getApiBaseUrl } from '../config/api';
 
-// Configuración base de la API
-const API_BASE_URL = 'http://localhost:5000/api';
+// Configuración base de la API - Usa .env para producción
+const API_BASE_URL = getApiBaseUrl();
 
 // Interfaz para los datos de usuario
 export interface User {

@@ -1,6 +1,7 @@
 import axios from "axios";
+import { getApiBaseUrl } from "../config/api";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = getApiBaseUrl();
 
 export const categoriesAPI = {
   // Obtener todas las categorías
