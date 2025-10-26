@@ -38,7 +38,7 @@ interface CreditHistory {
   fecha_movimiento: string;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export function MyProfilePage({ onNavigate }: MyProfilePageProps) {
   const { user: currentUser, updateUser } = useAuthContext();

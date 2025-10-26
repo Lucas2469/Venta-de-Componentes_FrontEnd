@@ -3,7 +3,7 @@ import axios from "axios";
 import { Mail, ArrowLeft, Send, CheckCircle } from "lucide-react";
 import { useToast } from "./Toast";
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL;
 
 interface ForgotPasswordPageProps {
   onNavigate: (page: string) => void;

@@ -1,6 +1,9 @@
 // Configuración de la API
 const getBaseUrl = (): string => {
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const apiUrl = import.meta.env.VITE_API_URL;
+  if (!apiUrl) {
+    throw new Error('VITE_API_URL no está configurada en .env');
+  }
   return apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`;
 };
 
@@ -191,10 +194,13 @@ export const getImageUrl = (imagePath: string): string => {
   }
   
   // Si es una ruta relativa, construir la URL completa
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const baseUrl = import.meta.env.VITE_API_URL;
+  if (!baseUrl) {
+    return '/placeholder-image.jpg';
+  }
   const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
   const cleanImagePath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-  
+
   return `${cleanBaseUrl}${cleanImagePath}`;
 };
 

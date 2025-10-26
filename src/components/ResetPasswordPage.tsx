@@ -3,7 +3,7 @@ import axios from "axios";
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "./Toast";
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL;
 
 interface ResetPasswordPageProps {
   onNavigate: (page: string) => void;

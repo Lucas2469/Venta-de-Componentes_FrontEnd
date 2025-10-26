@@ -22,7 +22,7 @@ interface Product {
   fecha_publicacion: string;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export function MyProductsPage({ onNavigate, onProductClick }: MyProductsPageProps) {
   const { user: currentUser } = useAuthContext();

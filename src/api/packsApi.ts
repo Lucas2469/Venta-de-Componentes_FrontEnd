@@ -12,8 +12,8 @@ export interface CreditPack {
   qr_imagen_url?: string | null;
 }
 
-/** Base de la API (usa env si existe, si no localhost) */
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+/** Base de la API */
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export const PACKS_API = `${API_BASE}/api/packs`;
 
