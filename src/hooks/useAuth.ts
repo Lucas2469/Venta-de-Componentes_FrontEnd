@@ -303,7 +303,7 @@ export const useRole = () => {
     hasRole: (role: 'admin' | 'vendedor' | 'comprador') => 
       isAuthenticated && user?.tipo_usuario === role,
     canAccess: (requiredRoles: ('admin' | 'vendedor' | 'comprador')[]) =>
-      isAuthenticated && user && requiredRoles.includes(user.tipo_usuario)
+      isAuthenticated && user ? requiredRoles.includes(user.tipo_usuario) : false
   };
 };
 

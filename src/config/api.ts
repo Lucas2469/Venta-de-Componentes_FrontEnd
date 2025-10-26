@@ -205,7 +205,7 @@ export const hasRole = (userRole: string, requiredRoles: string[]): boolean => {
 
 // Función para validar si el usuario tiene un permiso específico
 export const hasPermission = (userRole: string, permission: keyof typeof PERMISSIONS): boolean => {
-  return PERMISSIONS[permission].includes(userRole as any);
+  return (PERMISSIONS[permission] as readonly string[]).includes(userRole);
 };
 
 // Función para formatear precios
