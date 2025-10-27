@@ -28,9 +28,9 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
       // Redirigir según el tipo de usuario CON REFRESH para garantizar que funcione
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       if (user.tipo_usuario === 'admin') {
-        window.location.href = '/admin-dashboard';
+        navigate('/admin-dashboard');
       } else {
-        window.location.href = '/catalog';
+        navigate('/catalog');
       }
     }
   }, [loginSuccess, isAuthenticated, isLoading]);
