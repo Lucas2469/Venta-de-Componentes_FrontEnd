@@ -80,7 +80,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isVendor: role.isVendor,
     isBuyer: role.isBuyer,
     hasRole: role.hasRole,
-    canAccess: role.canAccess,
+    // Función canAccess creada aquí para garantizar que siempre usa datos actuales
+    canAccess: (requiredRoles: ('admin' | 'vendedor' | 'comprador')[]) => {
+      const result = auth.isAuthenticated && auth.user
+        ? requiredRoles.includes(auth.user.tipo_usuario)
+        : false;
+      console.log('🔑 canAccess called:', {
+        requiredRoles,
+        userTipoUsuario: auth.user?.tipo_usuario,
+        result,
+        includes: auth.user ? requiredRoles.includes(auth.user.tipo_usuario) : null
+      });
+      return result;
+    },
 
     // Permisos
     canCreateProducts: permissions.canCreateProducts,
@@ -123,13 +135,28 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, user, canAccess } = useAuthContext();
 
+  // Calcular hasAccess con debugging detallado
+  let hasAccess = false;
+  if (requiredRoles && user) {
+    hasAccess = canAccess(requiredRoles);
+    console.log('🔍 canAccess DEBUGGING:', {
+      requiredRoles,
+      requiredRolesJson: JSON.stringify(requiredRoles),
+      userTipoUsuario: user.tipo_usuario,
+      canAccessResult: hasAccess,
+      rolesIncludesUserType: requiredRoles.includes(user.tipo_usuario),
+      manualCheck: requiredRoles && user.tipo_usuario ? requiredRoles.includes(user.tipo_usuario) : false
+    });
+  }
+
   console.log('🛡️ ProtectedRoute check:', {
     isLoading,
     isAuthenticated,
     user_id: user?.id,
     tipo_usuario: user?.tipo_usuario,
     requiredRoles,
-    hasAccess: requiredRoles ? canAccess(requiredRoles) : 'N/A'
+    requiredRolesJson: JSON.stringify(requiredRoles),
+    hasAccess: requiredRoles ? hasAccess : 'N/A'
   });
 
   // Mostrar loading mientras se carga el estado (es prioritario)
@@ -176,8 +203,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Verificar roles si es requerido
-  if (requiredRoles && !canAccess(requiredRoles)) {
-    console.log('❌ ProtectedRoute: Usuario no tiene roles requeridos:', { requiredRoles, userRole: user?.tipo_usuario });
+  if (requiredRoles && !hasAccess) {
+    console.log('❌ ProtectedRoute: Usuario no tiene roles requeridos:', { requiredRoles, userRole: user?.tipo_usuario, hasAccess });
     return <>{fallback}</>;
   }
 
