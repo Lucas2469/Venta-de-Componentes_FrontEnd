@@ -123,8 +123,18 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, user, canAccess } = useAuthContext();
 
+  console.log('🛡️ ProtectedRoute check:', {
+    isLoading,
+    isAuthenticated,
+    user_id: user?.id,
+    tipo_usuario: user?.tipo_usuario,
+    requiredRoles,
+    hasAccess: requiredRoles ? canAccess(requiredRoles) : 'N/A'
+  });
+
   // Mostrar loading mientras se carga el estado (es prioritario)
   if (isLoading) {
+    console.log('⏳ ProtectedRoute: Mostrando loader (isLoading=true)');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -134,6 +144,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Si no está autenticado, no tiene acceso
   if (!isAuthenticated) {
+    console.log('❌ ProtectedRoute: No autenticado');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -156,6 +167,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Si requiere roles específicos pero el usuario no tiene datos aún, esperar
   if (requiredRoles && !user) {
+    console.log('⏳ ProtectedRoute: Esperando datos del usuario (requiere roles pero user=null)');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -165,9 +177,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Verificar roles si es requerido
   if (requiredRoles && !canAccess(requiredRoles)) {
+    console.log('❌ ProtectedRoute: Usuario no tiene roles requeridos:', { requiredRoles, userRole: user?.tipo_usuario });
     return <>{fallback}</>;
   }
 
+  console.log('✅ ProtectedRoute: Acceso permitido');
   return <>{children}</>;
 };
 
