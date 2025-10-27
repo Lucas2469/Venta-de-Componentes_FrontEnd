@@ -165,8 +165,11 @@ class AuthService {
   // Login
   public async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
+      // Limpiar datos viejos antes de loguearse (importante para cambios de usuario)
+      this.clearAuth();
+
       const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
-      
+
       if (response.data.success) {
         this.tokens = response.data.data.tokens;
         this.user = response.data.data.user;

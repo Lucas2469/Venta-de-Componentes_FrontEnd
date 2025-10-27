@@ -25,8 +25,8 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
   // Redirigir cuando el login sea exitoso y el usuario esté autenticado
   useEffect(() => {
     if (loginSuccess && isAuthenticated && !isLoading) {
-      // Redirigir según el tipo de usuario CON REFRESH para garantizar que funcione
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      // Redirigir según el tipo de usuario - usar auth_user de authApi
+      const user = JSON.parse(localStorage.getItem('auth_user') || '{}');
       if (user.tipo_usuario === 'admin') {
         navigate('/admin-dashboard');
       } else {
