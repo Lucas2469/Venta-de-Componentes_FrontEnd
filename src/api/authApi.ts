@@ -147,7 +147,7 @@ class AuthService {
             return axios(originalRequest);
           } catch (refreshError) {
             this.logout();
-            window.location.href = window.location.origin + '/login';
+            window.location.href = '/login';
             return Promise.reject(refreshError);
           }
         }
