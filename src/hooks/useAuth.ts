@@ -90,6 +90,12 @@ export const useAuth = (): AuthState & AuthActions => {
     try {
       const authResponse = await authService.login(credentials);
 
+      console.log('🟢 Login exitoso:', {
+        user_id: authResponse.user.id,
+        tipo_usuario: authResponse.user.tipo_usuario,
+        email: authResponse.user.email
+      });
+
       // Actualizar usuario primero pero mantener isLoading: true
       setState({
         user: authResponse.user,
@@ -142,9 +148,13 @@ export const useAuth = (): AuthState & AuthActions => {
   // Logout
   const logout = useCallback(async () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
-    
+
     try {
       await authService.logout();
+      // Limpiar localStorage completamente para evitar datos corruptos o viejos
+      console.log('🔴 Limpiando localStorage completamente...');
+      localStorage.clear();
+
       setState({
         user: null,
         isAuthenticated: false,
@@ -153,7 +163,10 @@ export const useAuth = (): AuthState & AuthActions => {
       });
     } catch (error: any) {
       console.error('Error during logout:', error);
-      // Incluso si hay error, limpiar el estado local
+      // Incluso si hay error, limpiar localStorage y estado local
+      console.log('🔴 Limpiando localStorage completamente (en error)...');
+      localStorage.clear();
+
       setState({
         user: null,
         isAuthenticated: false,
@@ -231,7 +244,10 @@ export const useAuth = (): AuthState & AuthActions => {
 
     const syncCredits = async () => {
       try {
-        console.log('🔄 Sincronizando créditos y tipo_usuario automáticamente...');
+        console.log('🔄 Sincronizando créditos y tipo_usuario automáticamente...', {
+          current_user_id: state.user?.id,
+          current_tipo_usuario: state.user?.tipo_usuario
+        });
         const updatedUser = await authService.getProfile();
 
         // Usar setState con función para obtener el estado más reciente
