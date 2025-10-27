@@ -86,6 +86,7 @@ function AppContent() {
         tipo_usuario: user.tipo_usuario
       });
 
+      const navigationDelay = user.tipo_usuario === 'admin' ? 500 : 300;
       const timer = setTimeout(() => {
         console.log('🟢 AppContent: Navegando a', user.tipo_usuario === 'admin' ? '/admin-dashboard' : '/catalog');
         if (user.tipo_usuario === 'admin') {
@@ -93,7 +94,7 @@ function AppContent() {
         } else {
           navigate('/catalog', { replace: true });
         }
-      }, 300);
+      }, navigationDelay);
 
       return () => clearTimeout(timer);
     }

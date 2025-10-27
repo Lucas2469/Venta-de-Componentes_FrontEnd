@@ -105,10 +105,14 @@ export const useAuth = (): AuthState & AuthActions => {
       });
 
       // Esperar a que el contexto se propague antes de cambiar isLoading a false
-      // Aumentado a 1500ms para garantizar que todas las actualizaciones de estado se propaguen
+      // Aumentado a 2000ms para garantizar que todas las actualizaciones de estado se propaguen
       // completamente a través del árbol de componentes (especialmente en ProtectedRoute)
-      console.log('⏳ Esperando 1500ms para propagación completa del contexto...');
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const delayMs = authResponse.user.tipo_usuario === 'admin' ? 2000 : 1500;
+      console.log(`⏳ Esperando ${delayMs}ms para propagación completa del contexto...`, {
+        tipo_usuario: authResponse.user.tipo_usuario,
+        email: authResponse.user.email
+      });
+      await new Promise(resolve => setTimeout(resolve, delayMs));
 
       setState(prev => ({
         ...prev,
