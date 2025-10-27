@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { AuthProvider, ProtectedRoute as AuthProtectedRoute, RoleBased } from './contexts/AuthContext';
+import { useAuthContext } from './contexts/AuthContext';
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { LoginPage } from "./components/LoginPage";
@@ -72,6 +73,24 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const { isAuthenticated, user, isLoading } = useAuthContext();
+
+  // Navegar automáticamente después del login una vez que el contexto esté actualizado
+  useEffect(() => {
+    // Solo navegamos si estamos en login/register y el usuario se acaba de autenticar
+    if (isAuthenticated && user && !isLoading && (location.pathname === '/login' || location.pathname === '/register')) {
+      // Esperar un tick de React para garantizar que todo esté renderizado
+      const timer = setTimeout(() => {
+        if (user.tipo_usuario === 'admin') {
+          navigate('/admin-dashboard', { replace: true });
+        } else {
+          navigate('/catalog', { replace: true });
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, user, isLoading, location.pathname, navigate]);
 
   const handleNavigate = (page: string) => {
     navigate(`/${page}`);

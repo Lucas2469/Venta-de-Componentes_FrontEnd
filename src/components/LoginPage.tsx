@@ -22,18 +22,8 @@ export function LoginPage({ onNavigateToRegistration }: LoginPageProps) {
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Redirigir cuando el login sea exitoso y el usuario esté autenticado
-  useEffect(() => {
-    if (loginSuccess && isAuthenticated && !isLoading) {
-      // Redirigir según el tipo de usuario - usar auth_user de authApi
-      const user = JSON.parse(localStorage.getItem('auth_user') || '{}');
-      if (user.tipo_usuario === 'admin') {
-        navigate('/admin-dashboard');
-      } else {
-        navigate('/catalog');
-      }
-    }
-  }, [loginSuccess, isAuthenticated, isLoading]);
+  // Nota: La navegación después del login ahora se maneja en App.tsx
+  // para garantizar que el contexto esté completamente actualizado
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
