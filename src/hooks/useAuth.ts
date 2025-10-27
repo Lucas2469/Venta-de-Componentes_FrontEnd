@@ -99,8 +99,9 @@ export const useAuth = (): AuthState & AuthActions => {
       });
 
       // Esperar a que el contexto se propague antes de cambiar isLoading a false
-      // Se aumentó de 200ms a 500ms para asegurar propagación en rutas protegidas
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Aumentado a 1000ms para garantizar que todas las actualizaciones de estado se propaguen
+      // a través del árbol de componentes (especialmente en rutas protegidas)
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       setState(prev => ({
         ...prev,

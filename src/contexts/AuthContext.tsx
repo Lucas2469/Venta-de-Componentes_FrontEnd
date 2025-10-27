@@ -121,8 +121,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   fallback = <div>Acceso denegado</div>
 }) => {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading, canAccess } = useAuthContext();
+  const { isAuthenticated, isLoading, user, canAccess } = useAuthContext();
 
+  // Mostrar loading mientras se carga el estado (es prioritario)
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -131,6 +132,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
+  // Si no está autenticado, no tiene acceso
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -152,6 +154,16 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
+  // Si requiere roles específicos pero el usuario no tiene datos aún, esperar
+  if (requiredRoles && !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Verificar roles si es requerido
   if (requiredRoles && !canAccess(requiredRoles)) {
     return <>{fallback}</>;
   }
