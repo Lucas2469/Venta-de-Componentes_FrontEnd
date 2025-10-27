@@ -137,7 +137,12 @@ class AuthService {
       async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // No intentar refresh en endpoints de autenticación (login, register, etc)
+        const isAuthEndpoint = originalRequest.url?.includes('/auth/login') ||
+                              originalRequest.url?.includes('/auth/register') ||
+                              originalRequest.url?.includes('/auth/forgot-password');
+
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
           originalRequest._retry = true;
 
           try {

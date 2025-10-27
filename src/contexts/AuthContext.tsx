@@ -1,4 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth, useRole, usePermissions } from '../hooks/useAuth';
 import { User } from '../api/authApi';
 
@@ -119,6 +120,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRoles,
   fallback = <div>Acceso denegado</div>
 }) => {
+  const navigate = useNavigate();
   const { isAuthenticated, isLoading, canAccess } = useAuthContext();
 
   if (isLoading) {
@@ -140,7 +142,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             Necesitas iniciar sesión para acceder a esta página
           </p>
           <button
-            onClick={() => window.location.href = '/login'}
+            onClick={() => navigate('/login')}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Ir a Login
