@@ -82,16 +82,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     hasRole: role.hasRole,
     // Función canAccess creada aquí para garantizar que siempre usa datos actuales
     canAccess: (requiredRoles: ('admin' | 'vendedor' | 'comprador')[]) => {
-      const result = auth.isAuthenticated && auth.user
+      return auth.isAuthenticated && auth.user
         ? requiredRoles.includes(auth.user.tipo_usuario)
         : false;
-      console.log('🔑 canAccess called:', {
-        requiredRoles,
-        userTipoUsuario: auth.user?.tipo_usuario,
-        result,
-        includes: auth.user ? requiredRoles.includes(auth.user.tipo_usuario) : null
-      });
-      return result;
     },
 
     // Permisos
@@ -135,33 +128,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, user, canAccess } = useAuthContext();
 
-  // Calcular hasAccess con debugging detallado
+  // Calcular hasAccess
   let hasAccess = false;
   if (requiredRoles && user) {
     hasAccess = canAccess(requiredRoles);
-    console.log('🔍 canAccess DEBUGGING:', {
-      requiredRoles,
-      requiredRolesJson: JSON.stringify(requiredRoles),
-      userTipoUsuario: user.tipo_usuario,
-      canAccessResult: hasAccess,
-      rolesIncludesUserType: requiredRoles.includes(user.tipo_usuario),
-      manualCheck: requiredRoles && user.tipo_usuario ? requiredRoles.includes(user.tipo_usuario) : false
-    });
   }
-
-  console.log('🛡️ ProtectedRoute check:', {
-    isLoading,
-    isAuthenticated,
-    user_id: user?.id,
-    tipo_usuario: user?.tipo_usuario,
-    requiredRoles,
-    requiredRolesJson: JSON.stringify(requiredRoles),
-    hasAccess: requiredRoles ? hasAccess : 'N/A'
-  });
 
   // Mostrar loading mientras se carga el estado (es prioritario)
   if (isLoading) {
-    console.log('⏳ ProtectedRoute: Mostrando loader (isLoading=true)');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -171,7 +145,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Si no está autenticado, no tiene acceso
   if (!isAuthenticated) {
-    console.log('❌ ProtectedRoute: No autenticado');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -194,7 +167,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Si requiere roles específicos pero el usuario no tiene datos aún, esperar
   if (requiredRoles && !user) {
-    console.log('⏳ ProtectedRoute: Esperando datos del usuario (requiere roles pero user=null)');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -204,11 +176,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Verificar roles si es requerido
   if (requiredRoles && !hasAccess) {
-    console.log('❌ ProtectedRoute: Usuario no tiene roles requeridos:', { requiredRoles, userRole: user?.tipo_usuario, hasAccess });
     return <>{fallback}</>;
   }
 
-  console.log('✅ ProtectedRoute: Acceso permitido');
   return <>{children}</>;
 };
 

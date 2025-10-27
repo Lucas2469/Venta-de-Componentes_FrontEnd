@@ -79,16 +79,9 @@ function AppContent() {
   useEffect(() => {
     // Solo navegamos si estamos en login/register y el usuario se acaba de autenticar
     if (isAuthenticated && user && !isLoading && (location.pathname === '/login' || location.pathname === '/register')) {
-      // Esperar para garantizar que el contexto esté completamente actualizado en todos los componentes
-      // (especialmente en ProtectedRoute)
-      console.log('🔵 AppContent: Detectada autenticación exitosa. Navegando en 300ms...', {
-        user_id: user.id,
-        tipo_usuario: user.tipo_usuario
-      });
-
+      // Navigate with slight delay to ensure context is fully propagated
       const navigationDelay = user.tipo_usuario === 'admin' ? 500 : 300;
       const timer = setTimeout(() => {
-        console.log('🟢 AppContent: Navegando a', user.tipo_usuario === 'admin' ? '/admin-dashboard' : '/catalog');
         if (user.tipo_usuario === 'admin') {
           navigate('/admin-dashboard', { replace: true });
         } else {

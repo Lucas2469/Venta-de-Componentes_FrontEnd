@@ -99,18 +99,9 @@ class AuthService {
         if (tokens?.accessToken && user?.id && user?.email && user?.tipo_usuario) {
           this.tokens = tokens;
           this.user = user;
-          console.log('✅ Tokens cargados desde localStorage:', {
-            user_id: user.id,
-            tipo_usuario: user.tipo_usuario,
-            email: user.email
-          });
         } else {
-          console.warn('⚠️ Datos inválidos en localStorage, limpiando...');
           this.clearAuth();
         }
-      } else {
-        console.log('ℹ️ No hay tokens en localStorage');
-      }
     } catch (error) {
       console.error('Error loading tokens from storage:', error);
       this.clearAuth();
@@ -151,11 +142,8 @@ class AuthService {
     }
 
     keysToRemove.forEach(key => {
-      console.log('🗑️ Removing from localStorage:', key);
       localStorage.removeItem(key);
     });
-
-    console.log('🔴 clearAuth: Autenticación completamente limpiada. Keys removidas:', keysToRemove);
   }
 
   // Configurar interceptores de axios
