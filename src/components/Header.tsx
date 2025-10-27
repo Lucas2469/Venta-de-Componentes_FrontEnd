@@ -12,7 +12,7 @@ interface HeaderProps {
 }
 
 export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps) {
-  const { user: currentUser, logout, isAuthenticated } = useAuthContext();
+  const { user: currentUser, logout, isAuthenticated, isLoading } = useAuthContext();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -128,14 +128,19 @@ export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps)
                     {/* User Menu Dropdown */}
                     <div className="relative">
                       <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-105"
+                        onClick={() => !isLoading && setIsMenuOpen(!isMenuOpen)}
+                        disabled={isLoading}
+                        className={`p-2 rounded-lg transition-all duration-200 ${
+                          isLoading
+                            ? 'bg-white/5 text-white/50 cursor-not-allowed'
+                            : 'bg-white/10 hover:bg-white/20 text-white hover:scale-105'
+                        }`}
                       >
                         <Menu className="h-5 w-5" />
                       </button>
 
                       {/* User Menu Dropdown */}
-                      {isMenuOpen && (
+                      {isMenuOpen && !isLoading && (
                         <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 -z-50">
                           <div className="p-2">
                             {/* Mi Perfil - Para todos los usuarios */}
