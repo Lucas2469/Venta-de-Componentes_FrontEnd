@@ -89,10 +89,27 @@ class AuthService {
     try {
       const storedTokens = localStorage.getItem('auth_tokens');
       const storedUser = localStorage.getItem('auth_user');
-      
+
+      // Validar que ambos existan y sean válidos
       if (storedTokens && storedUser) {
-        this.tokens = JSON.parse(storedTokens);
-        this.user = JSON.parse(storedUser);
+        const tokens = JSON.parse(storedTokens);
+        const user = JSON.parse(storedUser);
+
+        // Validación adicional: asegurar que tengan los campos necesarios
+        if (tokens?.accessToken && user?.id && user?.email && user?.tipo_usuario) {
+          this.tokens = tokens;
+          this.user = user;
+          console.log('✅ Tokens cargados desde localStorage:', {
+            user_id: user.id,
+            tipo_usuario: user.tipo_usuario,
+            email: user.email
+          });
+        } else {
+          console.warn('⚠️ Datos inválidos en localStorage, limpiando...');
+          this.clearAuth();
+        }
+      } else {
+        console.log('ℹ️ No hay tokens en localStorage');
       }
     } catch (error) {
       console.error('Error loading tokens from storage:', error);
@@ -108,12 +125,37 @@ class AuthService {
     }
   }
 
-  // Limpiar autenticación
+  // Limpiar autenticación - AGRESIVAMENTE
   private clearAuth(): void {
     this.tokens = null;
     this.user = null;
+
+    // Eliminar keys específicas
     localStorage.removeItem('auth_tokens');
     localStorage.removeItem('auth_user');
+    localStorage.removeItem('user');
+    localStorage.removeItem('tokens');
+
+    // Eliminar TODAS las keys que contengan 'auth', 'token' o 'user' (case-insensitive)
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        const lowerKey = key.toLowerCase();
+        if (lowerKey.includes('auth') ||
+            lowerKey.includes('token') ||
+            lowerKey.includes('user')) {
+          keysToRemove.push(key);
+        }
+      }
+    }
+
+    keysToRemove.forEach(key => {
+      console.log('🗑️ Removing from localStorage:', key);
+      localStorage.removeItem(key);
+    });
+
+    console.log('🔴 clearAuth: Autenticación completamente limpiada. Keys removidas:', keysToRemove);
   }
 
   // Configurar interceptores de axios
