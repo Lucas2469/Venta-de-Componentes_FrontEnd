@@ -102,6 +102,7 @@ class AuthService {
         } else {
           this.clearAuth();
         }
+      }
     } catch (error) {
       console.error('Error loading tokens from storage:', error);
       this.clearAuth();
