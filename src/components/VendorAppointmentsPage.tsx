@@ -333,18 +333,23 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = () => {
                   </div>
                 </div>
 
-                {/* Cantidad y Precio */}
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Package className="h-4 w-4 text-gray-600 mr-2" />
+                {/* Cantidad, Precio Unitario y Total */}
+                <div className="mb-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Package className="h-4 w-4 text-gray-600 mr-2" />
+                      <span className="text-sm text-gray-600">
+                        Cantidad: <span className="font-semibold text-gray-900">{appointment.cantidad_solicitada || 1}</span>
+                      </span>
+                    </div>
                     <span className="text-sm text-gray-600">
-                      Cantidad: <span className="font-semibold text-gray-900">{appointment.cantidad_solicitada || 1}</span>
+                      Unitario: <span className="font-semibold text-gray-900">Bs {appointment.producto_precio ? Number(appointment.producto_precio).toFixed(2) : '0.00'}</span>
                     </span>
                   </div>
-                  <div className="flex items-center">
-                    <DollarSign className="h-4 w-4 text-gray-600 mr-2" />
-                    <span className="text-lg font-semibold text-green-600">
-                      Bs {appointment.producto_precio ? Number(appointment.producto_precio).toFixed(2) : '0.00'}
+                  <div className="flex items-center justify-end">
+                    <DollarSign className="h-4 w-4 text-green-600 mr-2" />
+                    <span className="text-xl font-bold text-green-600">
+                      Total: Bs {appointment.producto_precio ? (Number(appointment.producto_precio) * (appointment.cantidad_solicitada || 1)).toFixed(2) : '0.00'}
                     </span>
                   </div>
                 </div>
