@@ -6,7 +6,8 @@ import {
   Star,
   Zap,
   FileImage,
-  RefreshCw
+  RefreshCw,
+  Download
 } from "lucide-react";
 import { SuccessModal } from "./reusables/SuccessModal";
 import { useAuthContext } from "../contexts/AuthContext";
@@ -119,6 +120,18 @@ export function BuyCreditsPage({ onBack }: BuyCreditsPageProps) {
     setProofImage("");
     // Volver al catálogo
     onBack();
+  };
+
+  // Función para descargar el código QR
+  const downloadQRCode = () => {
+    if (!selectedPkg?.qrCodeUrl) return;
+
+    const link = document.createElement('a');
+    link.href = selectedPkg.qrCodeUrl;
+    link.download = `QR-Bs${selectedPkg.price}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -287,19 +300,30 @@ export function BuyCreditsPage({ onBack }: BuyCreditsPageProps) {
                 {/* QR Code Display */}
                 <div className="text-center bg-white p-6 border rounded-lg">
                   {selectedPkg.qrCodeUrl ? (
-                    <img
-                      src={selectedPkg.qrCodeUrl}
-                      alt={`Código QR Bs ${selectedPkg.price}`}
-                      className="w-48 h-48 mx-auto rounded-lg shadow-md"
-                    />
+                    <>
+                      <img
+                        src={selectedPkg.qrCodeUrl}
+                        alt={`Código QR Bs ${selectedPkg.price}`}
+                        className="w-48 h-48 mx-auto rounded-lg shadow-md"
+                      />
+                      <p className="text-sm text-gray-600 mt-2">
+                        Código QR<br />Bs {selectedPkg.price}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={downloadQRCode}
+                        className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        title="Descargar código QR"
+                      >
+                        <Download className="h-4 w-4" />
+                        Descargar QR
+                      </button>
+                    </>
                   ) : (
                     <div className="w-48 h-48 mx-auto bg-gray-200 rounded-lg flex items-center justify-center">
                       <FileImage className="h-12 w-12 text-gray-400" />
                     </div>
                   )}
-                  <p className="text-sm text-gray-600 mt-2">
-                    Código QR<br />Bs {selectedPkg.price}
-                  </p>
                 </div>
               </div>
             </div>
