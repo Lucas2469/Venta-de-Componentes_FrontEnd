@@ -156,7 +156,7 @@ class ProductsApi {
 
     // Buscar productos
     async searchProducts(query: string, filters: ProductFilters = {}): Promise<PaginatedProductsResponse> {
-        const searchParams = new URLSearchParams({ q: query });
+        const searchParams = new URLSearchParams({ search: query });
 
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
