@@ -254,7 +254,7 @@ export function MeetingPointsSection() {
                 <option value="Zona Sur">Zona Sur</option>
                 <option value="Zona Este">Zona Este</option>
                 <option value="Zona Oeste">Zona Oeste</option>
-                <option value="Centro">Centro</option>
+                <option value="Zona Centro">Zona Centro</option>
               </select>
             </div>
           </div>
@@ -464,7 +464,7 @@ export function MeetingPointsSection() {
                   <option value="Zona Sur">Zona Sur</option>
                   <option value="Zona Este">Zona Este</option>
                   <option value="Zona Oeste">Zona Oeste</option>
-                  <option value="Centro">Centro</option>
+                  <option value="Zona Centro">Zona Centro</option>
                 </select>
               </div>
 
