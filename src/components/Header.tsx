@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, User as UserIcon, LogOut, Settings, Package, CreditCard, BarChart3, Menu, Bell, Grid, Calendar, Clock } from "lucide-react";
+import { Search, User as UserIcon, LogOut, Package, CreditCard, BarChart3, Menu, Bell, Grid, Calendar, Clock } from "lucide-react";
 import { useAuthContext } from "../contexts/AuthContext";
 import { NotificationPanel } from "./NotificationPanel";
 import { fetchUnreadNotificationsCount } from "../api/notifications";
@@ -236,17 +236,6 @@ export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps)
                                 Panel Administrativo
                               </button>
                             )}
-
-                            <button
-                              onClick={() => {
-                                onNavigate("settings");
-                                setIsMenuOpen(false);
-                              }}
-                              className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 rounded-md transition-colors"
-                            >
-                              <Settings className="h-4 w-4 mr-3" />
-                              Configuración
-                            </button>
 
                             <div className="border-t border-gray-200 my-2"></div>
 
