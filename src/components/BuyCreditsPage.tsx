@@ -123,15 +123,31 @@ export function BuyCreditsPage({ onBack }: BuyCreditsPageProps) {
   };
 
   // Función para descargar el código QR
-  const downloadQRCode = () => {
+  const downloadQRCode = async () => {
     if (!selectedPkg?.qrCodeUrl) return;
 
-    const link = document.createElement('a');
-    link.href = selectedPkg.qrCodeUrl;
-    link.download = `QR-Bs${selectedPkg.price}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      // Obtener la imagen como blob
+      const response = await fetch(selectedPkg.qrCodeUrl);
+      const blob = await response.blob();
+
+      // Crear URL del blob
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Crear enlace y descargar
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `QR-Bs${selectedPkg.price}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Limpiar el blob URL
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Error descargando QR:', error);
+      alert('No se pudo descargar el código QR. Intenta nuevamente.');
+    }
   };
 
   return (
