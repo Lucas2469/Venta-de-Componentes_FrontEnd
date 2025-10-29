@@ -36,7 +36,7 @@ export const MeetingPointsPage = ({ onBack }) => {
     { value: 'Zona Sur', label: 'Zona Sur' },
     { value: 'Zona Este', label: 'Zona Este' },
     { value: 'Zona Oeste', label: 'Zona Oeste' },
-    { value: 'Centro', label: 'Centro' },
+    { value: 'Zona Centro', label: 'Zona Centro' },
     { value: 'Otra', label: 'Otra ubicación' }
   ];
 
