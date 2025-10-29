@@ -336,7 +336,6 @@ export const UsersList: React.FC<UsersListProps> = ({
                                     >
                                         <option value="">📊 Todos los estados</option>
                                         <option value="activo">✅ Activos</option>
-                                        <option value="suspendido">⏸️ Suspendidos</option>
                                         <option value="inactivo">❌ Inactivos</option>
                                     </select>
                                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -467,16 +466,13 @@ export const UsersList: React.FC<UsersListProps> = ({
                                                 <div className="flex items-center">
                                                     <div className={`w-3 h-3 rounded-full mr-2 ${
                                                         user.estado === 'activo' ? 'bg-green-500 animate-pulse' :
-                                                        user.estado === 'suspendido' ? 'bg-yellow-500' :
                                                         'bg-gray-400'
                                                     }`}></div>
                                                     <span className={`px-3 py-1 text-sm font-semibold rounded-lg ${
                                                         user.estado === 'activo' ? 'bg-green-100 text-green-800' :
-                                                        user.estado === 'suspendido' ? 'bg-yellow-100 text-yellow-800' :
                                                         'bg-gray-100 text-gray-800'
                                                     }`}>
                                                         {user.estado === 'activo' ? '✅ Activo' :
-                                                         user.estado === 'suspendido' ? '⏸️ Suspendido' :
                                                          '❌ Inactivo'}
                                                     </span>
                                                 </div>

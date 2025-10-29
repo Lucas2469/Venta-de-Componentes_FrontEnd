@@ -22,6 +22,7 @@ export default function ComprobantesPage() {
   const [estadoFlt, setEstadoFlt] = useState<EstadoFiltro>("all");
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
+  const [dateError, setDateError] = useState<string>("");
 
   const [packs, setPacks] = useState<CreditPack[]>([]);
   const [packIdFlt, setPackIdFlt] = useState<string>("all");
@@ -254,7 +255,15 @@ export default function ComprobantesPage() {
               type="date"
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={from}
-              onChange={(e) => setFrom(e.target.value)}
+              onChange={(e) => {
+                setFrom(e.target.value);
+                // Validar si "hasta" es mayor que "desde"
+                if (to && e.target.value && e.target.value > to) {
+                  setDateError('La fecha "Desde" no puede ser mayor que "Hasta"');
+                } else {
+                  setDateError('');
+                }
+              }}
             />
           </div>
 
@@ -262,10 +271,23 @@ export default function ComprobantesPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
             <input
               type="date"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-blue-500 ${
+                dateError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+              }`}
               value={to}
-              onChange={(e) => setTo(e.target.value)}
+              onChange={(e) => {
+                setTo(e.target.value);
+                // Validar si "hasta" es mayor que "desde"
+                if (from && e.target.value && from > e.target.value) {
+                  setDateError('La fecha "Hasta" debe ser mayor o igual que "Desde"');
+                } else {
+                  setDateError('');
+                }
+              }}
             />
+            {dateError && (
+              <p className="text-red-500 text-xs mt-1">{dateError}</p>
+            )}
           </div>
 
           <div className="md:col-span-6">
