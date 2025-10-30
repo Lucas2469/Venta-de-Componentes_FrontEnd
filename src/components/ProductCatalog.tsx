@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, Grid, List, SlidersHorizontal } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Filter, Grid, List, SlidersHorizontal, X } from 'lucide-react';
 import { productsApi, ProductSummary, ProductFilters } from '../api/productsApi';
 import { getImageUrl } from '../api/api';
 import { StatisticsSidebar } from './StatisticsSidebar';
+import { categoriesAPI } from '../api/categoriesApi';
 
 interface ProductCatalogProps {
     onProductClick?: (productId: number) => void;
@@ -18,7 +19,12 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [searchQuery, setSearchQuery] = useState('');
+
+    // Estados para el buscador con debounce
+    const [searchInput, setSearchInput] = useState(''); // Valor del input (no dispara API)
+    const [searchQuery, setSearchQuery] = useState(''); // Valor que dispara la API
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
     const [filters, setFilters] = useState<ProductFilters>({
         page: 1,
         limit: 12,
@@ -29,17 +35,44 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
     const [selectedPriceRange, setSelectedPriceRange] = useState('');
     const [selectedStockFilter, setSelectedStockFilter] = useState('activo');
 
+    // Estados para categorías
+    const [categories, setCategories] = useState<any[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+    const [loadingCategories, setLoadingCategories] = useState(false);
+
+    // Cargar categorías
+    const loadCategories = async () => {
+        try {
+            setLoadingCategories(true);
+            const response = await categoriesAPI.getAll();
+            if (response.success || Array.isArray(response.data) || Array.isArray(response)) {
+                const categoriesData = response.data || response;
+                setCategories(categoriesData);
+            }
+        } catch (err) {
+            console.error('Error loading categories:', err);
+        } finally {
+            setLoadingCategories(false);
+        }
+    };
+
     // Cargar productos
     const loadProducts = async () => {
         try {
             setLoading(true);
             setError(null);
 
+            // Construir filtros incluyendo categoría
+            const productFilters = {
+                ...filters,
+                ...(selectedCategory && { category: selectedCategory })
+            };
+
             let response;
             if (searchQuery.trim()) {
-                response = await productsApi.searchProducts(searchQuery, filters);
+                response = await productsApi.searchProducts(searchQuery, productFilters);
             } else {
-                response = await productsApi.getAllProducts(filters);
+                response = await productsApi.getAllProducts(productFilters);
             }
 
             if (response.success) {
@@ -57,17 +90,43 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         }
     };
 
+    // Effect para cargar categorías al montar
+    useEffect(() => {
+        loadCategories();
+    }, []);
+
+    // Effect para implementar debounce en el buscador
+    useEffect(() => {
+        // Limpiar timeout anterior
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+
+        // Crear nuevo timeout para buscar después de 500ms
+        searchTimeoutRef.current = setTimeout(() => {
+            setSearchQuery(searchInput);
+            setFilters(prev => ({ ...prev, page: 1 }));
+        }, 500);
+
+        // Cleanup
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, [searchInput]);
+
     // Effect para sincronizar búsqueda externa con estado interno
     useEffect(() => {
-        if (externalSearchQuery !== undefined && externalSearchQuery !== searchQuery) {
-            setSearchQuery(externalSearchQuery);
+        if (externalSearchQuery !== undefined && externalSearchQuery !== searchInput) {
+            setSearchInput(externalSearchQuery);
         }
     }, [externalSearchQuery]);
 
     // Effect para cargar productos
     useEffect(() => {
         loadProducts();
-    }, [filters, searchQuery]);
+    }, [filters, searchQuery, selectedCategory]);
 
     // Manejar cambio de página
     const handlePageChange = (newPage: number) => {
@@ -79,15 +138,32 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
     };
 
-    // Manejar búsqueda
+    // Manejar búsqueda con debounce (solo actualiza el input, el debounce se encarga del resto)
     const handleSearchChange = (query: string) => {
-        setSearchQuery(query);
-        setFilters(prev => ({ ...prev, page: 1 }));
+        setSearchInput(query);
     };
 
     // Limpiar búsqueda
     const clearSearch = () => {
+        setSearchInput('');
         setSearchQuery('');
+        setFilters(prev => ({ ...prev, page: 1 }));
+    };
+
+    // Manejar selección de categoría
+    const handleCategoryClick = (categoryId: number) => {
+        if (selectedCategory === categoryId) {
+            // Si ya está seleccionada, deseleccionar
+            setSelectedCategory(null);
+        } else {
+            setSelectedCategory(categoryId);
+        }
+        setFilters(prev => ({ ...prev, page: 1 }));
+    };
+
+    // Limpiar filtro de categoría
+    const clearCategoryFilter = () => {
+        setSelectedCategory(null);
         setFilters(prev => ({ ...prev, page: 1 }));
     };
 
@@ -116,7 +192,9 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
     const clearAllFilters = () => {
         setSelectedPriceRange('');
         setSelectedStockFilter('activo');
+        setSearchInput('');
         setSearchQuery('');
+        setSelectedCategory(null);
         setFilters({
             page: 1,
             limit: 12,
@@ -217,7 +295,9 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                                     </div>
                                     <div>
                                         <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                                            {searchQuery ? `Resultados para "${searchQuery}"` : 'Catálogo ElectroMarket'}
+                                            {searchQuery ? `Resultados para "${searchQuery}"` :
+                                             selectedCategory ? `${categories.find(c => c.id === selectedCategory)?.nombre || 'Categoría'}` :
+                                             'Catálogo ElectroMarket'}
                                         </h1>
                                         <p className="text-gray-600 font-medium mt-1">
                                             {products.length > 0 ? `${products.length} componentes electrónicos disponibles` : 'Explora nuestra selección de productos'}
@@ -230,6 +310,14 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                                     <span className="px-3 py-1 bg-white/60 rounded-lg">🏠 Inicio</span>
                                     <span>→</span>
                                     <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg font-medium">🛍️ Catálogo</span>
+                                    {selectedCategory && (
+                                        <>
+                                            <span>→</span>
+                                            <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg font-medium">
+                                                📁 {categories.find(c => c.id === selectedCategory)?.nombre}
+                                            </span>
+                                        </>
+                                    )}
                                     {searchQuery && (
                                         <>
                                             <span>→</span>
@@ -278,15 +366,13 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                                 </div>
 
                                 {/* Botón limpiar filtros mejorado */}
-                                {(selectedPriceRange || selectedStockFilter !== 'activo' || searchQuery) && (
+                                {(selectedPriceRange || selectedStockFilter !== 'activo' || searchQuery || selectedCategory) && (
                                     <button
                                         onClick={clearAllFilters}
                                         className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 transform hover:scale-105 shadow-lg font-medium flex items-center space-x-2"
                                     >
-                                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                        <span>🧹 Limpiar</span>
+                                        <X className="h-5 w-5" />
+                                        <span>🧹 Limpiar todo</span>
                                     </button>
                                 )}
                             </div>
@@ -317,47 +403,59 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                             <input
                                 type="text"
                                 placeholder="Buscar productos por nombre (ej: Arduino, sensor, resistencia, ESP32...)"
-                                value={searchQuery}
+                                value={searchInput}
                                 onChange={(e) => handleSearchChange(e.target.value)}
                                 className="w-full pl-16 pr-16 py-5 text-lg border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 placeholder:text-gray-400 bg-white/80 backdrop-blur-sm shadow-inner"
                             />
-                            {searchQuery && (
+                            {searchInput && (
                                 <button
                                     onClick={clearSearch}
                                     className="absolute inset-y-0 right-0 pr-6 flex items-center text-gray-400 hover:text-blue-500 transition-colors z-10"
                                 >
-                                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                                    <X className="h-6 w-6" />
                                 </button>
                             )}
 
                             {/* Indicador de búsqueda activa */}
-                            {searchQuery && (
+                            {searchInput && (
                                 <div className="absolute inset-0 rounded-2xl ring-2 ring-blue-500/50 ring-offset-2 pointer-events-none"></div>
                             )}
                         </div>
 
-                        {/* Búsquedas sugeridas mejoradas */}
+                        {/* Categorías dinámicas */}
                         {!searchQuery && (
                             <div className="mb-4">
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <span className="text-sm font-semibold text-gray-700 px-3 py-2 bg-gray-100 rounded-lg">✨ Búsquedas populares:</span>
-                                    {[
-                                        { term: 'Arduino', icon: '🔌' },
-                                        { term: 'Sensor', icon: '📡' },
-                                        { term: 'Resistencia', icon: '⚡' },
-                                        { term: 'ESP32', icon: '📱' },
-                                        { term: 'LED', icon: '💡' }
-                                    ].map(({ term, icon }) => (
-                                        <button
-                                            key={term}
-                                            onClick={() => handleSearchChange(term)}
-                                            className="px-4 py-2 text-sm bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-xl hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 transform hover:scale-105 shadow-sm border border-blue-200/50 font-medium"
-                                        >
-                                            {icon} {term}
-                                        </button>
-                                    ))}
+                                    <span className="text-sm font-semibold text-gray-700 px-3 py-2 bg-gray-100 rounded-lg">📁 Categorías:</span>
+                                    {loadingCategories ? (
+                                        <span className="text-sm text-gray-500">Cargando categorías...</span>
+                                    ) : categories.length > 0 ? (
+                                        <>
+                                            {categories.map((category) => (
+                                                <button
+                                                    key={category.id}
+                                                    onClick={() => handleCategoryClick(category.id)}
+                                                    className={`px-4 py-2 text-sm rounded-xl transition-all duration-200 transform hover:scale-105 shadow-sm border font-medium ${
+                                                        selectedCategory === category.id
+                                                            ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-purple-600 shadow-lg'
+                                                            : 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 hover:from-blue-100 hover:to-indigo-100 border-blue-200/50'
+                                                    }`}
+                                                >
+                                                    📦 {category.nombre}
+                                                </button>
+                                            ))}
+                                            {selectedCategory && (
+                                                <button
+                                                    onClick={clearCategoryFilter}
+                                                    className="px-4 py-2 text-sm bg-gradient-to-r from-red-50 to-orange-50 text-red-700 rounded-xl hover:from-red-100 hover:to-orange-100 transition-all duration-200 transform hover:scale-105 shadow-sm border border-red-200/50 font-medium"
+                                                >
+                                                    <X className="h-4 w-4 inline mr-1" /> Limpiar filtro
+                                                </button>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <span className="text-sm text-gray-500">No hay categorías disponibles</span>
+                                    )}
                                 </div>
                             </div>
                         )}
