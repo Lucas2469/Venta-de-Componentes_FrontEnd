@@ -15,7 +15,8 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
     searchQuery: externalSearchQuery
 }) => {
     const [products, setProducts] = useState<ProductSummary[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [initialLoading, setInitialLoading] = useState(true); // Solo para la carga inicial
+    const [loading, setLoading] = useState(false); // Para búsquedas subsecuentes
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -57,9 +58,13 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
     };
 
     // Cargar productos
-    const loadProducts = async () => {
+    const loadProducts = async (isInitial = false) => {
         try {
-            setLoading(true);
+            if (isInitial) {
+                setInitialLoading(true);
+            } else {
+                setLoading(true);
+            }
             setError(null);
 
             // Construir filtros incluyendo categoría
@@ -86,7 +91,11 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             setError('Error de conexión al servidor');
             console.error('Error loading products:', err);
         } finally {
-            setLoading(false);
+            if (isInitial) {
+                setInitialLoading(false);
+            } else {
+                setLoading(false);
+            }
         }
     };
 
@@ -123,9 +132,16 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         }
     }, [externalSearchQuery]);
 
-    // Effect para cargar productos
+    // Effect para cargar productos (carga inicial)
     useEffect(() => {
-        loadProducts();
+        loadProducts(true);
+    }, []);
+
+    // Effect para cargar productos (búsquedas y filtros subsecuentes)
+    useEffect(() => {
+        if (!initialLoading) {
+            loadProducts(false);
+        }
     }, [filters, searchQuery, selectedCategory]);
 
     // Manejar cambio de página
@@ -202,8 +218,8 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         });
     };
 
-    // Componente de loading mejorado
-    if (loading) {
+    // Componente de loading mejorado (solo para carga INICIAL)
+    if (initialLoading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -487,8 +503,16 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     </div>
                 </div>
 
+                {/* Indicador de carga discreto (solo para búsquedas, no carga inicial) */}
+                {loading && !initialLoading && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6 flex items-center justify-center space-x-3">
+                        <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-blue-700 font-medium">🔍 Buscando productos...</span>
+                    </div>
+                )}
+
                 {/* Grid de productos */}
-                {products.length === 0 ? (
+                {products.length === 0 && !loading ? (
                     <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-16 text-center border border-white/20">
                         <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
                             <span className="text-5xl text-white">🔍</span>
@@ -525,7 +549,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                             </div>
                         ) : (
                             <button
-                                onClick={loadProducts}
+                                onClick={() => loadProducts(false)}
                                 className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 shadow-lg font-medium"
                             >
                                 🔄 Recargar productos
@@ -535,7 +559,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                 ) : (
                     <>
                         {/* Grid responsivo espectacular */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-8">
+                        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-8 transition-opacity duration-300 ${loading ? 'opacity-60' : 'opacity-100'}`}>
                             {products.map((product, index) => (
                                 <ProductCard
                                     key={product.id}
