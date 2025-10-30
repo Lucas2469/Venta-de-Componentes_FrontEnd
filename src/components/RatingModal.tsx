@@ -48,7 +48,7 @@ export const RatingModal: React.FC<RatingModalProps> = ({
       // Parse the date string (YYYY-MM-DD)
       const parts = dateStr.split('-').map(Number);
       if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) {
-        console.error('Invalid date format:', dateString);
+        // Validación fallida, retornar fecha actual sin error
         return new Date();
       }
 
@@ -61,7 +61,7 @@ export const RatingModal: React.FC<RatingModalProps> = ({
       const localDate = new Date(Date.UTC(year, month - 1, day + 1, 12, 0, 0));
       return localDate;
     } catch (error) {
-      console.error('Error parsing date:', error);
+      // Error al parsear, retornar fecha actual sin error
       return new Date();
     }
   };
