@@ -184,10 +184,31 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = () => {
   };
 
   const formatDate = (dateString: string) => {
+    // Validar que la fecha existe y está en formato correcto
+    if (!dateString || typeof dateString !== 'string') {
+      return 'Fecha no especificada';
+    }
+
     // Parsear la fecha sin convertirla a UTC
     // dateString viene como "YYYY-MM-DD" del backend
-    const [year, month, day] = dateString.split('-').map(Number);
+    const parts = dateString.split('-');
+    if (parts.length !== 3) {
+      return 'Fecha inválida';
+    }
+
+    const [year, month, day] = parts.map(Number);
+
+    // Validar que los números sean válidos
+    if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
+      return 'Fecha inválida';
+    }
+
     const date = new Date(year, month - 1, day); // month es 0-indexed en Date
+
+    // Validar que la fecha es válida
+    if (isNaN(date.getTime())) {
+      return 'Fecha inválida';
+    }
 
     return date.toLocaleDateString('es-ES', {
       year: 'numeric',

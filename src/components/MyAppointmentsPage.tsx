@@ -152,10 +152,31 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = () => {
   };
 
   const formatDate = (dateString: string) => {
+    // Validar que la fecha existe y está en formato correcto
+    if (!dateString || typeof dateString !== 'string') {
+      return 'Fecha no especificada';
+    }
+
     // Parsear la fecha sin convertirla a UTC
     // dateString viene como "YYYY-MM-DD" del backend
-    const [year, month, day] = dateString.split('-').map(Number);
+    const parts = dateString.split('-');
+    if (parts.length !== 3) {
+      return 'Fecha inválida';
+    }
+
+    const [year, month, day] = parts.map(Number);
+
+    // Validar que los números sean válidos
+    if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
+      return 'Fecha inválida';
+    }
+
     const date = new Date(year, month - 1, day); // month es 0-indexed en Date
+
+    // Validar que la fecha es válida
+    if (isNaN(date.getTime())) {
+      return 'Fecha inválida';
+    }
 
     return date.toLocaleDateString('es-ES', {
       year: 'numeric',
@@ -169,12 +190,43 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = () => {
   };
 
   const isUpcoming = (dateString: string, timeString: string) => {
+    // Validar que la fecha y hora existen
+    if (!dateString || !timeString) {
+      return false;
+    }
+
     // Parsear la fecha sin convertirla a UTC
-    const [year, month, day] = dateString.split('-').map(Number);
+    const parts = dateString.split('-');
+    if (parts.length !== 3) {
+      return false;
+    }
+
+    const [year, month, day] = parts.map(Number);
+
+    // Validar que los números sean válidos
+    if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
+      return false;
+    }
+
     const appointmentDate = new Date(year, month - 1, day);
+
     // Agregar la hora
-    const [hours, minutes] = timeString.split(':').map(Number);
+    const timeParts = timeString.split(':');
+    if (timeParts.length < 2) {
+      return false;
+    }
+
+    const [hours, minutes] = timeParts.map(Number);
+    if (isNaN(hours) || isNaN(minutes)) {
+      return false;
+    }
+
     appointmentDate.setHours(hours, minutes, 0, 0);
+
+    // Validar que la fecha es válida
+    if (isNaN(appointmentDate.getTime())) {
+      return false;
+    }
 
     return appointmentDate > new Date();
   };
