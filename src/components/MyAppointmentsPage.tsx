@@ -152,7 +152,12 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
+    // Parsear la fecha sin convertirla a UTC
+    // dateString viene como "YYYY-MM-DD" del backend
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month es 0-indexed en Date
+
+    return date.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -164,7 +169,13 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = () => {
   };
 
   const isUpcoming = (dateString: string, timeString: string) => {
-    const appointmentDate = new Date(`${dateString}T${timeString}`);
+    // Parsear la fecha sin convertirla a UTC
+    const [year, month, day] = dateString.split('-').map(Number);
+    const appointmentDate = new Date(year, month - 1, day);
+    // Agregar la hora
+    const [hours, minutes] = timeString.split(':').map(Number);
+    appointmentDate.setHours(hours, minutes, 0, 0);
+
     return appointmentDate > new Date();
   };
 
