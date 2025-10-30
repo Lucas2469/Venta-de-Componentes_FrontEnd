@@ -158,39 +158,37 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = () => {
   };
 
   const formatDate = (dateString: string) => {
+    // 🔴 LOG VISIBLE - Testing if code is deployed
+    console.error('❌ TESTING formatDate called with:', dateString);
+
     // Validar que la fecha existe y está en formato correcto
     if (!dateString || typeof dateString !== 'string') {
-      console.warn('formatDate: dateString is invalid', { dateString, type: typeof dateString });
+      console.error('❌ formatDate: dateString is invalid', { dateString, type: typeof dateString });
       return 'Fecha no especificada';
     }
-
-    console.log('formatDate input:', { dateString, type: typeof dateString, length: dateString.length });
 
     // Parsear la fecha sin convertirla a UTC
     // dateString viene como "YYYY-MM-DD" del backend
     const parts = dateString.split('-');
-    console.log('formatDate parts:', { parts, length: parts.length });
 
     if (parts.length !== 3) {
-      console.warn('formatDate: Invalid format - expected 3 parts', { parts });
+      console.error('❌ formatDate: Invalid format - expected 3 parts, got:', { parts, inputValue: dateString });
       return 'Fecha inválida';
     }
 
     const [year, month, day] = parts.map(Number);
-    console.log('formatDate parsed numbers:', { year, month, day });
 
     // Validar que los números sean válidos
     if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
-      console.warn('formatDate: Invalid numbers', { year, month, day, yearIsNaN: isNaN(year), monthIsNaN: isNaN(month), dayIsNaN: isNaN(day) });
+      console.error('❌ formatDate: Invalid numbers', { year, month, day, inputValue: dateString });
       return 'Fecha inválida';
     }
 
     const date = new Date(year, month - 1, day); // month es 0-indexed en Date
-    console.log('formatDate created date:', { date, getTime: date.getTime() });
 
     // Validar que la fecha es válida
     if (isNaN(date.getTime())) {
-      console.warn('formatDate: Invalid date object');
+      console.error('❌ formatDate: Invalid date object from input:', dateString);
       return 'Fecha inválida';
     }
 
@@ -199,7 +197,6 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = () => {
       month: 'long',
       day: 'numeric'
     });
-    console.log('formatDate result:', formatted);
 
     return formatted;
   };
