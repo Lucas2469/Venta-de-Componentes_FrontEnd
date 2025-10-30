@@ -32,24 +32,34 @@ export const RatingModal: React.FC<RatingModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Función para convertir fecha UTC a LOCAL (Bolivia UTC-4)
-  const getLocalDate = (dateString: string) => {
+  const getLocalDate = (dateString: any) => {
     try {
+      if (!dateString) return new Date();
+
       // Si es un Date object, convertir a string ISO
       let dateStr = dateString;
       if (dateString instanceof Date) {
-        dateStr = dateString.toISOString().split('T')[0];
+        dateStr = dateString.toISOString().split('T')[0]; // Convertir a YYYY-MM-DD
       }
 
       // Parse the date string (YYYY-MM-DD)
-      const [year, month, day] = dateStr.split('-').map(Number);
-      // Crear como UTC
-      const utcDate = new Date(Date.UTC(year, month - 1, day));
-      // Sumar 4 horas para convertir a LOCAL (Bolivia es UTC-4)
-      const localDate = new Date(utcDate.getTime() + (4 * 60 * 60 * 1000));
+      const parts = dateStr.split('-').map(Number);
+      if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) {
+        console.error('Invalid date format:', dateString);
+        return new Date();
+      }
+
+      const [year, month, day] = parts;
+
+      // fecha_cita está en UTC pero representa 1 día adelante en Bolivia (UTC-4)
+      // Ejemplo: 2025-10-29 UTC = 2025-10-30 LOCAL en Bolivia
+      // Por eso sumamos 1 día
+      // Crear como 2025-10-30 12:00 UTC para asegurar que cualquier zona vea el mismo día
+      const localDate = new Date(Date.UTC(year, month - 1, day + 1, 12, 0, 0));
       return localDate;
     } catch (error) {
       console.error('Error parsing date:', error);
-      return new Date(dateString);
+      return new Date();
     }
   };
 

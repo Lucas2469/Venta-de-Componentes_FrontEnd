@@ -83,7 +83,7 @@ export const Toast: React.FC<ToastProps> = ({
   const IconComponent = config.icon;
 
   return (
-    <div className="fixed top-4 right-4 z-[99999] max-w-sm w-full">
+    <div className="fixed top-20 right-4 z-[99999] max-w-sm w-full">
       <div className={`${config.bgColor} ${config.borderColor} border rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 ease-in-out ${
         isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
       }`}>
