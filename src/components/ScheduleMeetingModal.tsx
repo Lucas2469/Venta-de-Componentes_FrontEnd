@@ -128,23 +128,9 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Normalizar la hora para comparaciones
 
-        // Si estamos en los últimos días del mes y no hay fechas válidas restantes,
-        // mostrar el próximo mes
-        let displayMonth = today.getMonth();
-        let displayYear = today.getFullYear();
-
-        // Verificar si hay fechas válidas en el mes actual
-        const daysLeftInMonth = new Date(displayYear, displayMonth + 1, 0).getDate() - today.getDate();
-        if (daysLeftInMonth <= 2) { // Si quedan 2 días o menos, mostrar próximo mes
-            displayMonth = displayMonth + 1;
-            if (displayMonth > 11) {
-                displayMonth = 0;
-                displayYear = displayYear + 1;
-            }
-        }
-
-        const currentMonth = displayMonth;
-        const currentYear = displayYear;
+        // Siempre mostrar el mes actual
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
 
         // Primer día del mes
         const firstDay = new Date(currentYear, currentMonth, 1);
@@ -357,18 +343,8 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
                             <h4 className="text-center font-medium text-gray-900">
                                 {(() => {
                                     const today = new Date();
-                                    let displayMonth = today.getMonth();
-                                    let displayYear = today.getFullYear();
-
-                                    // Misma lógica para mostrar el mes correcto
-                                    const daysLeftInMonth = new Date(displayYear, displayMonth + 1, 0).getDate() - today.getDate();
-                                    if (daysLeftInMonth <= 2) {
-                                        displayMonth = displayMonth + 1;
-                                        if (displayMonth > 11) {
-                                            displayMonth = 0;
-                                            displayYear = displayYear + 1;
-                                        }
-                                    }
+                                    const displayMonth = today.getMonth();
+                                    const displayYear = today.getFullYear();
 
                                     return new Date(displayYear, displayMonth, 1).toLocaleDateString('es-ES', {
                                         month: 'long',
