@@ -41,12 +41,6 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = () => {
       const userId = parseInt(currentUser.id.toString());
       const response = await appointmentApi.getVendorAppointments(userId, filter || undefined);
 
-      console.log('fetchAppointments response:', { success: response.success, dataLength: response.data?.length });
-      if (response.data && response.data.length > 0) {
-        console.log('First appointment structure:', response.data[0]);
-        console.log('First appointment fecha_cita:', { value: response.data[0].fecha_cita, type: typeof response.data[0].fecha_cita });
-      }
-
       if (response.success) {
         setAppointments(response.data);
       } else {
@@ -190,21 +184,22 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = () => {
   };
 
   const formatDate = (dateString: string) => {
-    // 🔴 LOG VISIBLE - Testing if code is deployed
-    console.error('❌ TESTING formatDate called with:', dateString);
-
-    // Validar que la fecha existe y está en formato correcto
+    // Validar que la fecha existe
     if (!dateString || typeof dateString !== 'string') {
-      console.error('❌ formatDate: dateString is invalid', { dateString, type: typeof dateString });
       return 'Fecha no especificada';
     }
 
+    // Si viene en formato ISO (2025-11-05T00:00:00.000Z), extraer solo la fecha
+    // Si viene en formato simple (2025-11-05), usar directamente
+    let dateOnly = dateString;
+    if (dateString.includes('T')) {
+      dateOnly = dateString.split('T')[0]; // Obtener solo "YYYY-MM-DD"
+    }
+
     // Parsear la fecha sin convertirla a UTC
-    // dateString viene como "YYYY-MM-DD" del backend
-    const parts = dateString.split('-');
+    const parts = dateOnly.split('-');
 
     if (parts.length !== 3) {
-      console.error('❌ formatDate: Invalid format - expected 3 parts, got:', { parts, inputValue: dateString });
       return 'Fecha inválida';
     }
 
@@ -212,25 +207,22 @@ const VendorAppointmentsPage: React.FC<VendorAppointmentsPageProps> = () => {
 
     // Validar que los números sean válidos
     if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
-      console.error('❌ formatDate: Invalid numbers', { year, month, day, inputValue: dateString });
       return 'Fecha inválida';
     }
 
-    const date = new Date(year, month - 1, day); // month es 0-indexed en Date
+    // Crear fecha con constructor Date(year, month, day) para evitar interpretación UTC
+    const date = new Date(year, month - 1, day);
 
     // Validar que la fecha es válida
     if (isNaN(date.getTime())) {
-      console.error('❌ formatDate: Invalid date object from input:', dateString);
       return 'Fecha inválida';
     }
 
-    const formatted = date.toLocaleDateString('es-ES', {
+    return date.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
-
-    return formatted;
   };
 
   const formatTime = (timeString: string) => {
