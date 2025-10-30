@@ -54,11 +54,9 @@ export const RatingModal: React.FC<RatingModalProps> = ({
 
       const [year, month, day] = parts;
 
-      // fecha_cita está en UTC pero representa 1 día adelante en Bolivia (UTC-4)
-      // Ejemplo: 2025-10-29 UTC = 2025-10-30 LOCAL en Bolivia
-      // Por eso sumamos 1 día
-      // Crear como 2025-10-30 12:00 UTC para asegurar que cualquier zona vea el mismo día
-      const localDate = new Date(Date.UTC(year, month - 1, day + 1, 12, 0, 0));
+      // La fecha ya está en LOCAL en la BD, simplemente crear un Date object
+      // 2025-10-30 en BD = 2025-10-30 en LOCAL
+      const localDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
       return localDate;
     } catch (error) {
       // Error al parsear, retornar fecha actual sin error
