@@ -40,6 +40,9 @@ export const RatingModal: React.FC<RatingModalProps> = ({
       let dateStr = dateString;
       if (dateString instanceof Date) {
         dateStr = dateString.toISOString().split('T')[0]; // Convertir a YYYY-MM-DD
+      } else if (typeof dateString === 'string' && dateString.includes('T')) {
+        // Si es ISO format (2025-10-30T00:00:00.000Z), extraer solo la parte de fecha
+        dateStr = dateString.split('T')[0]; // Convertir a YYYY-MM-DD
       }
 
       // Parse the date string (YYYY-MM-DD)
