@@ -36,6 +36,11 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
     const [cantidadSolicitada, setCantidadSolicitada] = useState<number>(quantity); // Estado para la cantidad (AnettG)
     const [errors, setErrors] = useState<string[]>([]);
 
+    // Estado para controlar el mes que se muestra en el calendario
+    const today = new Date();
+    const [displayMonth, setDisplayMonth] = useState<number>(today.getMonth());
+    const [displayYear, setDisplayYear] = useState<number>(today.getFullYear());
+
     // Mapeo de días de la semana
     const dayMap = {
         0: 'domingo',
@@ -49,6 +54,36 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 
     // Obtener días disponibles del vendedor
     const availableDays = horarios.map(h => h.dia_semana);
+
+    // Funciones para navegar entre meses
+    const goToPreviousMonth = () => {
+        if (displayMonth === 0) {
+            setDisplayMonth(11);
+            setDisplayYear(displayYear - 1);
+        } else {
+            setDisplayMonth(displayMonth - 1);
+        }
+    };
+
+    const goToNextMonth = () => {
+        if (displayMonth === 11) {
+            setDisplayMonth(0);
+            setDisplayYear(displayYear + 1);
+        } else {
+            setDisplayMonth(displayMonth + 1);
+        }
+    };
+
+    // Verificar si podemos ir al mes anterior (no permitir meses pasados)
+    const canGoPrevious = () => {
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+
+        if (displayYear < currentYear) return false;
+        if (displayYear === currentYear && displayMonth <= currentMonth) return false;
+        return true;
+    };
 
     // Verificar si una fecha es válida (el vendedor trabaja ese día y tiene horarios disponibles)
     const isDateValid = (date: Date): boolean => {
@@ -128,9 +163,9 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Normalizar la hora para comparaciones
 
-        // Siempre mostrar el mes actual
-        const currentMonth = today.getMonth();
-        const currentYear = today.getFullYear();
+        // Usar el mes y año que se está mostrando (displayMonth/displayYear)
+        const currentMonth = displayMonth;
+        const currentYear = displayYear;
 
         // Primer día del mes
         const firstDay = new Date(currentYear, currentMonth, 1);
@@ -285,6 +320,10 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
             setSelectedExactTime(''); // Reset hora exacta
             setCantidadSolicitada(quantity); // Reset cantidad (AnettG)
             setErrors([]);
+            // Reset calendario al mes actual
+            const currentDate = new Date();
+            setDisplayMonth(currentDate.getMonth());
+            setDisplayYear(currentDate.getFullYear());
         }
     }, [isOpen, quantity]);
 
@@ -338,20 +377,39 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
                             </p>
                         </div>
 
-                        {/* Cabecera del calendario */}
-                        <div className="mb-4">
-                            <h4 className="text-center font-medium text-gray-900">
-                                {(() => {
-                                    const today = new Date();
-                                    const displayMonth = today.getMonth();
-                                    const displayYear = today.getFullYear();
+                        {/* Cabecera del calendario con navegación */}
+                        <div className="mb-4 flex items-center justify-between">
+                            <button
+                                onClick={goToPreviousMonth}
+                                disabled={!canGoPrevious()}
+                                className={`p-2 rounded-lg transition-colors ${
+                                    canGoPrevious()
+                                        ? 'hover:bg-gray-100 text-gray-700'
+                                        : 'text-gray-300 cursor-not-allowed'
+                                }`}
+                                title={canGoPrevious() ? 'Mes anterior' : 'No se puede ir a meses pasados'}
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
 
-                                    return new Date(displayYear, displayMonth, 1).toLocaleDateString('es-ES', {
-                                        month: 'long',
-                                        year: 'numeric'
-                                    }).toUpperCase();
-                                })()}
+                            <h4 className="text-center font-medium text-gray-900">
+                                {new Date(displayYear, displayMonth, 1).toLocaleDateString('es-ES', {
+                                    month: 'long',
+                                    year: 'numeric'
+                                }).toUpperCase()}
                             </h4>
+
+                            <button
+                                onClick={goToNextMonth}
+                                className="p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors"
+                                title="Mes siguiente"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
                         </div>
 
                         {/* Días de la semana */}
