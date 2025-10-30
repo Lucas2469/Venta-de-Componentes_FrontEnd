@@ -31,6 +31,28 @@ export const RatingModal: React.FC<RatingModalProps> = ({
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Función para convertir fecha UTC a LOCAL (Bolivia UTC-4)
+  const getLocalDate = (dateString: string) => {
+    try {
+      // Si es un Date object, convertir a string ISO
+      let dateStr = dateString;
+      if (dateString instanceof Date) {
+        dateStr = dateString.toISOString().split('T')[0];
+      }
+
+      // Parse the date string (YYYY-MM-DD)
+      const [year, month, day] = dateStr.split('-').map(Number);
+      // Crear como UTC
+      const utcDate = new Date(Date.UTC(year, month - 1, day));
+      // Sumar 4 horas para convertir a LOCAL (Bolivia es UTC-4)
+      const localDate = new Date(utcDate.getTime() + (4 * 60 * 60 * 1000));
+      return localDate;
+    } catch (error) {
+      console.error('Error parsing date:', error);
+      return new Date(dateString);
+    }
+  };
+
   const handleStarClick = (starRating: number) => {
     setRating(starRating);
   };
@@ -107,7 +129,7 @@ export const RatingModal: React.FC<RatingModalProps> = ({
               <span className="font-medium text-gray-700">{ratingType === 'comprador_a_vendedor' ? 'Vendedor' : 'Comprador'}:</span> {targetUser.nombre}
             </p>
             <p className="text-sm text-gray-600">
-              <span className="font-medium text-gray-700">Fecha del encuentro:</span> {new Date(fechaCita).toLocaleDateString('es-BO', {
+              <span className="font-medium text-gray-700">Fecha del encuentro:</span> {getLocalDate(fechaCita).toLocaleDateString('es-BO', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
