@@ -36,6 +36,12 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = () => {
       const userId = parseInt(currentUser.id.toString());
       const response = await appointmentApi.getBuyerAppointments(userId, filter || undefined);
 
+      console.log('fetchAppointments (buyer) response:', { success: response.success, dataLength: response.data?.length });
+      if (response.data && response.data.length > 0) {
+        console.log('First appointment structure:', response.data[0]);
+        console.log('First appointment fecha_cita:', { value: response.data[0].fecha_cita, type: typeof response.data[0].fecha_cita });
+      }
+
       if (response.success) {
         setAppointments(response.data);
       } else {
@@ -154,35 +160,48 @@ const MyAppointmentsPage: React.FC<MyAppointmentsPageProps> = () => {
   const formatDate = (dateString: string) => {
     // Validar que la fecha existe y está en formato correcto
     if (!dateString || typeof dateString !== 'string') {
+      console.warn('formatDate: dateString is invalid', { dateString, type: typeof dateString });
       return 'Fecha no especificada';
     }
+
+    console.log('formatDate input:', { dateString, type: typeof dateString, length: dateString.length });
 
     // Parsear la fecha sin convertirla a UTC
     // dateString viene como "YYYY-MM-DD" del backend
     const parts = dateString.split('-');
+    console.log('formatDate parts:', { parts, length: parts.length });
+
     if (parts.length !== 3) {
+      console.warn('formatDate: Invalid format - expected 3 parts', { parts });
       return 'Fecha inválida';
     }
 
     const [year, month, day] = parts.map(Number);
+    console.log('formatDate parsed numbers:', { year, month, day });
 
     // Validar que los números sean válidos
     if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
+      console.warn('formatDate: Invalid numbers', { year, month, day, yearIsNaN: isNaN(year), monthIsNaN: isNaN(month), dayIsNaN: isNaN(day) });
       return 'Fecha inválida';
     }
 
     const date = new Date(year, month - 1, day); // month es 0-indexed en Date
+    console.log('formatDate created date:', { date, getTime: date.getTime() });
 
     // Validar que la fecha es válida
     if (isNaN(date.getTime())) {
+      console.warn('formatDate: Invalid date object');
       return 'Fecha inválida';
     }
 
-    return date.toLocaleDateString('es-ES', {
+    const formatted = date.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
+    console.log('formatDate result:', formatted);
+
+    return formatted;
   };
 
   const formatTime = (timeString: string) => {
