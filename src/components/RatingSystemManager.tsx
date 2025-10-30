@@ -78,15 +78,16 @@ const RatingSystemManager: React.FC<RatingSystemManagerProps> = ({
   useEffect(() => {
     if (!isActive) return;
 
-    // Cargar inmediatamente
+    // Cargar inmediatamente al montar
     loadPendingRatings();
     checkAlerts();
 
-    // Configurar intervalo para verificar cada 2 minutos
+    // Configurar intervalo para verificar cada 30 segundos (en lugar de 2 minutos)
+    // Esto asegura que el modal aparezca casi inmediatamente cuando llega la hora de la cita
     const interval = setInterval(() => {
       loadPendingRatings();
       checkAlerts();
-    }, 2 * 60 * 1000); // 2 minutos
+    }, 30 * 1000); // 30 segundos (antes era 2 * 60 * 1000)
 
     return () => clearInterval(interval);
   }, [loadPendingRatings, checkAlerts, isActive]);
