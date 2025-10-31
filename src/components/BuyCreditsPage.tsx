@@ -101,13 +101,18 @@ export function BuyCreditsPage({ onBack }: BuyCreditsPageProps) {
         body: formData
       });
 
-      if (!response.ok) throw new Error("Error en la solicitud");
+      const data = await response.json();
 
-      await response.json();
+      if (!response.ok) {
+        const errorMsg = data?.error || "Error en la solicitud";
+        throw new Error(errorMsg);
+      }
+
       setShowSuccessModal(true);
     } catch (error) {
       console.error("Error en handleSubmit:", error);
-      alert("Hubo un error al enviar la solicitud, intenta nuevamente.");
+      const errorMessage = error instanceof Error ? error.message : "Hubo un error al enviar la solicitud, intenta nuevamente.";
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
