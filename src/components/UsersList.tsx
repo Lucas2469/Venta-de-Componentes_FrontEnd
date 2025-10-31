@@ -594,26 +594,26 @@ export const UsersList: React.FC<UsersListProps> = ({
                         <div className="md:hidden space-y-3 px-4">
                             {users.map((user) => (
                                 <div key={user.id} className="bg-white/80 backdrop-blur-sm rounded-lg shadow-md border border-white/20 p-4 space-y-3">
-                                    {/* Header: Nombre y Tipo */}
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                                                <span className="text-white font-bold text-sm">{user.nombre.charAt(0).toUpperCase()}</span>
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold text-gray-900 text-sm">{user.nombre} {user.apellido}</p>
-                                                <p className="text-xs text-gray-600">{user.email}</p>
-                                            </div>
+                                    {/* Header: Avatar, Nombre y Tipo */}
+                                    <div className="flex gap-3 items-start">
+                                        <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg flex-shrink-0">
+                                            <span className="text-white font-bold text-sm">{user.nombre.charAt(0).toUpperCase()}</span>
                                         </div>
-                                        <span className={`px-2 py-1 text-xs font-bold rounded-lg ${
-                                            user.tipo_usuario === 'admin' ? 'bg-red-100 text-red-700' :
-                                            user.tipo_usuario === 'vendedor' ? 'bg-purple-100 text-purple-700' :
-                                            'bg-blue-100 text-blue-700'
-                                        }`}>
-                                            {user.tipo_usuario === 'admin' ? '👑 Admin' :
-                                             user.tipo_usuario === 'vendedor' ? '🏦 Vendedor' :
-                                             '🛒 Comprador'}
-                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-start justify-between gap-2 mb-1">
+                                                <p className="font-semibold text-gray-900 text-sm truncate">{user.nombre} {user.apellido}</p>
+                                                <span className={`px-2 py-0.5 text-xs font-bold rounded-lg whitespace-nowrap flex-shrink-0 ${
+                                                    user.tipo_usuario === 'admin' ? 'bg-red-100 text-red-700' :
+                                                    user.tipo_usuario === 'vendedor' ? 'bg-purple-100 text-purple-700' :
+                                                    'bg-blue-100 text-blue-700'
+                                                }`}>
+                                                    {user.tipo_usuario === 'admin' ? '👑 Admin' :
+                                                     user.tipo_usuario === 'vendedor' ? '🏦 Vendedor' :
+                                                     '🛒 Comprador'}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-600 truncate">{user.email}</p>
+                                        </div>
                                     </div>
 
                                     {/* Información */}
