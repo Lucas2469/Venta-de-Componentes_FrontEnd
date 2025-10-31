@@ -430,7 +430,7 @@ export function MeetingPointsSection() {
                     </div>
                     <div>
                       <p className="text-gray-600 font-medium">Coordenadas</p>
-                      <p className="text-gray-900 text-xs">{point.coordenadas_lat?.toFixed(4)}, {point.coordenadas_lng?.toFixed(4)}</p>
+                      <p className="text-gray-900 text-xs">{point.coordenadas_lat ? Number(point.coordenadas_lat).toFixed(4) : 'N/A'}, {point.coordenadas_lng ? Number(point.coordenadas_lng).toFixed(4) : 'N/A'}</p>
                     </div>
                   </div>
                   <div className="flex gap-1 pt-2 border-t border-gray-200">
