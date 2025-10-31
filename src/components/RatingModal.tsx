@@ -117,8 +117,8 @@ export const RatingModal: React.FC<RatingModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-2xl border border-gray-200 max-w-md w-screen max-w-[500px]">
         {/* Header */}
         <div className="border-b border-gray-200 p-6">
           <div className="flex items-center justify-between">
