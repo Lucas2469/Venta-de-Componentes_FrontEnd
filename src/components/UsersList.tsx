@@ -223,48 +223,48 @@ export const UsersList: React.FC<UsersListProps> = ({
                 
                 {/* Estadísticas con animaciones mejoradas */}
                 {stats && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-white/20">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8">
+                        <div className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-white/20">
                             <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             <div className="relative z-10">
-                                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mb-4">
-                                    <span className="text-2xl text-white">👥</span>
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                                    <span className="text-xl sm:text-2xl text-white">👥</span>
                                 </div>
-                                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Total Usuarios</h3>
-                                <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{stats.total_usuarios}</p>
+                                <h3 className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Total Usuarios</h3>
+                                <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{stats.total_usuarios}</p>
                             </div>
                         </div>
 
-                        <div className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-white/20">
+                        <div className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-white/20">
                             <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             <div className="relative z-10">
-                                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mb-4">
-                                    <span className="text-2xl text-white">🛒</span>
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                                    <span className="text-xl sm:text-2xl text-white">🛒</span>
                                 </div>
-                                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Compradores</h3>
-                                <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{stats.total_compradores}</p>
+                                <h3 className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Compradores</h3>
+                                <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{stats.total_compradores}</p>
                             </div>
                         </div>
 
-                        <div className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-white/20">
+                        <div className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-white/20">
                             <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             <div className="relative z-10">
-                                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mb-4">
-                                    <span className="text-2xl text-white">🏪</span>
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                                    <span className="text-xl sm:text-2xl text-white">🏪</span>
                                 </div>
-                                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Vendedores</h3>
-                                <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{stats.total_vendedores}</p>
+                                <h3 className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Vendedores</h3>
+                                <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{stats.total_vendedores}</p>
                             </div>
                         </div>
 
-                        <div className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-white/20">
+                        <div className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-white/20">
                             <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             <div className="relative z-10">
-                                <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center mb-4">
-                                    <span className="text-2xl text-white">⭐</span>
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                                    <span className="text-xl sm:text-2xl text-white">⭐</span>
                                 </div>
-                                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Calificación Promedio</h3>
-                                <p className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                                <h3 className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Calificación Promedio</h3>
+                                <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
                                     {typeof stats.calificacion_promedio_general === 'number' ? stats.calificacion_promedio_general.toFixed(1) : '0.0'}
                                 </p>
                             </div>
@@ -279,17 +279,17 @@ export const UsersList: React.FC<UsersListProps> = ({
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full filter blur-3xl opacity-20 transform translate-x-16 -translate-y-16"></div>
 
                     <div className="relative z-10">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-8">
                             <div className="flex-1">
-                                <div className="flex items-center mb-4">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center mr-4">
-                                        <span className="text-2xl text-white">👥</span>
+                                <div className="flex items-center mb-4 gap-3">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
+                                        <span className="text-xl sm:text-2xl text-white">👥</span>
                                     </div>
                                     <div>
-                                        <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                                        <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                                             {searchQuery ? `Resultados para "${searchQuery}"` : 'Gestión de Usuarios'}
                                         </h1>
-                                        <p className="text-gray-600 mt-1">
+                                        <p className="text-xs sm:text-sm text-gray-600 mt-1">
                                             Panel administrativo avanzado para gestionar usuarios del sistema
                                         </p>
                                     </div>
@@ -303,11 +303,11 @@ export const UsersList: React.FC<UsersListProps> = ({
                                 </div>
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex flex-col xs:flex-row gap-2 xs:gap-4 w-full lg:w-auto">
                                 {/* Filtro por tipo con diseño mejorado */}
-                                <div className="relative">
+                                <div className="relative flex-1 xs:flex-none">
                                     <select
-                                        className="appearance-none px-6 py-3 pr-10 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-indigo-300 text-gray-700 font-medium"
+                                        className="appearance-none w-full px-3 xs:px-6 py-2 xs:py-3 pr-8 xs:pr-10 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-indigo-300 text-gray-700 font-medium text-sm xs:text-base"
                                         value={filters.tipo_usuario || ''}
                                         onChange={(e) => {
                                             handleFilterChange({ tipo_usuario: e.target.value as any || undefined });
@@ -317,18 +317,18 @@ export const UsersList: React.FC<UsersListProps> = ({
                                         <option value="comprador">🛒 Compradores</option>
                                         <option value="vendedor">🏪 Vendedores</option>
                                         <option value="admin">👑 Administradores</option>
-                                    </select>                                  
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">                                       
-                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">                                          
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>                                     
-                                        </svg>                                
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 xs:pr-3 pointer-events-none">
+                                        <svg className="w-4 xs:w-5 h-4 xs:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
                                     </div>
                                 </div>
 
                                 {/* Filtro por estado con diseño mejorado */}
-                                <div className="relative">
+                                <div className="relative flex-1 xs:flex-none">
                                     <select
-                                        className="appearance-none px-6 py-3 pr-10 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-purple-300 text-gray-700 font-medium"
+                                        className="appearance-none w-full px-3 xs:px-6 py-2 xs:py-3 pr-8 xs:pr-10 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-purple-300 text-gray-700 font-medium text-sm xs:text-base"
                                         value={filters.estado || ''}
                                         onChange={(e) => {
                                             handleFilterChange({ estado: e.target.value as any || undefined });
@@ -338,8 +338,8 @@ export const UsersList: React.FC<UsersListProps> = ({
                                         <option value="activo">✅ Activos</option>
                                         <option value="inactivo">❌ Inactivos</option>
                                     </select>
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 xs:pr-3 pointer-events-none">
+                                        <svg className="w-4 xs:w-5 h-4 xs:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                                         </svg>
                                     </div>
@@ -353,7 +353,7 @@ export const UsersList: React.FC<UsersListProps> = ({
                                             estado: undefined
                                         });
                                     }}
-                                    className="px-6 py-3 bg-gradient-to-r from-gray-600 to-slate-600 text-white rounded-xl hover:from-gray-700 hover:to-slate-700 transition-all duration-200 transform hover:scale-105 shadow-lg font-medium"
+                                    className="px-3 xs:px-6 py-2 xs:py-3 bg-gradient-to-r from-gray-600 to-slate-600 text-white rounded-xl hover:from-gray-700 hover:to-slate-700 transition-all duration-200 transform hover:scale-105 shadow-lg font-medium text-sm xs:text-base whitespace-nowrap"
                                 >
                                     🧹 Limpiar filtros
                                 </button>

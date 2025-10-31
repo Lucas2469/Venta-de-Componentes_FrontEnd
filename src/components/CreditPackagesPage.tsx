@@ -220,9 +220,9 @@ export default function CreditPackagesPage() {
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">Crear Paquete de Créditos</h3>
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <form onSubmit={handleCreditPackSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
               <div>
                 <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">Nombre del paquete</label>
                 <input
@@ -360,63 +360,63 @@ export default function CreditPackagesPage() {
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">Paquetes de Créditos Disponibles</h3>
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {creditPackages.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p>No hay paquetes de créditos registrados</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Créditos</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio (Bs)</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">QR de Pago</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Nombre</th>
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Créditos</th>
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Precio (Bs)</th>
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">QR de Pago</th>
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {creditPackages.map((pack) => (
                     <tr key={pack.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pack.nombre}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">{pack.nombre}</td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                         <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                          {pack.cantidad_creditos} créditos
+                          {pack.cantidad_creditos}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                         Bs {Number(pack.precio).toFixed(2)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                         {pack.qr_imagen_url ? (
                           <button
-                            className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 gap-2"
+                            className="inline-flex items-center px-2 sm:px-3 py-1 border border-gray-300 rounded-md text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 gap-1"
                             onClick={() => setShowQr(pack.qr_imagen_url!)}
                           >
-                            <Eye className="h-4 w-4" />
-                            Ver QR
+                            <Eye className="h-3 sm:h-4 w-3 sm:w-4" />
+                            Ver
                           </button>
                         ) : (
-                          <span className="text-gray-500 text-sm">Sin QR</span>
+                          <span className="text-gray-500 text-xs">Sin QR</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex gap-2">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
+                        <div className="flex gap-1 sm:gap-2">
                           <button
-                            className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 gap-2"
+                            className="inline-flex items-center px-2 sm:px-3 py-1 border border-gray-300 rounded-md text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 gap-1"
                             onClick={() => openEditModal(pack)}
                           >
-                            <Edit className="h-4 w-4" />
-                            Editar
+                            <Edit className="h-3 sm:h-4 w-3 sm:w-4" />
+                            <span className="hidden sm:inline">Editar</span>
                           </button>
                           <button
-                            className="inline-flex items-center px-3 py-1 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            className="inline-flex items-center px-2 sm:px-3 py-1 border border-red-300 rounded-md text-xs sm:text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                             onClick={() => handleDeletePack(pack)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3 sm:h-4 w-3 sm:w-4" />
                           </button>
                         </div>
                       </td>
@@ -456,8 +456,8 @@ export default function CreditPackagesPage() {
 
       {/* Modal Editar - Overlay flotante sin fondo negro */}
       {editOpen && (
-        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 max-h-[90vh] overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-[95vw] max-w-lg">
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-2 sm:p-4 max-h-[95vh] overflow-y-auto w-screen">
+          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 mx-auto w-[95vw] sm:w-full max-w-lg">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Editar Paquete de Créditos</h3>

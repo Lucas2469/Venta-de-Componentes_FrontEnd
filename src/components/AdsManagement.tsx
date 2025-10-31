@@ -236,23 +236,20 @@ export const AdsManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header con información */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-        <div className="flex items-center justify-between">
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Gestión de Anuncios</h3>
-            <div className="text-sm text-gray-600 mt-1 space-y-1">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900">Gestión de Anuncios</h3>
+            <div className="text-xs sm:text-sm text-gray-600 mt-1 space-y-1">
               <p>
-                Total de productos: <span className="font-semibold">{products.length}</span>
+                Total: <span className="font-semibold">{products.length}</span>
               </p>
-              <div className="flex gap-4">
-                <span className="text-green-600">
+              <div className="flex gap-2 sm:gap-4 flex-wrap">
+                <span className="text-green-600 text-xs sm:text-sm">
                   Activos: <span className="font-semibold">{products.filter(p => p.estado === 'activo').length}</span>
                 </span>
-                <span className="text-red-600">
+                <span className="text-red-600 text-xs sm:text-sm">
                   Inactivos: <span className="font-semibold">{products.filter(p => p.estado === 'inactivo').length}</span>
-                </span>
-                <span className="text-yellow-600">
-                  Agotados: <span className="font-semibold">{products.filter(p => p.estado === 'agotado').length}</span>
                 </span>
               </div>
             </div>
@@ -268,26 +265,26 @@ export const AdsManagement: React.FC = () => {
 
       {/* Tabla de productos */}
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
           <table className="w-full">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                   Nombre
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                   Vendedor
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                   Precio
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                   Estado
                 </th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                   Vista Previa
                 </th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                   Acciones
                 </th>
               </tr>
@@ -296,50 +293,50 @@ export const AdsManagement: React.FC = () => {
               {products.length > 0 ? (
                 products.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4">
                       <div className="max-w-xs">
-                        <p className="font-medium text-gray-900 truncate" title={product.nombre}>
+                        <p className="font-medium text-gray-900 truncate text-xs sm:text-sm" title={product.nombre}>
                           {product.nombre}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs text-gray-500">
                           {product.categoria_nombre}
                         </p>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4">
+                      <div className="text-xs sm:text-sm">
                         <p className="font-medium text-gray-900">
-                          {product.vendedor_nombre} {product.vendedor_apellido}
+                          {product.vendedor_nombre}
                         </p>
                         <div className="flex items-center mt-1">
-                          <Star className="h-3 w-3 text-yellow-500 mr-1" />
+                          <Star className="h-2 sm:h-3 w-2 sm:w-3 text-yellow-500 mr-1" />
                           <span className="text-xs text-gray-500">
                             {parseFloat(product.vendedor_calificacion).toFixed(1)}
                           </span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="text-lg font-bold text-green-600">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4">
+                      <span className="text-sm sm:text-lg font-bold text-green-600">
                         Bs {formatPrice(product.precio)}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4">
                       {getStatusBadge(product.estado)}
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 text-center">
                       <button
                         onClick={() => handlePreviewProduct(product)}
-                        className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors duration-200 hover:scale-110 transform"
+                        className="p-1 sm:p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors duration-200 hover:scale-110 transform"
                         title="Ver vista previa"
                       >
-                        <Eye className="h-5 w-5" />
+                        <Eye className="h-3 sm:h-5 w-3 sm:w-5" />
                       </button>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 text-center">
                       <button
                         onClick={() => handleToggleProductStatus(product)}
-                        className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 transform ${
+                        className={`p-1 sm:p-2 rounded-lg transition-all duration-200 hover:scale-110 transform ${
                           product.estado === 'activo'
                             ? 'bg-red-100 hover:bg-red-200 text-red-600'
                             : 'bg-green-100 hover:bg-green-200 text-green-600'
@@ -347,9 +344,9 @@ export const AdsManagement: React.FC = () => {
                         title={product.estado === 'activo' ? 'Desactivar producto' : 'Activar producto'}
                       >
                         {product.estado === 'activo' ? (
-                          <ToggleLeft className="h-5 w-5" />
+                          <ToggleLeft className="h-3 sm:h-5 w-3 sm:w-5" />
                         ) : (
-                          <ToggleRight className="h-5 w-5" />
+                          <ToggleRight className="h-3 sm:h-5 w-3 sm:w-5" />
                         )}
                       </button>
                     </td>
@@ -371,8 +368,8 @@ export const AdsManagement: React.FC = () => {
 
       {/* Modal de Vista Previa de Producto */}
       {showPreviewModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto mx-auto sm:mx-0">
             {/* Header del modal */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h3 className="text-xl font-bold text-gray-900">Vista Previa del Producto</h3>

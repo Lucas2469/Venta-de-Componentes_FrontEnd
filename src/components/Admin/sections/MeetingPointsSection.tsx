@@ -251,11 +251,11 @@ export function MeetingPointsSection() {
     <div className="space-y-6">
       {/* Filters Card */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">Filtros</h3>
         </div>
-        <div className="px-6 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+        <div className="px-4 sm:px-6 py-4">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label htmlFor="zone-filter" className="block text-sm font-medium text-gray-700 mb-2">
                 Filtrar por Zona
@@ -280,7 +280,7 @@ export function MeetingPointsSection() {
 
       {/* Meeting Points Card */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200 flex flex-row items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h3 className="text-lg font-semibold text-gray-900">
             Puntos de Encuentro ({filteredMeetingPoints.length})
           </h3>
@@ -297,7 +297,7 @@ export function MeetingPointsSection() {
             Agregar Punto
           </button>
         </div>
-        <div className="px-6 py-4">
+        <div className="px-4 sm:px-6 py-4">
           {isMeetingPointsLoading && meetingPoints.length === 0 ? (
             <div className="flex justify-center items-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
@@ -316,26 +316,26 @@ export function MeetingPointsSection() {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Nombre
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Dirección
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Referencias
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Coordenadas
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Estado
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
@@ -343,20 +343,22 @@ export function MeetingPointsSection() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredMeetingPoints.map((point) => (
                     <tr key={point.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
                         {point.nombre}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 max-w-xs truncate">
                         {point.direccion}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 max-w-xs truncate">
                         {point.referencias || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                        {point.coordenadas_lat ? Number(point.coordenadas_lat).toFixed(7) : 'N/A'},
-                        {point.coordenadas_lng ? Number(point.coordenadas_lng).toFixed(7) : 'N/A'}
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs text-gray-500 max-w-[80px] truncate">
+                        <span title={`${point.coordenadas_lat}, ${point.coordenadas_lng}`}>
+                          {point.coordenadas_lat ? Number(point.coordenadas_lat).toFixed(4) : 'N/A'},
+                          {point.coordenadas_lng ? Number(point.coordenadas_lng).toFixed(4) : 'N/A'}
+                        </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                         <span
                           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             point.estado === "activo"
@@ -367,8 +369,8 @@ export function MeetingPointsSection() {
                           {point.estado === "activo" ? "Activo" : "Inactivo"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
+                        <div className="flex space-x-1 sm:space-x-2">
                           <button
                             onClick={() => openStatusToggleConfirm(point)}
                             disabled={meetingPointActionLoading === point.id}
@@ -409,8 +411,8 @@ export function MeetingPointsSection() {
 
       {/* Create/Edit Dialog - Overlay flotante sin fondo negro */}
       {showMeetingPointDialog && (
-        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 max-h-[90vh] overflow-y-auto">
-          <div className="relative bg-white rounded-lg shadow-2xl border border-gray-200 max-w-4xl w-screen max-w-[900px]">
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-2 sm:p-4 max-h-[95vh] overflow-y-auto w-screen">
+          <div className="relative bg-white rounded-lg shadow-2xl border border-gray-200 mx-auto w-[95vw] sm:w-full max-w-[900px]">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">
                 {editingMeetingPoint ? "Editar Punto de Encuentro" : "Nuevo Punto de Encuentro"}

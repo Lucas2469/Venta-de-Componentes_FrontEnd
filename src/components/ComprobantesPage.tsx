@@ -204,10 +204,10 @@ export default function ComprobantesPage() {
       <div className="px-6 py-4 border-b border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900">Comprobantes de Pago</h3>
       </div>
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
 
         {/* Toolbar de filtros */}
-        <div className="mb-4 grid gap-3 md:grid-cols-6">
+        <div className="mb-4 grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Búsqueda</label>
             <input
@@ -290,9 +290,9 @@ export default function ComprobantesPage() {
             )}
           </div>
 
-          <div className="md:col-span-6">
+          <div className="sm:col-span-2 md:col-span-3 lg:col-span-6">
             <button
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               onClick={resetFiltros}
             >
               Limpiar filtros
@@ -304,17 +304,17 @@ export default function ComprobantesPage() {
           {filtered.length} resultado{filtered.length === 1 ? "" : "s"}
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paquete</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comprobante</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Usuario</th>
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Paquete</th>
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Monto</th>
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Comprobante</th>
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Estado</th>
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Fecha</th>
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Acciones</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -327,15 +327,15 @@ export default function ComprobantesPage() {
             ) : (
               filtered.map((tx) => (
                 <tr key={tx.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.usuario}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">{tx.usuario}</td>
+                  <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                     <div>
                       <div className="font-medium">{tx.pack_nombre}</div>
                       <div className="text-xs text-gray-500">{tx.cantidad_creditos} créditos</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatMonto(tx.monto_pagado)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">{formatMonto(tx.monto_pagado)}</td>
+                  <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                     {tx.comprobante_pago_url ? (
                       <button
                         className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 gap-2"
@@ -347,7 +347,7 @@ export default function ComprobantesPage() {
                       <span className="text-gray-500 text-sm">Sin comprobante</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                       tx.estado === 'aprobada' ? 'bg-green-100 text-green-800' :
                       tx.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
@@ -356,9 +356,9 @@ export default function ComprobantesPage() {
                       {estadoLabel(tx.estado)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatFecha(tx.fecha_compra)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex gap-2">
+                  <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">{formatFecha(tx.fecha_compra)}</td>
+                  <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
+                    <div className="flex gap-1 sm:gap-2">
                       {tx.estado === "pendiente" && (
                         <button
                           className="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
@@ -391,8 +391,8 @@ export default function ComprobantesPage() {
 
       {/* Modal: Ver comprobante - Overlay flotante sin fondo negro */}
       {proofOpen && (
-        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 max-h-[90vh] overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 max-w-lg w-screen max-w-[500px]">
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-2 sm:p-4 max-h-[90vh] overflow-y-auto w-screen">
+          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 max-w-lg mx-auto w-[95vw] sm:w-full max-w-[500px]">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Comprobante de Pago</h3>
               <button
@@ -439,8 +439,8 @@ export default function ComprobantesPage() {
 
       {/* Modal: Rechazar con motivo - Overlay flotante sin fondo negro */}
       {showPurchaseRejectModal && (
-        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 max-h-[90vh] overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 max-w-lg w-screen max-w-[500px]">
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-2 sm:p-4 max-h-[90vh] overflow-y-auto w-screen">
+          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 max-w-lg mx-auto w-[95vw] sm:w-full max-w-[500px]">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-start">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Rechazar Solicitud de Pago</h3>
