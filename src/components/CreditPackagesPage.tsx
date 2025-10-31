@@ -454,15 +454,24 @@ export default function CreditPackagesPage() {
         </div>
       )}
 
-      {/* Modal Editar */}
+      {/* Modal Editar - Overlay flotante sin fondo negro */}
       {editOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Editar Paquete de Créditos</h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Actualiza los datos del paquete. El QR es opcional.
-              </p>
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-[95vw] max-w-lg">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Editar Paquete de Créditos</h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  Actualiza los datos del paquete. El QR es opcional.
+                </p>
+              </div>
+              <button
+                onClick={() => setEditOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors ml-4"
+                title="Cerrar"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
 
             <div className="p-6 space-y-3">
