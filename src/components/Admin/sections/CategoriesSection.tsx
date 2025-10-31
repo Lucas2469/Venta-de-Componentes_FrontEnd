@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Loader2, Plus, Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, ToggleLeft, ToggleRight, X } from "lucide-react";
 import { categoriesAPI } from '../../../api/categoriesApi';
 import { Category } from "../../types";
 import { mockProducts } from "../../mockData";
