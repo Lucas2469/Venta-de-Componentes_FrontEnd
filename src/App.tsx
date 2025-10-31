@@ -168,7 +168,7 @@ function AppContent() {
           } />
 
           <Route path="/vendor-appointments" element={
-            <AuthProtectedRoute requiredRoles={['vendedor', 'admin']}>
+            <AuthProtectedRoute requiredRoles={['vendedor', 'comprador', 'admin']}>
               <VendorAppointmentsPage />
             </AuthProtectedRoute>
           } />
