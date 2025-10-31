@@ -407,13 +407,14 @@ export const AdsManagement: React.FC = () => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto mx-auto sm:mx-0">
             {/* Header del modal */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900">Vista Previa del Producto</h3>
+            <div className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-6 border-b border-gray-200 gap-2">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex-1">Vista Previa del Producto</h3>
               <button
                 onClick={() => setShowPreviewModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+                title="Cerrar"
               >
-                <X className="h-6 w-6 text-gray-500" />
+                <X className="h-5 sm:h-6 w-5 sm:w-6 text-gray-500" />
               </button>
             </div>
 

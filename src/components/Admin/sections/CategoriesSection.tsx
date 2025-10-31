@@ -346,22 +346,22 @@ export function CategoriesSection({ onShowToast }: CategoriesSectionProps) {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex gap-2 pt-2 border-t border-gray-200">
+                    <div className="flex gap-2 pt-3 border-t border-gray-200">
                       <button
                         onClick={() => openStatusToggleConfirm(category)}
                         disabled={categoryActionLoading === category.id}
-                        className="flex-1 px-3 py-2 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+                        className="flex-1 px-2 py-2 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center gap-1"
                       >
                         {categoryActionLoading === category.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin" />
                         ) : category.estado === "activo" ? (
                           <>
-                            <ToggleLeft className="h-4 w-4" />
+                            <ToggleLeft className="h-4 w-4 flex-shrink-0" />
                             <span>Desact</span>
                           </>
                         ) : (
                           <>
-                            <ToggleRight className="h-4 w-4" />
+                            <ToggleRight className="h-4 w-4 flex-shrink-0" />
                             <span>Activ</span>
                           </>
                         )}
@@ -369,17 +369,17 @@ export function CategoriesSection({ onShowToast }: CategoriesSectionProps) {
                       <button
                         onClick={() => openEditCategoryDialog(category)}
                         disabled={isCategoriesLoading}
-                        className="flex-1 px-3 py-2 text-xs font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+                        className="flex-1 px-2 py-2 text-xs font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center gap-1"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-4 w-4 flex-shrink-0" />
                         <span>Editar</span>
                       </button>
                       <button
                         onClick={() => openDeleteCategoryConfirm(category.id)}
                         disabled={isCategoriesLoading}
-                        className="flex-1 px-3 py-2 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+                        className="flex-1 px-2 py-2 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center gap-1"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 flex-shrink-0" />
                         <span>Borrar</span>
                       </button>
                     </div>
