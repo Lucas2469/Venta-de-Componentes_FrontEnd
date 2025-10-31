@@ -429,27 +429,26 @@ export default function CreditPackagesPage() {
         </div>
       </div>
 
-      {/* Modal QR */}
+      {/* Overlay QR flotante (sin fondo negro) */}
       {showQr && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="px-6 py-4 border-b border-gray-200">
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 max-w-lg w-auto">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">QR del Paquete</h3>
+              <button
+                onClick={() => setShowQr(null)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+                title="Cerrar"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
             <div className="p-6 flex justify-center">
               <img
                 src={buildAssetUrl(showQr) ?? ""}
                 alt="Código QR de pago"
-                className="max-w-full h-auto max-h-64 object-contain border rounded-lg"
+                className="max-w-full h-auto max-h-96 w-auto object-contain rounded-lg"
               />
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-              <button
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                onClick={() => setShowQr(null)}
-              >
-                Cerrar
-              </button>
             </div>
           </div>
         </div>
