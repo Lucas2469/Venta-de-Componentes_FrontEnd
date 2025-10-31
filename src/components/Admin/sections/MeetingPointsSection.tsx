@@ -433,12 +433,12 @@ export function MeetingPointsSection() {
                       <p className="text-gray-900 text-xs">{point.coordenadas_lat ? Number(point.coordenadas_lat).toFixed(4) : 'N/A'}, {point.coordenadas_lng ? Number(point.coordenadas_lng).toFixed(4) : 'N/A'}</p>
                     </div>
                   </div>
-                  <div className="flex gap-1 pt-2 border-t border-gray-200">
-                    <button onClick={() => openStatusToggleConfirm(point)} className="flex-1 px-2 py-1 text-xs font-bold text-blue-600 bg-blue-50 rounded hover:bg-blue-100" disabled={meetingPointActionLoading === point.id}>
+                  <div className="flex gap-2 pt-3 border-t border-gray-200">
+                    <button onClick={() => openStatusToggleConfirm(point)} className="flex-1 px-2 py-2 text-xs font-bold text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors" disabled={meetingPointActionLoading === point.id}>
                       {point.estado === 'activo' ? '⬜ Desactivar' : '✅ Activar'}
                     </button>
-                    <button onClick={() => openEditMeetingPointDialog(point)} className="flex-1 px-2 py-1 text-xs font-bold text-purple-600 bg-purple-50 rounded hover:bg-purple-100">✏️ Editar</button>
-                    <button onClick={() => openDeleteMeetingPointConfirm(point)} className="flex-1 px-2 py-1 text-xs font-bold text-red-600 bg-red-50 rounded hover:bg-red-100">🗑️ Borrar</button>
+                    <button onClick={() => openEditMeetingPointDialog(point)} className="flex-1 px-2 py-2 text-xs font-bold text-purple-600 bg-purple-50 rounded hover:bg-purple-100 transition-colors">✏️ Editar</button>
+                    <button onClick={() => openDeleteMeetingPointConfirm(point)} className="flex-1 px-2 py-2 text-xs font-bold text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors">🗑️ Borrar</button>
                   </div>
                 </div>
               ))}
