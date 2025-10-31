@@ -304,7 +304,8 @@ export default function ComprobantesPage() {
           {filtered.length} resultado{filtered.length === 1 ? "" : "s"}
         </div>
 
-        <div className="overflow-x-auto -mx-4 sm:mx-0">
+        {/* DESKTOP: Tabla tradicional */}
+        <div className="hidden md:block overflow-x-auto -mx-4 sm:mx-0">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -386,6 +387,73 @@ export default function ComprobantesPage() {
             )}
             </tbody>
           </table>
+        </div>
+
+        {/* MOBILE: Cards Layout */}
+        <div className="md:hidden space-y-3 px-4">
+          {filtered.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>No hay resultados con los filtros actuales.</p>
+            </div>
+          ) : (
+            filtered.map((tx) => (
+              <div key={tx.id} className="bg-white rounded-lg shadow border border-gray-200 p-4 space-y-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">{tx.usuario}</p>
+                    <p className="text-xs text-gray-600">{tx.pack_nombre} · {tx.cantidad_creditos} créditos</p>
+                  </div>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    tx.estado === 'aprobada' ? 'bg-green-100 text-green-800' :
+                    tx.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {estadoLabel(tx.estado)}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs border-t border-gray-200 pt-2">
+                  <div>
+                    <p className="text-gray-600 font-medium">Monto</p>
+                    <p className="font-semibold text-gray-900">{formatMonto(tx.monto_pagado)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-medium">Fecha</p>
+                    <p className="font-semibold text-gray-900">{formatFecha(tx.fecha_compra)}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2 border-t border-gray-200">
+                  {tx.comprobante_pago_url && (
+                    <button
+                      className="flex-1 px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50 rounded hover:bg-blue-100"
+                      onClick={() => handleViewProof(tx.comprobante_pago_url)}
+                    >
+                      📷 Ver Comprobante
+                    </button>
+                  )}
+                  {tx.estado === "pendiente" && (
+                    <>
+                      <button
+                        className="flex-1 px-2 py-1 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700"
+                        onClick={() => openApprovalModal(tx)}
+                        disabled={loadingAction}
+                      >
+                        ✅ Aprobar
+                      </button>
+                      <button
+                        className="flex-1 px-2 py-1 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700"
+                        onClick={() => openRejectModal(tx.id)}
+                        disabled={loadingAction}
+                      >
+                        ❌ Rechazar
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

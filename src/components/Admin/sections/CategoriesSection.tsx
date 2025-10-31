@@ -230,7 +230,9 @@ export function CategoriesSection({ onShowToast }: CategoriesSectionProps) {
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
             </div>
           ) : (
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <>
+            {/* DESKTOP */}
+            <div className="hidden md:block overflow-x-auto -mx-4 sm:mx-0">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -311,6 +313,83 @@ export function CategoriesSection({ onShowToast }: CategoriesSectionProps) {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* MOBILE: Card layout */}
+            <div className="md:hidden space-y-3 px-2">
+              {categories.length > 0 ? (
+                categories.map((category) => (
+                  <div key={category.id} className="bg-white rounded-lg shadow border border-gray-200 p-4 space-y-3">
+                    {/* Header with name and status badge */}
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 text-sm">{category.nombre}</p>
+                        <p className="text-xs text-gray-600 line-clamp-2">{category.descripcion || '-'}</p>
+                      </div>
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${
+                          category.estado === "activo"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {category.estado === "activo" ? "Activo" : "Inactivo"}
+                      </span>
+                    </div>
+
+                    {/* Product count */}
+                    <div className="text-xs border-t border-gray-200 pt-2">
+                      <p className="text-gray-600 font-medium mb-1">Productos</p>
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                        {typeof category.product_count === 'number' ? category.product_count : products.filter(p => p.category === category.id).length}
+                      </span>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2 pt-2 border-t border-gray-200">
+                      <button
+                        onClick={() => openStatusToggleConfirm(category)}
+                        disabled={categoryActionLoading === category.id}
+                        className="flex-1 px-3 py-2 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+                      >
+                        {categoryActionLoading === category.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : category.estado === "activo" ? (
+                          <>
+                            <ToggleLeft className="h-4 w-4" />
+                            <span>Desact</span>
+                          </>
+                        ) : (
+                          <>
+                            <ToggleRight className="h-4 w-4" />
+                            <span>Activ</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => openEditCategoryDialog(category)}
+                        disabled={isCategoriesLoading}
+                        className="flex-1 px-3 py-2 text-xs font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+                      >
+                        <Edit className="h-4 w-4" />
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        onClick={() => openDeleteCategoryConfirm(category.id)}
+                        disabled={isCategoriesLoading}
+                        className="flex-1 px-3 py-2 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span>Borrar</span>
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p className="text-sm">No hay categorías disponibles</p>
+                </div>
+              )}
             </div>
           )}
         </div>

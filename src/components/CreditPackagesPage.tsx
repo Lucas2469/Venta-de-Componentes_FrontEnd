@@ -367,7 +367,9 @@ export default function CreditPackagesPage() {
               <p>No hay paquetes de créditos registrados</p>
             </div>
           ) : (
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <>
+            {/* DESKTOP */}
+            <div className="hidden md:block overflow-x-auto -mx-4 sm:mx-0">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -425,6 +427,28 @@ export default function CreditPackagesPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* MOBILE */}
+            <div className="md:hidden space-y-3 px-2">
+              {creditPackages.map((pack) => (
+                <div key={pack.id} className="bg-white rounded-lg shadow border border-gray-200 p-3 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-semibold text-gray-900">{pack.nombre}</p>
+                      <p className="text-xs text-gray-600">{pack.cantidad_creditos} créditos · Bs {Number(pack.precio).toFixed(2)}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-2 border-t border-gray-200">
+                    {pack.qr_imagen_url && (
+                      <button onClick={() => setShowQr(pack.qr_imagen_url!)} className="flex-1 px-2 py-1 text-xs font-bold text-blue-600 bg-blue-50 rounded hover:bg-blue-100">📷 QR</button>
+                    )}
+                    <button onClick={() => openEditModal(pack)} className="flex-1 px-2 py-1 text-xs font-bold text-purple-600 bg-purple-50 rounded hover:bg-purple-100">✏️ Editar</button>
+                    <button onClick={() => handleDeletePack(pack)} className="flex-1 px-2 py-1 text-xs font-bold text-red-600 bg-red-50 rounded hover:bg-red-100">🗑️ Borrar</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            </>
           )}
         </div>
       </div>

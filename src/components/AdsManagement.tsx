@@ -265,7 +265,8 @@ export const AdsManagement: React.FC = () => {
 
       {/* Tabla de productos */}
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
-        <div className="overflow-x-auto -mx-4 sm:mx-0">
+        {/* DESKTOP */}
+        <div className="hidden md:block overflow-x-auto -mx-4 sm:mx-0">
           <table className="w-full">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
               <tr>
@@ -363,6 +364,41 @@ export const AdsManagement: React.FC = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* MOBILE */}
+        <div className="md:hidden space-y-3 px-2">
+          {products.length > 0 ? (
+            products.map((product) => (
+              <div key={product.id} className="bg-white rounded-lg shadow border border-gray-200 p-3 space-y-2">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900 text-sm">{product.nombre}</p>
+                    <p className="text-xs text-gray-600">{product.vendedor_nombre} · ⭐{parseFloat(product.vendedor_calificacion).toFixed(1)}</p>
+                  </div>
+                  {getStatusBadge(product.estado)}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs border-t border-gray-200 pt-2">
+                  <div>
+                    <p className="text-gray-600 font-medium">Precio</p>
+                    <p className="text-green-600 font-bold">Bs {formatPrice(product.precio)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-medium">Categoría</p>
+                    <p className="text-gray-900">{product.categoria_nombre}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-2 border-t border-gray-200">
+                  <button onClick={() => handlePreviewProduct(product)} className="flex-1 px-2 py-1 text-xs font-bold text-blue-600 bg-blue-50 rounded hover:bg-blue-100">👁️ Ver</button>
+                  <button onClick={() => handleToggleProductStatus(product)} className={`flex-1 px-2 py-1 text-xs font-bold rounded hover:scale-105 ${product.estado === 'activo' ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100'}`}>
+                    {product.estado === 'activo' ? '⬜ Desact' : '✅ Activ'}
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8"><ShoppingBag className="h-8 w-8 mx-auto mb-2 text-gray-300" /><p>No hay productos</p></div>
+          )}
         </div>
       </div>
 

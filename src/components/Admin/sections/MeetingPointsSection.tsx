@@ -316,7 +316,9 @@ export function MeetingPointsSection() {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <>
+            {/* DESKTOP: Tabla */}
+            <div className="hidden md:block overflow-x-auto -mx-4 sm:mx-0">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -405,6 +407,43 @@ export function MeetingPointsSection() {
                 </tbody>
               </table>
             </div>
+
+            {/* MOBILE: Cards */}
+            <div className="md:hidden space-y-3 px-2">
+              {filteredMeetingPoints.map((point) => (
+                <div key={point.id} className="bg-white rounded-lg shadow border border-gray-200 p-3 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">{point.nombre}</p>
+                      <p className="text-xs text-gray-600">{point.direccion}</p>
+                    </div>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      point.estado === 'activo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {point.estado === 'activo' ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs border-t border-gray-200 pt-2">
+                    <div>
+                      <p className="text-gray-600 font-medium">Referencias</p>
+                      <p className="text-gray-900">{point.referencias || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600 font-medium">Coordenadas</p>
+                      <p className="text-gray-900 text-xs">{point.coordenadas_lat?.toFixed(4)}, {point.coordenadas_lng?.toFixed(4)}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1 pt-2 border-t border-gray-200">
+                    <button onClick={() => openStatusToggleConfirm(point)} className="flex-1 px-2 py-1 text-xs font-bold text-blue-600 bg-blue-50 rounded hover:bg-blue-100" disabled={meetingPointActionLoading === point.id}>
+                      {point.estado === 'activo' ? '⬜ Desactivar' : '✅ Activar'}
+                    </button>
+                    <button onClick={() => openEditMeetingPointDialog(point)} className="flex-1 px-2 py-1 text-xs font-bold text-purple-600 bg-purple-50 rounded hover:bg-purple-100">✏️ Editar</button>
+                    <button onClick={() => openDeleteMeetingPointConfirm(point)} className="flex-1 px-2 py-1 text-xs font-bold text-red-600 bg-red-50 rounded hover:bg-red-100">🗑️ Borrar</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            </>
           )}
         </div>
       </div>

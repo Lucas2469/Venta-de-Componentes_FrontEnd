@@ -391,38 +391,40 @@ export const UsersList: React.FC<UsersListProps> = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/20">
-                        {/* Tabla responsiva mejorada */}
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-100">
-                                <thead className="bg-gradient-to-r from-indigo-50 to-purple-50">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                            👤 Usuario
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                            🏷️ Tipo
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                            🟢 Estado
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                            💳 Créditos
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                            ⭐ Calificación
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                            📅 Registro
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                            ⚙️ Acciones
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white/50 divide-y divide-gray-100">
-                                    {users.map((user, index) => (
-                                        <tr key={user.id} className="group hover:bg-white/80 transition-all duration-200 hover:shadow-lg">
+                    <>
+                        {/* DESKTOP: Tabla tradicional (oculta en móvil) */}
+                        <div className="hidden md:block bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/20">
+                            {/* Tabla responsiva mejorada */}
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-100">
+                                    <thead className="bg-gradient-to-r from-indigo-50 to-purple-50">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                👤 Usuario
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                🏷️ Tipo
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                🟢 Estado
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                💳 Créditos
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                ⭐ Calificación
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                📅 Registro
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                ⚙️ Acciones
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white/50 divide-y divide-gray-100">
+                                        {users.map((user, index) => (
+                                            <tr key={user.id} className="group hover:bg-white/80 transition-all duration-200 hover:shadow-lg">
                                             {/* Usuario */}
                                             <td className="px-6 py-5 whitespace-nowrap">
                                                 <div className="flex items-center">
@@ -549,44 +551,112 @@ export const UsersList: React.FC<UsersListProps> = ({
                             </table>
                         </div>
 
-                        {/* Paginación mejorada */}
-                        {totalPages > 1 && (
-                            <div className="px-6 py-6 border-t border-gray-100 bg-gradient-to-r from-gray-50 to-indigo-50">
-                                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                                    <div className="text-sm font-medium text-gray-700 bg-white/80 px-4 py-2 rounded-lg shadow-sm">
-                                        📄 Mostrando {((currentPage - 1) * filters.limit!) + 1} a {Math.min(currentPage * filters.limit!, users.length)} de {users.length} usuarios
-                                    </div>
-                                    <div className="flex items-center space-x-3">
-                                        <button
-                                            onClick={() => handlePageChange(currentPage - 1)}
-                                            disabled={currentPage <= 1}
-                                            className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-lg"
-                                        >
-                                            ← Anterior
-                                        </button>
-
-                                        <div className="flex items-center space-x-1">
-                                            <span className="px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg">
-                                                {currentPage}
-                                            </span>
-                                            <span className="text-gray-500 font-medium">de</span>
-                                            <span className="px-4 py-2 text-sm font-bold text-gray-700 bg-white rounded-xl shadow-sm border border-gray-200">
-                                                {totalPages}
-                                            </span>
+                            {/* Paginación mejorada */}
+                            {totalPages > 1 && (
+                                <div className="px-6 py-6 border-t border-gray-100 bg-gradient-to-r from-gray-50 to-indigo-50">
+                                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                        <div className="text-sm font-medium text-gray-700 bg-white/80 px-4 py-2 rounded-lg shadow-sm">
+                                            📄 Mostrando {((currentPage - 1) * filters.limit!) + 1} a {Math.min(currentPage * filters.limit!, users.length)} de {users.length} usuarios
                                         </div>
+                                        <div className="flex items-center space-x-3">
+                                            <button
+                                                onClick={() => handlePageChange(currentPage - 1)}
+                                                disabled={currentPage <= 1}
+                                                className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-lg"
+                                            >
+                                                ← Anterior
+                                            </button>
 
+                                            <div className="flex items-center space-x-1">
+                                                <span className="px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg">
+                                                    {currentPage}
+                                                </span>
+                                                <span className="text-gray-500 font-medium">de</span>
+                                                <span className="px-4 py-2 text-sm font-bold text-gray-700 bg-white rounded-xl shadow-sm border border-gray-200">
+                                                    {totalPages}
+                                                </span>
+                                            </div>
+
+                                            <button
+                                                onClick={() => handlePageChange(currentPage + 1)}
+                                                disabled={currentPage >= totalPages}
+                                                className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-lg"
+                                            >
+                                                Siguiente →
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* MOBILE: Cards Layout (mostrado solo en móvil) */}
+                        <div className="md:hidden space-y-3 px-4">
+                            {users.map((user) => (
+                                <div key={user.id} className="bg-white/80 backdrop-blur-sm rounded-lg shadow-md border border-white/20 p-4 space-y-3">
+                                    {/* Header: Nombre y Tipo */}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                                                <span className="text-white font-bold text-sm">{user.nombre.charAt(0).toUpperCase()}</span>
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-gray-900 text-sm">{user.nombre} {user.apellido}</p>
+                                                <p className="text-xs text-gray-600">{user.email}</p>
+                                            </div>
+                                        </div>
+                                        <span className={`px-2 py-1 text-xs font-bold rounded-lg ${
+                                            user.tipo_usuario === 'admin' ? 'bg-red-100 text-red-700' :
+                                            user.tipo_usuario === 'vendedor' ? 'bg-purple-100 text-purple-700' :
+                                            'bg-blue-100 text-blue-700'
+                                        }`}>
+                                            {user.tipo_usuario === 'admin' ? '👑 Admin' :
+                                             user.tipo_usuario === 'vendedor' ? '🏦 Vendedor' :
+                                             '🛒 Comprador'}
+                                        </span>
+                                    </div>
+
+                                    {/* Información */}
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div>
+                                            <p className="text-gray-600 font-medium">Estado</p>
+                                            <p className={`font-semibold ${user.estado === 'activo' ? 'text-green-600' : 'text-gray-600'}`}>
+                                                {user.estado === 'activo' ? '✅ Activo' : '❌ Inactivo'}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-600 font-medium">Créditos</p>
+                                            <p className="font-semibold text-green-600">{user.creditos_disponibles || 0}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-600 font-medium">Calificación</p>
+                                            <p className="font-semibold text-yellow-600">⭐ {parseFloat(user.calificacion_promedio).toFixed(1)}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-600 font-medium">Registro</p>
+                                            <p className="font-semibold text-gray-700">{formatDate(user.fecha_registro)}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Acciones */}
+                                    <div className="flex gap-2 pt-2 border-t border-gray-200">
                                         <button
-                                            onClick={() => handlePageChange(currentPage + 1)}
-                                            disabled={currentPage >= totalPages}
-                                            className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-lg"
+                                            onClick={() => handleSuspendClick(user)}
+                                            className="flex-1 px-3 py-2 text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-sm"
                                         >
-                                            Siguiente →
+                                            🚫 Suspender
+                                        </button>
+                                        <button
+                                            onClick={() => handleViewDetails(user)}
+                                            className="flex-1 px-3 py-2 text-xs font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 shadow-sm"
+                                        >
+                                            👁️ Ver
                                         </button>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            ))}
+                        </div>
+                    </>
                 )}
             </div>
 
