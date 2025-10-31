@@ -37,16 +37,30 @@ export function BuyCreditsPage({ onBack }: BuyCreditsPageProps) {
     fetch(`${API_BASE}/api/packs`)
       .then(res => res.json())
       .then(data => {
-        const mapped = data.map((p: any) => ({
-          id: String(p.id),
-          name: p.nombre,
-          credits: Number(p.cantidad_creditos),
-          price: Number(p.precio),
-          qrCodeUrl: p.qr_imagen_url ? `${API_BASE}${p.qr_imagen_url}` : "",
-          description: p.descripcion || "",
-          popular: Boolean(p.popular),
-          bonus: Number(p.bonus_creditos || 0),
-        }));
+        const mapped = data.map((p: any) => {
+          // Construir QR URL - maneja tanto URLs completas como rutas relativas
+          let qrCodeUrl = "";
+          if (p.qr_imagen_url) {
+            // Si ya es una URL completa (Cloudinary o cualquier otra), usarla tal cual
+            if (p.qr_imagen_url.startsWith('http://') || p.qr_imagen_url.startsWith('https://')) {
+              qrCodeUrl = p.qr_imagen_url;
+            } else {
+              // Si es una ruta relativa, anteponer API_BASE
+              qrCodeUrl = `${API_BASE}${p.qr_imagen_url.startsWith("/") ? p.qr_imagen_url : `/${p.qr_imagen_url}`}`;
+            }
+          }
+
+          return {
+            id: String(p.id),
+            name: p.nombre,
+            credits: Number(p.cantidad_creditos),
+            price: Number(p.precio),
+            qrCodeUrl,
+            description: p.descripcion || "",
+            popular: Boolean(p.popular),
+            bonus: Number(p.bonus_creditos || 0),
+          };
+        });
         setCreditPackages(mapped);
         // Opcional: seleccionar el primero
         // if (mapped.length) setSelectedPackage(mapped[0].id);
