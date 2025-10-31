@@ -316,15 +316,21 @@ export function CategoriesSection({ onShowToast }: CategoriesSectionProps) {
         </div>
       </div>
 
-      {/* Create/Edit Dialog */}
+      {/* Create/Edit Dialog - Overlay flotante sin fondo negro */}
       {showCategoryDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setShowCategoryDialog(false)} />
-          <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
-            <div className="px-6 py-4 border-b border-gray-200">
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-white rounded-lg shadow-2xl border border-gray-200 w-[95vw] max-w-md">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">
                 {editingCategory ? "Editar Categoría" : "Nueva Categoría"}
               </h3>
+              <button
+                onClick={() => setShowCategoryDialog(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+                title="Cerrar"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
             <div className="px-6 py-4 space-y-4">
               <div>

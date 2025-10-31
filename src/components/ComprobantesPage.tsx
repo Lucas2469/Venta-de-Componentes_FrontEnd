@@ -389,12 +389,19 @@ export default function ComprobantesPage() {
         </div>
       </div>
 
-      {/* Modal: Ver comprobante */}
+      {/* Modal: Ver comprobante - Overlay flotante sin fondo negro */}
       {proofOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 max-w-lg w-screen max-w-[500px]">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Comprobante de Pago</h3>
+              <button
+                onClick={() => setProofOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+                title="Cerrar"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
             <div className="p-6 flex items-center justify-center">
               {proofSrc ? (
@@ -430,15 +437,24 @@ export default function ComprobantesPage() {
         </div>
       )}
 
-      {/* Modal: Rechazar con motivo */}
+      {/* Modal: Rechazar con motivo - Overlay flotante sin fondo negro */}
       {showPurchaseRejectModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Rechazar Solicitud de Pago</h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Indica el motivo del rechazo. Se guardará como comentario del administrador.
-              </p>
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 max-w-lg w-screen max-w-[500px]">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Rechazar Solicitud de Pago</h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  Indica el motivo del rechazo. Se guardará como comentario del administrador.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowPurchaseRejectModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors ml-4 mt-0"
+                title="Cerrar"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
 
             <div className="p-6">
