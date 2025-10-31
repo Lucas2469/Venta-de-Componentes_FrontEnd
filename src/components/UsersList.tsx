@@ -612,7 +612,7 @@ export const UsersList: React.FC<UsersListProps> = ({
                                                      '🛒 Comprador'}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-gray-600 truncate">{user.email}</p>
+                                            <p className="text-xs text-gray-600 break-words">{user.email}</p>
                                         </div>
                                     </div>
 
