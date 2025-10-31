@@ -22,11 +22,15 @@ import AdminStatisticsPage from "./AdminStatisticsPage";
 import { MeetingPointsSection } from './Admin/sections/MeetingPointsSection';
 import { CategoriesSection } from './Admin/sections/CategoriesSection';
 import CalificacionesPage from "./CalificacionesPage";
+import { useToast } from './Toast';
 
 export function NewAdminDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState("statistics");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // ✅ Toast hook para mostrar notificaciones
+  const { showToast, hideToast, ToastComponent } = useToast();
 
   // Leer parámetro de sección de la URL al cargar
   useEffect(() => {
@@ -258,7 +262,7 @@ export function NewAdminDashboard() {
       case "ads-management":
         return <AdsManagement />;
       case "categories":
-        return <CategoriesSection />;
+        return <CategoriesSection onShowToast={showToast} />;
       case "ratings":
         return <CalificacionesPage />;
       default:
@@ -362,6 +366,9 @@ export function NewAdminDashboard() {
           {renderContent()}
         </div>
       </div>
+
+      {/* ✅ Toast Component para mostrar notificaciones */}
+      <ToastComponent />
     </div>
   );
 }

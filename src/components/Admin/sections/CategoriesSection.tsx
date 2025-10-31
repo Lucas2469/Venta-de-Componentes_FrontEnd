@@ -4,9 +4,15 @@ import { categoriesAPI } from '../../../api/categoriesApi';
 import { Category } from "../../types";
 import { mockProducts } from "../../mockData";
 import { ConfirmationModal } from '../../reusables/ConfirmationModal';
-import { showToast } from '../../Toast';
+import { showToast as globalShowToast } from '../../Toast';
 
-export function CategoriesSection() {
+interface CategoriesSectionProps {
+  onShowToast?: (type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string) => void;
+}
+
+export function CategoriesSection({ onShowToast }: CategoriesSectionProps) {
+  // Usar prop si está disponible, sino usar la función global
+  const showToast = onShowToast || globalShowToast;
   const [categories, setCategories] = useState<Category[]>([]);
   const [products] = useState(mockProducts);
   const [newCategory, setNewCategory] = useState({
