@@ -48,5 +48,12 @@ export const rechazarTransaccion = async (id: number, motivo: string) => {
 
 export const buildProofUrl = (relUrl?: string | null) => {
   if (!relUrl) return null;
+
+  // Si ya es una URL completa (Cloudinary o cualquier otra), devolverla tal cual
+  if (relUrl.startsWith('http://') || relUrl.startsWith('https://')) {
+    return relUrl;
+  }
+
+  // Si es una ruta relativa (local filesystem), anteponer API_BASE
   return `${API_BASE}${relUrl.startsWith("/") ? relUrl : `/${relUrl}`}`;
 };
