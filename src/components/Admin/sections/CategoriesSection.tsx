@@ -391,6 +391,7 @@ export function CategoriesSection({ onShowToast }: CategoriesSectionProps) {
                 </div>
               )}
             </div>
+            </>
           )}
         </div>
       </div>
