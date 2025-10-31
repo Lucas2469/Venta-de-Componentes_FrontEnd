@@ -18,8 +18,17 @@ const API_BASE = import.meta.env.VITE_API_URL;
 export const PACKS_API = `${API_BASE}/api/packs`;
 
 /** Helper para componer URLs absolutas de imágenes/archivos */
-export const buildAssetUrl = (rel?: string | null) =>
-  rel ? `${API_BASE}${rel.startsWith("/") ? rel : `/${rel}`}` : null;
+export const buildAssetUrl = (rel?: string | null) => {
+  if (!rel) return null;
+
+  // Si ya es una URL completa (Cloudinary o cualquier otra), devolverla tal cual
+  if (rel.startsWith('http://') || rel.startsWith('https://')) {
+    return rel;
+  }
+
+  // Si es una ruta relativa (local filesystem), anteponer API_BASE
+  return `${API_BASE}${rel.startsWith("/") ? rel : `/${rel}`}`;
+};
 
 /* --------- CRUD --------- */
 
