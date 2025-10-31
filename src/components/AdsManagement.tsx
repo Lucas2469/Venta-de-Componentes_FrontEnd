@@ -503,34 +503,32 @@ export const AdsManagement: React.FC = () => {
               </div>
 
               {/* Botones de acción */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+              <div className="flex flex-wrap gap-2 sm:gap-3 pt-4 border-t border-gray-200">
                 <button
                   onClick={() => handleToggleProductStatus(selectedProduct)}
-                  className={`px-6 py-2 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 ${
+                  className={`flex-1 min-w-[140px] px-4 sm:px-6 py-2 rounded-xl font-medium text-sm transition-all duration-200 ${
                     selectedProduct.estado === 'activo'
                       ? 'bg-red-100 hover:bg-red-200 text-red-700'
                       : 'bg-green-100 hover:bg-green-200 text-green-700'
                   }`}
                 >
-                  {selectedProduct.estado === 'activo' ? '🔴 Desactivar' : '🟢 Activar'} Producto
+                  {selectedProduct.estado === 'activo' ? '🔴 Desact' : '🟢 Activ'} Producto
                 </button>
 
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => window.open(`/product/${selectedProduct.id}`, '_blank')}
-                    className="px-6 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 flex items-center"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Ver en Catálogo
-                  </button>
+                <button
+                  onClick={() => window.open(`/product/${selectedProduct.id}`, '_blank')}
+                  className="flex-1 min-w-[120px] px-4 sm:px-6 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-medium text-sm transition-all duration-200 inline-flex items-center justify-center gap-1"
+                >
+                  <ExternalLink className="h-4 w-4 flex-shrink-0" />
+                  <span>Ver Catálogo</span>
+                </button>
 
-                  <button
-                    onClick={() => setShowPreviewModal(false)}
-                    className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-200"
-                  >
-                    Cerrar
-                  </button>
-                </div>
+                <button
+                  onClick={() => setShowPreviewModal(false)}
+                  className="flex-1 min-w-[100px] px-4 sm:px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium text-sm transition-all duration-200"
+                >
+                  Cerrar
+                </button>
               </div>
             </div>
           </div>
