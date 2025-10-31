@@ -641,13 +641,13 @@ export const UsersList: React.FC<UsersListProps> = ({
                                     {/* Acciones */}
                                     <div className="flex gap-2 pt-2 border-t border-gray-200">
                                         <button
-                                            onClick={() => handleSuspendClick(user)}
+                                            onClick={() => handleStatusChange(user)}
                                             className="flex-1 px-3 py-2 text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-sm"
                                         >
                                             🚫 Suspender
                                         </button>
                                         <button
-                                            onClick={() => handleViewDetails(user)}
+                                            onClick={() => onUserClick?.(user.id)}
                                             className="flex-1 px-3 py-2 text-xs font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 shadow-sm"
                                         >
                                             👁️ Ver

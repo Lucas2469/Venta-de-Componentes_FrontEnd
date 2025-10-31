@@ -275,7 +275,7 @@ export function CategoriesSection({ onShowToast }: CategoriesSectionProps) {
                       </td>
                       <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                         <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {typeof category.product_count === 'number' ? category.product_count : products.filter(p => p.category === category.id).length}
+                          {typeof category.product_count === 'number' ? category.product_count : (products?.filter(p => p.category === category.id).length || 0)}
                         </span>
                       </td>
                       <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
@@ -341,7 +341,7 @@ export function CategoriesSection({ onShowToast }: CategoriesSectionProps) {
                     <div className="text-xs border-t border-gray-200 pt-2">
                       <p className="text-gray-600 font-medium mb-1">Productos</p>
                       <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {typeof category.product_count === 'number' ? category.product_count : products.filter(p => p.category === category.id).length}
+                        {typeof category.product_count === 'number' ? category.product_count : (products?.filter(p => p.category === category.id).length || 0)}
                       </span>
                     </div>
 

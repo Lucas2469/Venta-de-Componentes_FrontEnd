@@ -312,7 +312,7 @@ export const AdsManagement: React.FC = () => {
                         <div className="flex items-center mt-1">
                           <Star className="h-2 sm:h-3 w-2 sm:w-3 text-yellow-500 mr-1" />
                           <span className="text-xs text-gray-500">
-                            {parseFloat(product.vendedor_calificacion).toFixed(1)}
+                            {parseFloat(product.vendedor_calificacion || '0').toFixed(1)}
                           </span>
                         </div>
                       </div>
@@ -374,7 +374,7 @@ export const AdsManagement: React.FC = () => {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <p className="font-semibold text-gray-900 text-sm">{product.nombre}</p>
-                    <p className="text-xs text-gray-600">{product.vendedor_nombre} · ⭐{parseFloat(product.vendedor_calificacion).toFixed(1)}</p>
+                    <p className="text-xs text-gray-600">{product.vendedor_nombre} · ⭐{parseFloat(product.vendedor_calificacion || '0').toFixed(1)}</p>
                   </div>
                   {getStatusBadge(product.estado)}
                 </div>
