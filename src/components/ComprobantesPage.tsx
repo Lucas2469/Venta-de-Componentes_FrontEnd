@@ -423,17 +423,17 @@ export default function ComprobantesPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-2 border-t border-gray-200">
+                <div className="flex flex-col gap-2 pt-2 border-t border-gray-200">
                   {tx.comprobante_pago_url && (
                     <button
-                      className="flex-1 px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50 rounded hover:bg-blue-100"
+                      className="w-full px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50 rounded hover:bg-blue-100"
                       onClick={() => handleViewProof(tx.comprobante_pago_url)}
                     >
                       📷 Ver Comprobante
                     </button>
                   )}
                   {tx.estado === "pendiente" && (
-                    <>
+                    <div className="flex gap-2">
                       <button
                         className="flex-1 px-2 py-1 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700"
                         onClick={() => openApprovalModal(tx)}
@@ -448,7 +448,7 @@ export default function ComprobantesPage() {
                       >
                         ❌ Rechazar
                       </button>
-                    </>
+                    </div>
                   )}
                 </div>
               </div>
