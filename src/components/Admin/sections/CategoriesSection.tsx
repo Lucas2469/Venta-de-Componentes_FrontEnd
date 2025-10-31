@@ -4,6 +4,7 @@ import { categoriesAPI } from '../../../api/categoriesApi';
 import { Category } from "../../types";
 import { mockProducts } from "../../mockData";
 import { ConfirmationModal } from '../../reusables/ConfirmationModal';
+import { showToast } from '../../Toast';
 
 export function CategoriesSection() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -121,15 +122,39 @@ export function CategoriesSection() {
 
   const handleDeleteCategory = async () => {
     if (!categoryToDelete) return;
-    
+
     try {
       setCategoryActionLoading(categoryToDelete);
       await categoriesAPI.delete(categoryToDelete);
+
+      // ✅ Éxito: Mostrar toast
+      showToast('success', 'Categoría eliminada', 'La categoría ha sido eliminada correctamente');
+
       await loadCategories();
       setShowDeleteConfirm(false);
       setCategoryToDelete(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al eliminar categoría:", error);
+
+      // ✅ Manejar errores específicos con toast
+      const errorMessage = error?.message || 'Error al eliminar la categoría';
+
+      if (errorMessage.includes('productos asociados') || errorMessage.includes('foreign key')) {
+        // Error por dependencias (foreign key constraint)
+        showToast(
+          'error',
+          'No se puede eliminar esta categoría',
+          'Hay productos asociados. Primero elimina o reasigna los productos a otra categoría.'
+        );
+      } else if (errorMessage.includes('No se pudo eliminar')) {
+        showToast('error', 'Error al eliminar', errorMessage);
+      } else {
+        showToast(
+          'error',
+          'Error al eliminar categoría',
+          errorMessage.length > 100 ? 'Ocurrió un error. Intenta de nuevo.' : errorMessage
+        );
+      }
     } finally {
       setCategoryActionLoading(null);
     }
