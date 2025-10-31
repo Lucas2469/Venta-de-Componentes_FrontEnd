@@ -4,8 +4,10 @@ import { meetingPointsAPI } from '../../../api/meetingPointsApi';
 import MapComponent from '../../MapComponent';
 import { MeetingPoint } from "../../types";
 import { ConfirmationModal } from '../../reusables/ConfirmationModal';
+import { useToast } from '../../Toast';
 
 export function MeetingPointsSection() {
+  const { showToast, ToastComponent } = useToast();
   const [meetingPoints, setMeetingPoints] = useState<MeetingPoint[]>([]);
   const [newMeetingPoint, setNewMeetingPoint] = useState({
     nombre: "",
@@ -100,11 +102,26 @@ export function MeetingPointsSection() {
     try {
       setMeetingPointActionLoading(meetingPointToDelete.id);
       await meetingPointsAPI.delete(meetingPointToDelete.id);
+
+      // ✅ Éxito
+      showToast('success', 'Punto eliminado', 'El punto de encuentro ha sido eliminado correctamente');
       await loadMeetingPoints();
       setShowDeleteMeetingPointConfirm(false);
       setMeetingPointToDelete(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al eliminar punto de encuentro:", error);
+
+      const errorMessage = error?.message || 'Error al eliminar el punto de encuentro';
+
+      if (errorMessage.includes('foreign key constraint') || errorMessage.includes('CONSTRAINT') || errorMessage.includes('agendamientos')) {
+        showToast(
+          'error',
+          'No se puede eliminar este punto',
+          'Hay citas agendadas en este punto de encuentro. Primero debes resolver o cancelar las citas.'
+        );
+      } else {
+        showToast('error', 'Error al eliminar', errorMessage);
+      }
     } finally {
       setMeetingPointActionLoading(null);
     }
@@ -590,6 +607,9 @@ export function MeetingPointsSection() {
         type="danger"
         loading={meetingPointActionLoading === meetingPointToDelete?.id}
       />
+
+      {/* Toast Component */}
+      <ToastComponent />
     </div>
   );
 }
