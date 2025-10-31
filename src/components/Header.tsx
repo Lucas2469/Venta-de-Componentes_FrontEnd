@@ -169,8 +169,8 @@ export function Header({ onNavigate, searchQuery, onSearchChange }: HeaderProps)
                               </button>
                             )}
 
-                            {/* Mis Agendamientos (como vendedor) - Solo para vendedores */}
-                            {isVendor && (
+                            {/* Mis Agendamientos - Para todos los usuarios (citas como vendedor) */}
+                            {!isAdmin && (
                               <button
                                 onClick={() => {
                                   onNavigate("vendor-appointments");
