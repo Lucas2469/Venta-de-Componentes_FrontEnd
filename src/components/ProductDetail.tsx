@@ -601,6 +601,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack 
                     quantity={quantity}
                     unitPrice={product.precio}
                     stock={product.stock}
+                    isLoading={isCreatingAppointment}
                     onConfirm={handleScheduleConfirm}
                 />
             )}

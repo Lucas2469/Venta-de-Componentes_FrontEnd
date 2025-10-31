@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 import { HorarioVendedor } from '../api/productsApi';
 
 interface ScheduleMeetingModalProps {
@@ -15,6 +16,7 @@ interface ScheduleMeetingModalProps {
     quantity: number;
     unitPrice: number;
     stock: number; // Nuevo prop para el stock (AnettG)
+    isLoading?: boolean; // ✅ Estado de carga para prevenir múltiples clics
     onConfirm: (fecha: Date, horario: HorarioVendedor, horaExacta: string, cantidad: number, precioTotal: number) => void;
 }
 
@@ -28,6 +30,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
     quantity,
     unitPrice,
     stock,
+    isLoading = false,
     onConfirm
 }) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -682,15 +685,24 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
                 <div className="p-6 border-t border-gray-200 flex justify-end space-x-4">
                     <button
                         onClick={onClose}
-                        className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        disabled={isLoading}
+                        className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Cancelar
                     </button>
                     <button
                         onClick={handleConfirm}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        disabled={isLoading}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
-                        Confirmar y Agendar
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span>Agendando...</span>
+                            </>
+                        ) : (
+                            'Confirmar y Agendar'
+                        )}
                     </button>
                 </div>
             </div>
