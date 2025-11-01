@@ -193,7 +193,7 @@ const RatingSystemManager: React.FC<RatingSystemManagerProps> = ({
     if (!showPendingAlert || !pendingAlert.hasPendingRatings) return null;
 
     return (
-      <div className="fixed top-4 right-4 bg-yellow-100 border border-yellow-400 rounded-lg p-4 shadow-lg z-40 max-w-sm">
+      <div className="fixed top-4 right-4 bg-yellow-100 border border-yellow-400 rounded-lg p-4 shadow-lg z-50 max-w-sm">
         <div className="flex items-start">
           <Bell className="h-5 w-5 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" />
           <div className="flex-1">
