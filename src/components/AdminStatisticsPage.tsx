@@ -18,6 +18,7 @@ import {
   Check,
   BarChart3,
   PieChart as PieChartIcon,
+  RotateCcw,
 } from "lucide-react";
 import { getStats, StatsResponse } from "../api/statsApi";
 
@@ -35,18 +36,22 @@ export default function AdminStatisticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const loadStats = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getStats();
+      setStats(data);
+    } catch (e) {
+      setError("No se pudieron cargar las estadísticas. Por favor, intenta de nuevo.");
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await getStats();
-        setStats(data);
-      } catch (e) {
-        setError("No se pudieron cargar las estadísticas.");
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    loadStats();
   }, []);
 
   if (loading) {
@@ -68,7 +73,19 @@ export default function AdminStatisticsPage() {
   }
 
   if (error || !stats) {
-    return <p className="text-sm text-red-600">{error ?? "Sin datos"}</p>;
+    return (
+      <div className="flex flex-col items-center justify-center py-12 space-y-4">
+        <p className="text-sm text-red-600 text-center">{error ?? "Sin datos"}</p>
+        <button
+          onClick={loadStats}
+          disabled={loading}
+          className="flex items-center space-x-2 px-4 py-2 bg-pink-700 text-white rounded-lg hover:bg-pink-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <RotateCcw className="h-4 w-4" />
+          <span>{loading ? "Cargando..." : "Reintentar"}</span>
+        </button>
+      </div>
+    );
   }
 
   const pieData = [
