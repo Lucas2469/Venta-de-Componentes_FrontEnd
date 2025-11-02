@@ -14,6 +14,7 @@ import { getImageUrl } from '../api/api';
 import { ConfirmationModal } from './reusables/ConfirmationModal';
 import { DeactivationModal } from './reusables/DeactivationModal';
 import { notificationsApi } from '../api/notificationsApi';
+import { showToast } from './Toast';
 
 export const AdsManagement: React.FC = () => {
   // Estados para gestión de productos
@@ -109,11 +110,11 @@ export const AdsManagement: React.FC = () => {
         }
       } else {
         console.error('Error reactivating product:', response.message);
-        alert('Error al reactivar el producto');
+        showToast('error', 'Error', 'No se pudo reactivar el producto');
       }
     } catch (error) {
       console.error('Error reactivating product:', error);
-      alert('Error de conexión al reactivar el producto');
+      showToast('error', 'Error de conexión', 'Error al reactivar el producto');
     } finally {
       setIsUpdatingStatus(false);
       setShowConfirmModal(false);
@@ -162,15 +163,15 @@ export const AdsManagement: React.FC = () => {
           setSelectedProduct({ ...selectedProduct, estado: 'inactivo' });
         }
 
-        alert('Producto desactivado y notificación enviada exitosamente');
+        showToast('success', 'Éxito', 'Producto desactivado y notificación enviada');
       } else {
         console.warn('Producto desactivado pero error al enviar notificación:', notificationResponse.message);
-        alert('Producto desactivado correctamente, pero hubo un problema al enviar la notificación');
+        showToast('warning', 'Aviso', 'Producto desactivado, pero falló al enviar la notificación');
       }
 
     } catch (error) {
       console.error('Error deactivating product:', error);
-      alert('Error al desactivar el producto');
+      showToast('error', 'Error', 'No se pudo desactivar el producto');
     } finally {
       setIsUpdatingStatus(false);
       setShowDeactivationModal(false);
